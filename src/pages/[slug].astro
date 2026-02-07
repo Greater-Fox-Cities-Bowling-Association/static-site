@@ -1,0 +1,131 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Navigation from '../components/astro/Navigation.astro';
+import Footer from '../components/astro/Footer.astro';
+import Hero from '../components/astro/Hero.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const pages = await getCollection('pages');
+  return pages
+    .filter(page => page.id !== 'home')
+    .map(page => ({
+      params: { slug: page.data.slug },
+      props: { page },
+    }));
+}
+
+const { page } = Astro.props;
+const { title, description, hero, sections } = page.data;
+
+// Get related data based on page type
+let centers;
+let news;
+
+if (page.data.slug === 'centers') {
+  centers = await getCollection('centers');
+}
+
+if (page.data.slug === 'news') {
+  news = await getCollection('news');
+}
+---
+
+<BaseLayout title={title} description={description}>
+  <Navigation />
+  
+  {hero && (
+    <Hero
+      heading={hero.heading}
+      subheading={hero.subheading}
+      image={hero.image}
+      ctaText={hero.ctaText}
+      ctaLink={hero.ctaLink}
+    />
+  )}
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    {sections?.map((section) => (
+      <section class="mb-12">
+        {section.heading && (
+          <h2 class="font-display font-bold text-3xl mb-6 text-gray-900">
+            {section.heading}
+          </h2>
+        )}
+        
+        {section.type === 'text' && section.content && (
+          <div class="prose prose-lg max-w-none">
+            <p class="text-gray-700 leading-relaxed">{section.content}</p>
+          </div>
+        )}
+      </section>
+    ))}
+
+    {/* Centers Page */}
+    {centers && (
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+        {centers.map((center) => (
+          <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+            <h3 class="font-display font-bold text-xl mb-3 text-gray-900">
+              {center.data.name}
+            </h3>
+            <div class="space-y-2 text-gray-700">
+              <p>{center.data.address}</p>
+              <p>{center.data.city}, {center.data.state} {center.data.zip}</p>
+              <p class="font-semibold">{center.data.phone}</p>
+              {center.data.website && (
+                <a href={center.data.website} target="_blank" rel="noopener noreferrer" class="text-primary-600 hover:text-primary-700">
+                  Visit Website →
+                </a>
+              )}
+              {center.data.lanes && (
+                <p class="text-sm text-gray-600 mt-3">
+                  <strong>Lanes:</strong> {center.data.lanes}
+                </p>
+              )}
+              {center.data.features && center.data.features.length > 0 && (
+                <div class="mt-3">
+                  <p class="text-sm font-semibold text-gray-700 mb-1">Features:</p>
+                  <ul class="text-sm text-gray-600 space-y-1">
+                    {center.data.features.map((feature) => (
+                      <li>• {feature}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+
+    {/* News Page */}
+    {news && (
+      <div class="space-y-6 mt-8">
+        {news.map((article) => (
+          <article class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+            <h3 class="font-display font-bold text-2xl mb-2 text-gray-900">
+              {article.data.title}
+            </h3>
+            <p class="text-sm text-gray-500 mb-3">
+              {article.data.date} {article.data.author && `• by ${article.data.author}`}
+            </p>
+            <p class="text-gray-700 mb-4">{article.data.excerpt}</p>
+            <p class="text-gray-700">{article.data.content}</p>
+            {article.data.tags && (
+              <div class="flex flex-wrap gap-2 mt-4">
+                {article.data.tags.map((tag) => (
+                  <span class="px-3 py-1 bg-primary-100 text-primary-700 text-xs font-semibold rounded-full">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+          </article>
+        ))}
+      </div>
+    )}
+  </main>
+
+  <Footer />
+</BaseLayout>

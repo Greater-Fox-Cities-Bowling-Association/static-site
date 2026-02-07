@@ -1,0 +1,16 @@
+{
+  "title": "Honors",
+  "description": "Recognition of exceptional bowling achievements in the Greater Fox Cities area.",
+  "slug": "honors",
+  "hero": {
+    "heading": "Hall of Fame & Honors",
+    "subheading": "Celebrating bowling excellence"
+  },
+  "sections": [
+    {
+      "type": "text",
+      "heading": "Honors & Recognition",
+      "content": "The Greater Fox Cities BA recognizes outstanding achievements in bowling, including high scores, tournament victories, and lifetime contributions to the sport."
+    }
+  ]
+}

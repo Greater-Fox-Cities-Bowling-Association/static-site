@@ -1,0 +1,16 @@
+{
+  "title": "Tournaments",
+  "description": "Information about Greater Fox Cities BA tournaments, including upcoming events and registration details.",
+  "slug": "tournaments",
+  "hero": {
+    "heading": "Association Tournaments",
+    "subheading": "Compete at the highest level"
+  },
+  "sections": [
+    {
+      "type": "text",
+      "heading": "Tournament Information",
+      "content": "The Greater Fox Cities Bowling Association hosts several tournaments throughout the year. Check back regularly for updates on upcoming events and registration information."
+    }
+  ]
+}

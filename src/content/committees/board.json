@@ -1,0 +1,31 @@
+{
+  "name": "Board of Directors",
+  "role": "Governance",
+  "description": "The Board of Directors provides strategic oversight and governance for the Greater Fox Cities Bowling Association.",
+  "members": [
+    {
+      "name": "Robert Williams",
+      "position": "President",
+      "email": "president@gfcba.org",
+      "phone": "(920) 555-0100"
+    },
+    {
+      "name": "Jennifer Davis",
+      "position": "Vice President",
+      "email": "vp@gfcba.org",
+      "phone": "(920) 555-0101"
+    },
+    {
+      "name": "Thomas Miller",
+      "position": "Secretary",
+      "email": "secretary@gfcba.org",
+      "phone": "(920) 555-0102"
+    },
+    {
+      "name": "Patricia Brown",
+      "position": "Treasurer",
+      "email": "treasurer@gfcba.org",
+      "phone": "(920) 555-0103"
+    }
+  ]
+}

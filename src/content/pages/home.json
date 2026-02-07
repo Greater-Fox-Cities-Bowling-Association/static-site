@@ -1,0 +1,49 @@
+{
+  "title": "Greater Fox Cities Bowling Association",
+  "description": "Welcome to the Greater Fox Cities Bowling Association. Find information about tournaments, honors, awards, scholarships, and bowling centers.",
+  "slug": "index",
+  "hero": {
+    "heading": "Greater Fox Cities Bowling Association",
+    "subheading": "Building Community Through Bowling Excellence",
+    "image": "/images/hero-bowling.jpg",
+    "ctaText": "View Tournaments",
+    "ctaLink": "/tournaments"
+  },
+  "sections": [
+    {
+      "type": "text",
+      "heading": "Welcome",
+      "content": "Welcome to the Greater Fox Cities Bowling Association. Here you can find information regarding upcoming association tournaments, tournament results, honors recognized throughout the years, scholarship availability, and local awards provided by the Greater Fox Cities BA."
+    },
+    {
+      "type": "cards",
+      "heading": "Quick Links",
+      "items": [
+        {
+          "title": "Tournaments",
+          "description": "View upcoming and past tournament information",
+          "link": "/tournaments",
+          "icon": "trophy"
+        },
+        {
+          "title": "Honors",
+          "description": "Recognized achievements and hall of fame",
+          "link": "/honors",
+          "icon": "award"
+        },
+        {
+          "title": "Centers",
+          "description": "Find bowling centers in our association",
+          "link": "/centers",
+          "icon": "map"
+        },
+        {
+          "title": "Scholarships",
+          "description": "Information about available scholarships",
+          "link": "/scholarships",
+          "icon": "academic"
+        }
+      ]
+    }
+  ]
+}

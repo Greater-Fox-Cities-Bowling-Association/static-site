@@ -1,0 +1,88 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "public/images"
+public_folder: "/images"
+
+collections:
+  - name: "pages"
+    label: "Pages"
+    folder: "src/content/pages"
+    create: false
+    extension: "json"
+    format: "json"
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Description", name: "description", widget: "text" }
+      - { label: "Slug", name: "slug", widget: "string" }
+      - label: "Hero"
+        name: "hero"
+        widget: "object"
+        required: false
+        fields:
+          - { label: "Heading", name: "heading", widget: "string" }
+          - { label: "Subheading", name: "subheading", widget: "string", required: false }
+          - { label: "Image", name: "image", widget: "image", required: false }
+          - { label: "CTA Text", name: "ctaText", widget: "string", required: false }
+          - { label: "CTA Link", name: "ctaLink", widget: "string", required: false }
+      - label: "Sections"
+        name: "sections"
+        widget: "list"
+        required: false
+        fields:
+          - { label: "Type", name: "type", widget: "select", options: ["text", "cards", "list", "table", "hero"] }
+          - { label: "Heading", name: "heading", widget: "string", required: false }
+          - { label: "Content", name: "content", widget: "text", required: false }
+
+  - name: "centers"
+    label: "Bowling Centers"
+    folder: "src/content/centers"
+    create: true
+    extension: "json"
+    format: "json"
+    slug: "{{slug}}"
+    fields:
+      - { label: "Name", name: "name", widget: "string" }
+      - { label: "Address", name: "address", widget: "string" }
+      - { label: "City", name: "city", widget: "string" }
+      - { label: "State", name: "state", widget: "string", default: "WI" }
+      - { label: "ZIP Code", name: "zip", widget: "string" }
+      - { label: "Phone", name: "phone", widget: "string" }
+      - { label: "Email", name: "email", widget: "string", required: false }
+      - { label: "Website", name: "website", widget: "string", required: false }
+      - { label: "Number of Lanes", name: "lanes", widget: "number", required: false }
+      - { label: "Features", name: "features", widget: "list", required: false }
+
+  - name: "news"
+    label: "News"
+    folder: "src/content/news"
+    create: true
+    extension: "json"
+    format: "json"
+    slug: "{{slug}}"
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Date", name: "date", widget: "date" }
+      - { label: "Author", name: "author", widget: "string", required: false }
+      - { label: "Excerpt", name: "excerpt", widget: "text" }
+      - { label: "Content", name: "content", widget: "markdown" }
+      - { label: "Image", name: "image", widget: "image", required: false }
+      - { label: "Tags", name: "tags", widget: "list", required: false }
+
+  - name: "tournaments"
+    label: "Tournaments"
+    folder: "src/content/tournaments"
+    create: true
+    extension: "json"
+    format: "json"
+    slug: "{{slug}}"
+    fields:
+      - { label: "Name", name: "name", widget: "string" }
+      - { label: "Date", name: "date", widget: "date" }
+      - { label: "Location", name: "location", widget: "string" }
+      - { label: "Description", name: "description", widget: "text" }
+      - { label: "Entry Fee", name: "entryFee", widget: "string", required: false }
+      - { label: "Prize Fund", name: "prizeFund", widget: "string", required: false }
+      - { label: "Rules", name: "rules", widget: "text", required: false }
+      - { label: "Status", name: "status", widget: "select", options: ["upcoming", "completed", "registration-open"], required: false }

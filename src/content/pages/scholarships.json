@@ -1,0 +1,16 @@
+{
+  "title": "Scholarships",
+  "description": "Scholarship opportunities for bowlers in the Greater Fox Cities area.",
+  "slug": "scholarships",
+  "hero": {
+    "heading": "Scholarship Program",
+    "subheading": "Investing in the future of bowling"
+  },
+  "sections": [
+    {
+      "type": "text",
+      "heading": "Available Scholarships",
+      "content": "The Greater Fox Cities Bowling Association offers scholarships to support bowlers pursuing higher education. Learn about eligibility requirements and application deadlines."
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "title": "Committees",
+  "description": "Information about GFCBA committees and leadership.",
+  "slug": "committees",
+  "hero": {
+    "heading": "Association Committees",
+    "subheading": "Leadership and organization"
+  },
+  "sections": [
+    {
+      "type": "text",
+      "heading": "Our Committees",
+      "content": "The Greater Fox Cities BA is organized into several committees that manage different aspects of the association's operations and events."
+    }
+  ]
+}

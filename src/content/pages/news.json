@@ -1,0 +1,16 @@
+{
+  "title": "News",
+  "description": "Latest news and updates from the Greater Fox Cities Bowling Association.",
+  "slug": "news",
+  "hero": {
+    "heading": "News & Updates",
+    "subheading": "Stay informed with the latest from GFCBA"
+  },
+  "sections": [
+    {
+      "type": "text",
+      "heading": "Latest News",
+      "content": "Stay up to date with the latest news, announcements, and updates from the Greater Fox Cities Bowling Association."
+    }
+  ]
+}

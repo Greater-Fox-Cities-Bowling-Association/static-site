@@ -1,0 +1,16 @@
+{
+  "title": "Awards",
+  "description": "Local awards and recognition programs from the Greater Fox Cities Bowling Association.",
+  "slug": "awards",
+  "hero": {
+    "heading": "Awards Program",
+    "subheading": "Recognizing achievement and dedication"
+  },
+  "sections": [
+    {
+      "type": "text",
+      "heading": "Local Awards",
+      "content": "The Greater Fox Cities BA provides various awards to recognize bowlers who demonstrate excellence, sportsmanship, and dedication to the sport."
+    }
+  ]
+}

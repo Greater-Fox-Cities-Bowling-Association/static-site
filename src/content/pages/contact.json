@@ -1,0 +1,16 @@
+{
+  "title": "Contact Us",
+  "description": "Get in touch with the Greater Fox Cities Bowling Association.",
+  "slug": "contact",
+  "hero": {
+    "heading": "Contact Us",
+    "subheading": "We'd love to hear from you"
+  },
+  "sections": [
+    {
+      "type": "text",
+      "heading": "Get in Touch",
+      "content": "Have questions about tournaments, membership, or anything else? Contact the Greater Fox Cities Bowling Association."
+    }
+  ]
+}

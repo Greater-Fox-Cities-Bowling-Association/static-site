@@ -1,0 +1,18 @@
+{
+  "name": "High Rollers Bowl",
+  "address": "123 Bowling Lane",
+  "city": "Appleton",
+  "state": "WI",
+  "zip": "54911",
+  "phone": "(920) 555-0100",
+  "email": "info@highrollersbowl.com",
+  "website": "https://www.highrollersbowl.com",
+  "lanes": 32,
+  "features": [
+    "Automatic scoring",
+    "Pro shop",
+    "Lounge and bar",
+    "League bowling",
+    "Birthday parties"
+  ]
+}
