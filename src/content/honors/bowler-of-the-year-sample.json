@@ -1,0 +1,10 @@
+{
+  "category": "bowler-of-the-year",
+  "title": "Bowler of the Year",
+  "description": "This data should be imported via CSV. Each row: year,men,women,boys,girls",
+  "data": [
+    { "year": "2025", "men": "Nick Hietpas", "women": "Beth Kosiorek", "boys": "Kameron Harder", "girls": "Audry Dehlinger" },
+    { "year": "2024", "men": "Randy Southworth", "women": "Traci Brown", "boys": "Tyler Brown", "girls": "Miley Young" },
+    { "year": "2023", "men": "Nick Hietpas", "women": "Traci Brown", "boys": "Joshua Gaschler", "girls": "Hailey Stadler" }
+  ]
+}

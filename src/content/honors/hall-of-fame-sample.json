@@ -1,0 +1,12 @@
+{
+  "category": "hall-of-fame",
+  "title": "Hall of Fame",
+  "description": "This data should be imported via CSV using the admin panel. Each row: year,name",
+  "data": [
+    { "year": "2025", "inductee": "Randy Southworth" },
+    { "year": "2025", "inductee": "Ken Kempf" },
+    { "year": "2025", "inductee": "Mary Jo Woods" },
+    { "year": "2024", "inductee": "Becky Landgraf" },
+    { "year": "2024", "inductee": "Tim Mathe" }
+  ]
+}

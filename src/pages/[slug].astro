@@ -291,12 +291,12 @@ if (page.data.slug === 'committees') {
                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                       Achievement
                     </th>
-                    {honor.data.recipients.some(r => r.score) && (
+                    {honor.data.recipients?.some((r: any) => r.score) && (
                       <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         Score
                       </th>
                     )}
-                    {honor.data.recipients.some(r => r.date) && (
+                    {honor.data.recipients?.some((r: any) => r.date) && (
                       <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         Date
                       </th>
@@ -304,7 +304,7 @@ if (page.data.slug === 'committees') {
                   </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                  {honor.data.recipients.map((recipient) => (
+                  {honor.data.recipients?.map((recipient: any) => (
                     <tr>
                       <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {recipient.name}

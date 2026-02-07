@@ -1,0 +1,11 @@
+{
+  "category": "high-average",
+  "title": "High Average",
+  "description": "This data should be imported via CSV. Each row: year,name,games,average,category",
+  "data": [
+    { "year": "2023", "name": "Nick Hietpas", "games": "69", "average": "248", "category": "Men" },
+    { "year": "2023", "name": "Rachel Schmal", "games": "90", "average": "228", "category": "Women" },
+    { "year": "2022", "name": "Nick Hietpas", "games": "90", "average": "244", "category": "Men" },
+    { "year": "2022", "name": "Rachel Schmal", "games": "90", "average": "230", "category": "Women" }
+  ]
+}

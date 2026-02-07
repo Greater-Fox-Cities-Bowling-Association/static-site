@@ -68,18 +68,27 @@ const tournamentsCollection = defineCollection({
   }),
 });
 
-// Schema for honors/awards
+// Schema for honors/awards - flexible to support different honor types
 const honorsCollection = defineCollection({
   type: 'data',
   schema: z.object({
-    year: z.number(),
-    category: z.string(),
+    category: z.string(), // e.g., "hall-of-fame", "bowler-of-the-year", "high-average", etc.
+    title: z.string(), // Display title
+    description: z.string().optional(),
+    year: z.number().optional(), // For year-specific honors
+    // For tabular data (Hall of Fame, Bowler of Year, High Average, etc.)
+    data: z.array(z.record(z.any())).optional(),
+    // For individual recipients (300 games, etc.)
     recipients: z.array(z.object({
       name: z.string(),
-      achievement: z.string(),
+      achievement: z.string().optional(),
       score: z.number().optional(),
       date: z.string().optional(),
-    })),
+      games: z.number().optional(),
+      average: z.number().optional(),
+      team: z.string().optional(),
+      position: z.string().optional(),
+    })).optional(),
   }),
 });
 

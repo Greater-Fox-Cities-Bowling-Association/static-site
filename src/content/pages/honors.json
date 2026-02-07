@@ -18,39 +18,48 @@
       "items": [
         {
           "title": "Hall of Fame",
-          "description": "Inductees to the GFCBA Hall of Fame"
+          "description": "Inductees to the GFCBA Hall of Fame",
+          "link": "/honors/hall-of-fame"
         },
         {
           "title": "Bowler of the Year",
-          "description": "Annual recognition of top bowlers"
+          "description": "Annual recognition of top bowlers",
+          "link": "/honors/bowler-of-the-year"
         },
         {
           "title": "All Association Teams",
-          "description": "Recognition of outstanding team performances"
+          "description": "Recognition of outstanding team performances",
+          "link": "/honors/all-association-teams"
         },
         {
           "title": "High Average",
-          "description": "Bowlers with the highest season averages"
+          "description": "Bowlers with the highest season averages",
+          "link": "/honors/high-average"
         },
         {
           "title": "High Series",
-          "description": "Record high series scores"
+          "description": "Record high series scores",
+          "link": "/honors/high-series"
         },
         {
           "title": "Team Records",
-          "description": "Record-setting team performances"
+          "description": "Record-setting team performances",
+          "link": "/honors/team-records"
         },
         {
           "title": "Career Honors Scores",
-          "description": "Lifetime achievement scores"
+          "description": "Lifetime achievement scores",
+          "link": "/honors/career-honor-scores"
         },
         {
           "title": "Career Total Pins",
-          "description": "Lifetime total pins bowled"
+          "description": "Lifetime total pins bowled",
+          "link": "/honors/career-total-pins"
         },
         {
           "title": "Career Total Games",
-          "description": "Lifetime total games bowled"
+          "description": "Lifetime total games bowled",
+          "link": "/honors/career-total-games"
         }
       ]
     }
