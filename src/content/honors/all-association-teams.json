@@ -1,0 +1,246 @@
+{
+  "category": "all-association-teams",
+  "title": "All Association Teams",
+  "description": "Annual recognition of top bowlers in the Greater Fox Cities BA",
+  "years": [
+    {
+      "year": 2025,
+      "bowlerOfYear": {
+        "men": "Nick Hietpas",
+        "women": "Beth Kosiorek",
+        "boys": "Kameron Harder",
+        "girls": "Audry Dehlinger"
+      },
+      "teams": {
+        "menFirst": [],
+        "menSecond": [],
+        "womenFirst": [],
+        "womenSecond": [],
+        "boysFirst": [
+          "Kameron Harder",
+          "Dylan Herbst",
+          "Ayden Moseng",
+          "Nathan Williamson",
+          "Christopher Boldt"
+        ],
+        "girlsFirst": [
+          "Audry Dehlinger",
+          "Miley Young",
+          "Gracie Steffen",
+          "Alaina Lison",
+          "Emily Zak"
+        ]
+      }
+    },
+    {
+      "year": 2024,
+      "bowlerOfYear": {
+        "men": "Randy Southworth",
+        "women": "Traci Brown",
+        "boys": "Tyler Brown",
+        "girls": "Miley Young"
+      },
+      "teams": {
+        "menFirst": [
+          "Randy Southworth",
+          "Alex Leeman",
+          "Jordan Oppelt",
+          "Ryan Duescher",
+          "Nick Hietpas"
+        ],
+        "menSecond": [
+          "Rick Green",
+          "Jason Young",
+          "Dan Paul",
+          "Cody Weigel",
+          "Drew Krueger"
+        ],
+        "womenFirst": [
+          "Traci Brown",
+          "Melissa Kading",
+          "Beth Kosiorek",
+          "Denise Young",
+          "Marn Stern"
+        ],
+        "womenSecond": [
+          "Alyson Kandler",
+          "Daytona Weyland",
+          "Melissa Lang",
+          "Dawn Zwiers",
+          "Amy Young"
+        ],
+        "boysFirst": [
+          "Tyler Brown",
+          "Alex Carr",
+          "Zach Olson",
+          "Joshua Gaschler",
+          "Myles Moseng"
+        ],
+        "girlsFirst": [
+          "Miley Young",
+          "Alaina Lison",
+          "Emily Glasheen",
+          "Audry Dehlinger",
+          "Kylie Vanevenhoven"
+        ]
+      }
+    },
+    {
+      "year": 2023,
+      "bowlerOfYear": {
+        "men": "Nick Hietpas",
+        "women": "Traci Brown",
+        "boys": "Joshua Gaschler",
+        "girls": "Hailey Stadler"
+      },
+      "teams": {
+        "menFirst": [
+          "Nick Hietpas",
+          "Kyle Blaese",
+          "Cody Weigel",
+          "Jeff Nimke",
+          "Ryan Duescher"
+        ],
+        "menSecond": [
+          "Rick Green",
+          "Andrew Krueger",
+          "Alex Leeman",
+          "Dan Paul",
+          "John Kleppen"
+        ],
+        "womenFirst": [
+          "Traci Brown",
+          "Melissa Lang",
+          "Marn Stern",
+          "Megan Salentine",
+          "Amy Barth"
+        ],
+        "womenSecond": [
+          "Beth Kosiorek",
+          "Trisha Smith",
+          "Nicole Miller",
+          "Robin Blansette",
+          "Amy Young"
+        ],
+        "boysFirst": [
+          "Joshua Gaschler",
+          "Logan Wilson",
+          "Dylan Hietpas",
+          "Dylan Herbst",
+          "Anthony Stehofsky"
+        ],
+        "girlsFirst": [
+          "Hailey Stadler",
+          "Alaina Lison",
+          "Miley Young",
+          "Nora Rohloff",
+          "Vistoria Sheets"
+        ]
+      }
+    },
+    {
+      "year": 2022,
+      "bowlerOfYear": {
+        "men": "Wes Steffen",
+        "women": "Rachel Schmaal",
+        "boys": "Jacob Hackbarth",
+        "girls": "Kate Winter"
+      },
+      "teams": {
+        "menFirst": [
+          "Wes Steffen",
+          "Mark Weyland",
+          "Brett Clifford",
+          "Michael Van Domelen",
+          "Ryan Duescher"
+        ],
+        "menSecond": [
+          "Jeff Nimke",
+          "Dan Bourassa",
+          "Randy Southworth",
+          "Cale Rusch",
+          "Alex Leeman"
+        ],
+        "womenFirst": [
+          "Rachel Schmaal",
+          "Traci Brown",
+          "Charly Boelter",
+          "Robin Blansette",
+          "Amy Barth"
+        ],
+        "womenSecond": [
+          "Brianna Erdmann",
+          "Brianna Westenberger",
+          "Beth Kosiorek",
+          "Trisha Smith",
+          "Marn Stern"
+        ],
+        "boysFirst": [
+          "Jacob Hackbarth",
+          "Luke Winter",
+          "Ian Koster",
+          "Tyler Young",
+          "Zach Olson"
+        ],
+        "girlsFirst": [
+          "Kate Winter",
+          "Alyson Kandler",
+          "Kaila Groeschel",
+          "Logan Lowry",
+          "Kendal Paulbicki"
+        ]
+      }
+    },
+    {
+      "year": 2021,
+      "bowlerOfYear": {
+        "men": "Randy Southworth",
+        "women": "Charly Boelter",
+        "boys": "Luke Winter",
+        "girls": "Alyson Kandler"
+      },
+      "teams": {
+        "menFirst": [],
+        "menSecond": [],
+        "womenFirst": [],
+        "womenSecond": [],
+        "boysFirst": [],
+        "girlsFirst": []
+      }
+    },
+    {
+      "year": 2020,
+      "bowlerOfYear": {
+        "men": "Rick Green",
+        "women": "Charly Boelter",
+        "boys": "Cale Rusch",
+        "girls": "Mackenzie Juedes"
+      },
+      "teams": {
+        "menFirst": [],
+        "menSecond": [],
+        "womenFirst": [],
+        "womenSecond": [],
+        "boysFirst": [],
+        "girlsFirst": []
+      }
+    },
+    {
+      "year": 2019,
+      "bowlerOfYear": {
+        "men": "Kyle Blaese",
+        "women": "Charly Boelter",
+        "boys": "Cale Rusch",
+        "girls": "Olivia Lamers"
+      },
+      "teams": {
+        "menFirst": [],
+        "menSecond": [],
+        "womenFirst": [],
+        "womenSecond": [],
+        "boysFirst": [],
+        "girlsFirst": []
+      }
+    }
+  ]
+}

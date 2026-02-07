@@ -65,6 +65,10 @@ const tournamentsCollection = defineCollection({
       email: z.string(),
     }).optional(),
     status: z.enum(['upcoming', 'completed', 'registration-open']).optional(),
+    links: z.array(z.object({
+      text: z.string(),
+      url: z.string(),
+    })).optional(),
   }),
 });
 

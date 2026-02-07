@@ -1,0 +1,29 @@
+{
+  "category": "bowler-of-the-year",
+  "title": "Bowler of the Year",
+  "description": "Annual recognition of the top bowler in each division",
+  "data": [
+    { "year": "2025", "men": "Nick Hietpas", "women": "Beth Kosiorek", "boys": "Kameron Harder", "girls": "Audry Dehlinger" },
+    { "year": "2024", "men": "Randy Southworth", "women": "Traci Brown", "boys": "Tyler Brown", "girls": "Miley Young" },
+    { "year": "2023", "men": "Nick Hietpas", "women": "Traci Brown", "boys": "Joshua Gaschler", "girls": "Hailey Stadler" },
+    { "year": "2022", "men": "Wes Steffen", "women": "Rachel Schmal", "boys": "Jacob Hackbarth", "girls": "Kate Winter" },
+    { "year": "2021", "men": "Randy Southworth", "women": "Charly Boelter", "boys": "Luke Winter", "girls": "Alyson Kandler" },
+    { "year": "2020", "men": "Rick Green", "women": "Charly Boelter", "boys": "Cale Rusch", "girls": "Mackenzie Juedes" },
+    { "year": "2019", "men": "Kyle Blaese", "women": "Charly Boelter", "boys": "Cale Rusch", "girls": "Olivia Lamers" },
+    { "year": "2018", "men": "Nick Hietpas", "women": "", "boys": "", "girls": "" },
+    { "year": "2017", "men": "Jason Wendt", "women": "", "boys": "", "girls": "" },
+    { "year": "2016", "men": "Kenny Kempf", "women": "", "boys": "", "girls": "" },
+    { "year": "2015", "men": "Jason Wendt", "women": "", "boys": "", "girls": "" },
+    { "year": "2014", "men": "Kenny Kempf", "women": "", "boys": "", "girls": "" },
+    { "year": "2013", "men": "Steve Van Domelen", "women": "", "boys": "", "girls": "" },
+    { "year": "2012", "men": "Kenny Kempf", "women": "", "boys": "", "girls": "" },
+    { "year": "2011", "men": "Brad Kuhr", "women": "", "boys": "", "girls": "" },
+    { "year": "2010", "men": "Brad Kuhr", "women": "", "boys": "", "girls": "" },
+    { "year": "2009", "men": "Steve Van Domelen", "women": "", "boys": "", "girls": "" },
+    { "year": "2008", "men": "Jason Wendt", "women": "", "boys": "", "girls": "" },
+    { "year": "2007", "men": "Dean Johnson", "women": "", "boys": "", "girls": "" },
+    { "year": "2006", "men": "Kenny Kempf", "women": "", "boys": "", "girls": "" },
+    { "year": "2005", "men": "Jason Wendt", "women": "", "boys": "", "girls": "" },
+    { "year": "2004", "men": "Jason Wendt", "women": "", "boys": "", "girls": "" }
+  ]
+}

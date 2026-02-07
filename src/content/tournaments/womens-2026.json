@@ -11,5 +11,23 @@
     "phone": "",
     "email": "bethkusbc@gmail.com"
   },
-  "status": "completed"
+  "status": "completed",
+  "links": [
+    {
+      "text": "Online Registration",
+      "url": "https://webapps.bowl.com/USBC.Registration/registration?tags=GrFoxCities86887"
+    },
+    {
+      "text": "Entry Form and Rules",
+      "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2026-Womens-Tournament-Entry-Form.pdf"
+    },
+    {
+      "text": "Final Standings",
+      "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2026-Womens-Final-Standings.pdf"
+    },
+    {
+      "text": "Prize List",
+      "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2026-Womens-Final-Prize-List.pdf"
+    }
+  ]
 }

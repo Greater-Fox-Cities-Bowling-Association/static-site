@@ -11,5 +11,15 @@
     "phone": "",
     "email": "bethkusbc@gmail.com"
   },
-  "status": "completed"
+  "status": "completed",
+  "links": [
+    {
+      "text": "Entry Form and Rules",
+      "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2025-Youth-Tournament-Entry-Form.pdf"
+    },
+    {
+      "text": "Results",
+      "url": "#"
+    }
+  ]
 }

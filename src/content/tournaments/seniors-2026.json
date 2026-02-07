@@ -11,5 +11,19 @@
     "phone": "",
     "email": "bethkusbc@gmail.com"
   },
-  "status": "completed"
+  "status": "completed",
+  "links": [
+    {
+      "text": "Entry Form and Rules",
+      "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2026-Match-Play-Seniors-Entry-Form.pdf"
+    },
+    {
+      "text": "Qualifying Results",
+      "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2026-Senior-Qualifying-Results.pdf"
+    },
+    {
+      "text": "Match Play Bracket Results",
+      "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2026-Senior-Bracket-Results.pdf"
+    }
+  ]
 }

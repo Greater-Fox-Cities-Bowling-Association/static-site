@@ -1,0 +1,484 @@
+{
+  "category": "high-average",
+  "title": "High Average",
+  "description": "Highest bowling averages by year in the Greater Fox Cities BA",
+  "data": [
+    {
+      "year": "2023",
+      "name": "Nick Hietpas",
+      "games": 69,
+      "average": 248,
+      "gender": "Men"
+    },
+    {
+      "year": "2023",
+      "name": "Rachel Schmal",
+      "games": 90,
+      "average": 228,
+      "gender": "Women"
+    },
+    {
+      "year": "2023",
+      "name": "Zach Olson",
+      "games": 72,
+      "average": 217,
+      "gender": "Boys"
+    },
+    {
+      "year": "2023",
+      "name": "Nora Rohloff",
+      "games": 69,
+      "average": 180,
+      "gender": "Girls"
+    },
+    {
+      "year": "2022",
+      "name": "Nick Hietpas",
+      "games": 90,
+      "average": 244,
+      "gender": "Men"
+    },
+    {
+      "year": "2022",
+      "name": "Rachel Schmal",
+      "games": 90,
+      "average": 230,
+      "gender": "Women"
+    },
+    {
+      "year": "2022",
+      "name": "Jacob Hackbarth",
+      "games": 84,
+      "average": 221,
+      "gender": "Boys"
+    },
+    {
+      "year": "2022",
+      "name": "Kate Winter",
+      "games": 66,
+      "average": 201,
+      "gender": "Girls"
+    },
+    {
+      "year": "2021",
+      "name": "Nick Hietpas",
+      "games": 90,
+      "average": 253.87,
+      "gender": "Men",
+      "note": "*Unofficial WI State Record"
+    },
+    {
+      "year": "2021",
+      "name": "Charly Boelter",
+      "games": 117,
+      "average": 226,
+      "gender": "Women"
+    },
+    {
+      "year": "2021",
+      "name": "Luke Winter",
+      "games": 90,
+      "average": 221,
+      "gender": "Boys"
+    },
+    {
+      "year": "2021",
+      "name": "Alyson Kandler",
+      "games": 81,
+      "average": 204,
+      "gender": "Girls"
+    },
+    {
+      "year": "2020",
+      "name": "Nick Hietpas",
+      "games": 75,
+      "average": 247,
+      "gender": "Men"
+    },
+    {
+      "year": "2020",
+      "name": "Rachel Schmal",
+      "games": 75,
+      "average": 221,
+      "gender": "Women"
+    },
+    {
+      "year": "2020",
+      "name": "Cale Rusch",
+      "games": 78,
+      "average": 234,
+      "gender": "Boys"
+    },
+    {
+      "year": "2020",
+      "name": "Mackenzie Juedes",
+      "games": 81,
+      "average": 189,
+      "gender": "Girls"
+    },
+    {
+      "year": "2019",
+      "name": "Adam Brouch",
+      "games": 63,
+      "average": 238,
+      "gender": "Men"
+    },
+    {
+      "year": "2019",
+      "name": "Charly Boelter",
+      "games": 108,
+      "average": 223,
+      "gender": "Women"
+    },
+    {
+      "year": "2019",
+      "name": "Cale Rusch",
+      "games": 84,
+      "average": 229,
+      "gender": "Boys"
+    },
+    {
+      "year": "2019",
+      "name": "Olivia Lamers",
+      "games": 87,
+      "average": 199,
+      "gender": "Girls"
+    },
+    {
+      "year": "2018",
+      "name": "Randy Southworth",
+      "games": 72,
+      "average": 243
+    },
+    {
+      "year": "2017",
+      "name": "Kyle Breu",
+      "games": 93,
+      "average": 244
+    },
+    {
+      "year": "2016",
+      "name": "Rob Schuh",
+      "games": 69,
+      "average": 238
+    },
+    {
+      "year": "2015",
+      "name": "Adam Brouch",
+      "games": 78,
+      "average": 241
+    },
+    {
+      "year": "2014",
+      "name": "Jeff Nimke",
+      "games": 78,
+      "average": 239
+    },
+    {
+      "year": "2013",
+      "name": "Kyle Blaese",
+      "games": 78,
+      "average": 236
+    },
+    {
+      "year": "2012",
+      "name": "Al Rice",
+      "games": 90,
+      "average": 231
+    },
+    {
+      "year": "2011",
+      "name": "Brad Kuhr",
+      "games": 87,
+      "average": 233
+    },
+    {
+      "year": "2010",
+      "name": "Bryan Monday",
+      "games": 87,
+      "average": 234
+    },
+    {
+      "year": "2009",
+      "name": "Steve Van Domelen",
+      "games": 75,
+      "average": 240
+    },
+    {
+      "year": "2008",
+      "name": "Kyle Blaese",
+      "games": 90,
+      "average": 239
+    },
+    {
+      "year": "2007",
+      "name": "Kyle Blaese",
+      "games": 90,
+      "average": 246
+    },
+    {
+      "year": "2006",
+      "name": "Kyle Blaese",
+      "games": 93,
+      "average": 239
+    },
+    {
+      "year": "2005",
+      "name": "Pat Knapp",
+      "games": 75,
+      "average": 238
+    },
+    {
+      "year": "2004",
+      "name": "Rob Schuh",
+      "games": 72,
+      "average": 241
+    },
+    {
+      "year": "2003",
+      "name": "Rob Schuh",
+      "games": 69,
+      "average": 245
+    },
+    {
+      "year": "2002",
+      "name": "Rob Schuh",
+      "games": 63,
+      "average": 243
+    },
+    {
+      "year": "2001",
+      "name": "Rob Schuh",
+      "games": 72,
+      "average": 239
+    },
+    {
+      "year": "2000",
+      "name": "Adam Brouch",
+      "games": 87,
+      "average": 227
+    },
+    {
+      "year": "1999",
+      "name": "John Berg",
+      "games": 60,
+      "average": 225
+    },
+    {
+      "year": "1998",
+      "name": "Doug Hietpas",
+      "games": 84,
+      "average": 227
+    },
+    {
+      "year": "1997",
+      "name": "Brian Krieglstein",
+      "games": 69,
+      "average": 225
+    },
+    {
+      "year": "1996",
+      "name": "Terry Anderson",
+      "games": 90,
+      "average": 223
+    },
+    {
+      "year": "1995",
+      "name": "Steve Van Domelen",
+      "games": 75,
+      "average": 236
+    },
+    {
+      "year": "1994",
+      "name": "Brian Krieglstein",
+      "games": 75,
+      "average": 226
+    },
+    {
+      "year": "1993",
+      "name": "Steve Blohm",
+      "games": 84,
+      "average": 230
+    },
+    {
+      "year": "1992",
+      "name": "Rick Babler",
+      "games": 72,
+      "average": 219
+    },
+    {
+      "year": "1991",
+      "name": "Scott Tapley",
+      "games": 80,
+      "average": 229
+    },
+    {
+      "year": "1990",
+      "name": "Rick Babler / Gary Ver Voort",
+      "games": "108 / 81",
+      "average": 221
+    },
+    {
+      "year": "1989",
+      "name": "Tom Larson",
+      "games": 120,
+      "average": 223
+    },
+    {
+      "year": "1988",
+      "name": "Rick Babler",
+      "games": 120,
+      "average": 218
+    },
+    {
+      "year": "1987",
+      "name": "Mike St Louis",
+      "games": 75,
+      "average": 221
+    },
+    {
+      "year": "1986",
+      "name": "Rick Babler",
+      "games": 81,
+      "average": 218
+    },
+    {
+      "year": "1985",
+      "name": "Tom Larson",
+      "games": 108,
+      "average": 211
+    },
+    {
+      "year": "1984",
+      "name": "Bob Moberg",
+      "games": 81,
+      "average": 214
+    },
+    {
+      "year": "1983",
+      "name": "Robert Kulaszewicz",
+      "games": 81,
+      "average": 217
+    },
+    {
+      "year": "1982",
+      "name": "Tim Van Abel",
+      "games": 80,
+      "average": 208
+    },
+    {
+      "year": "1981",
+      "name": "Mike St Louis",
+      "games": 84,
+      "average": 217
+    },
+    {
+      "year": "1980",
+      "name": "Mike St Louis",
+      "games": 69,
+      "average": 211
+    },
+    {
+      "year": "1979",
+      "name": "Rick Haertl",
+      "games": 87,
+      "average": 221
+    },
+    {
+      "year": "1978",
+      "name": "Paul Thiel",
+      "games": 120,
+      "average": 210
+    },
+    {
+      "year": "1977",
+      "name": "Chuck Bayer",
+      "games": 116,
+      "average": 206
+    },
+    {
+      "year": "1976",
+      "name": "Terry Wegner",
+      "games": 124,
+      "average": 204
+    },
+    {
+      "year": "1975",
+      "name": "Chuck Bayer",
+      "games": 116,
+      "average": 206
+    },
+    {
+      "year": "1974",
+      "name": "Rick Haertl",
+      "games": 112,
+      "average": 212
+    },
+    {
+      "year": "1973",
+      "name": "Keith Gehring / Stan Prue / George Schroeder",
+      "games": "120 / 108 / 84",
+      "average": 208
+    },
+    {
+      "year": "1972",
+      "name": "Rollie Clement / Dan Mittag",
+      "games": "116 / 108",
+      "average": 203
+    },
+    {
+      "year": "1971",
+      "name": "Chuck Bayer",
+      "games": 90,
+      "average": 205
+    },
+    {
+      "year": "1970",
+      "name": "Eddie Grassl / Phil Kurczewski / George Schroeder",
+      "games": "90 / 84 / 90",
+      "average": 196
+    },
+    {
+      "year": "1969",
+      "name": "Chuck Bayer",
+      "games": 87,
+      "average": 207
+    },
+    {
+      "year": "1968",
+      "name": "Chuck Bayer / Keith Gehring",
+      "games": "90 / 84",
+      "average": 199
+    },
+    {
+      "year": "1967",
+      "name": "Roger Koehn",
+      "games": 90,
+      "average": 199
+    },
+    {
+      "year": "1966",
+      "name": "Chuck Bayer",
+      "games": 84,
+      "average": 194
+    },
+    {
+      "year": "1965",
+      "name": "Keith Gehring",
+      "games": 84,
+      "average": 203
+    },
+    {
+      "year": "1964",
+      "name": "Keith Gehring",
+      "games": 84,
+      "average": 197
+    },
+    {
+      "year": "1963",
+      "name": "Wally Moore",
+      "games": 72,
+      "average": 198
+    }
+  ]
+}
