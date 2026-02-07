@@ -10,7 +10,11 @@
     {
       "type": "text",
       "heading": "Join Our Board",
-      "content": "We are looking for people to join our Board of Directors and future Officer positions. Please consider applying and help make our association even better.\n\n[Application Form](https://www.greaterfoxcitiesba.com/wp-content/uploads/2024/04/Greater-Fox-Cities-BoardMemberApplication.doc)"
+      "content": "We are looking for people to join our Board of Directors and future Officer positions. Please consider applying and help make our association even better.",
+      "link": {
+        "text": "Application Form",
+        "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2024/04/Greater-Fox-Cities-BoardMemberApplication.doc"
+      }
     },
     {
       "type": "text",
@@ -20,7 +24,10 @@
     {
       "type": "text",
       "heading": "Social Media",
-      "content": "[Greater Fox Cities USBC on Facebook](https://www.facebook.com/groups/170723710059698)"
+      "link": {
+        "text": "Greater Fox Cities USBC on Facebook",
+        "url": "https://www.facebook.com/groups/170723710059698"
+      }
     },
     {
       "type": "list",

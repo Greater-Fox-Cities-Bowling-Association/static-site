@@ -34,6 +34,20 @@ collections:
           - { label: "Type", name: "type", widget: "select", options: ["text", "cards", "list", "table", "hero"] }
           - { label: "Heading", name: "heading", widget: "string", required: false }
           - { label: "Content", name: "content", widget: "text", required: false }
+          - label: "Single Link"
+            name: "link"
+            widget: "object"
+            required: false
+            fields:
+              - { label: "Link Text", name: "text", widget: "string" }
+              - { label: "URL", name: "url", widget: "string" }
+          - label: "Multiple Links"
+            name: "links"
+            widget: "list"
+            required: false
+            fields:
+              - { label: "Link Text", name: "text", widget: "string" }
+              - { label: "URL", name: "url", widget: "string" }
 
   - name: "centers"
     label: "Bowling Centers"

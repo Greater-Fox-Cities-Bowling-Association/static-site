@@ -15,7 +15,11 @@
     {
       "type": "text",
       "heading": "New Wisconsin State Hall of Famers!",
-      "content": "Congrats to our association's own Pam Haertl (GFCUSBC Hall-of-Fame Class of 1992), Rob Schuh (GFCUSBC Hall-of-Fame Class of 2015), and Melissa Lang for their well-deserved induction into the Wisconsin State Bowling Hall of Fame! Read more about their accomplishments [here](https://wibowl.com/wisconsin-bowling-hall-of-fame-announces-2025-inductees/)!"
+      "content": "Congrats to our association's own Pam Haertl (GFCUSBC Hall-of-Fame Class of 1992), Rob Schuh (GFCUSBC Hall-of-Fame Class of 2015), and Melissa Lang for their well-deserved induction into the Wisconsin State Bowling Hall of Fame!",
+      "link": {
+        "text": "Read more about their accomplishments",
+        "url": "https://wibowl.com/wisconsin-bowling-hall-of-fame-announces-2025-inductees/"
+      }
     },
     {
       "type": "list",

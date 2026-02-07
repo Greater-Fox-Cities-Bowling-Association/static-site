@@ -10,7 +10,21 @@
     {
       "type": "text",
       "heading": "Award Forms",
-      "content": "Download our awards application forms:\n\n- [Awards Form – Paper](https://www.greaterfoxcitiesba.com/wp-content/uploads/gfcba-awards-application.pdf)\n- [Awards Form – Online](https://bit.ly/gfcusbc-awards)\n- [Awards Control Form](https://www.greaterfoxcitiesba.com/wp-content/uploads/Awards-Control-Form.pdf)"
+      "content": "Download our awards application forms:",
+      "links": [
+        {
+          "text": "Awards Form – Paper",
+          "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/gfcba-awards-application.pdf"
+        },
+        {
+          "text": "Awards Form – Online",
+          "url": "https://bit.ly/gfcusbc-awards"
+        },
+        {
+          "text": "Awards Control Form",
+          "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/Awards-Control-Form.pdf"
+        }
+      ]
     },
     {
       "type": "text",

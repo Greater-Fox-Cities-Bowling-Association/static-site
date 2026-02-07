@@ -18,6 +18,14 @@ const pagesCollection = defineCollection({
       type: z.enum(['text', 'cards', 'list', 'table', 'hero']),
       heading: z.string().optional(),
       content: z.string().optional(),
+      link: z.object({
+        text: z.string(),
+        url: z.string(),
+      }).optional(),
+      links: z.array(z.object({
+        text: z.string(),
+        url: z.string(),
+      })).optional(),
       items: z.array(z.any()).optional(),
     })).optional(),
   }),
