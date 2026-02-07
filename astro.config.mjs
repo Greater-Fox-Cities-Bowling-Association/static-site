@@ -10,4 +10,7 @@ export default defineConfig({
   ],
   output: 'static',
   site: 'https://www.greaterfoxcitiesba.com',
+  
+  // Ensure trailing slashes are added
+  trailingSlash: 'always',
 });
