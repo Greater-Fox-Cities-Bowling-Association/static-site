@@ -1,0 +1,17 @@
+{
+  "name": "Electric City Lanes",
+  "address": "136 W Wisconsin Ave",
+  "city": "Kaukauna",
+  "state": "WI",
+  "zip": "54130",
+  "phone": "",
+  "email": "",
+  "website": "https://www.electriccitylanes.com/",
+  "lanes": 24,
+  "features": [
+    "Automatic scoring",
+    "League bowling",
+    "Food and beverages",
+    "Pro shop"
+  ]
+}

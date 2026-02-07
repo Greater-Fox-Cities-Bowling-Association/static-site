@@ -9,8 +9,93 @@
   "sections": [
     {
       "type": "text",
-      "heading": "Local Awards",
-      "content": "The Greater Fox Cities BA provides various awards to recognize bowlers who demonstrate excellence, sportsmanship, and dedication to the sport."
+      "heading": "Award Forms",
+      "content": "Download our awards application forms:\n\n- [Awards Form – Paper](https://www.greaterfoxcitiesba.com/wp-content/uploads/gfcba-awards-application.pdf)\n- [Awards Form – Online](https://bit.ly/gfcusbc-awards)\n- [Awards Control Form](https://www.greaterfoxcitiesba.com/wp-content/uploads/Awards-Control-Form.pdf)"
+    },
+    {
+      "type": "text",
+      "heading": "Eligibility",
+      "content": "**Who:** Adults, 18 years or older, who are sanctioned in any certified league within Greater Fox Cities USBC, are eligible for the awards shown below. Bowler must pay sanction, and card must be received by Association Manager, in order to be valid.\n\n**When:** Use last season's Bowl.com average until bowler establishes new average this season, 21 games, then use this current season's average going forward. If no average is available, then awards will begin for that bowler after 21 games this season in that league. Previous season scores are not eligible for local awards.\n\n**Where:** Forms are available on our website, and League Secretary packets. Bowlers should contact their secretary. Secretaries should turn forms into the Association Manager."
+    },
+    {
+      "type": "list",
+      "heading": "Once Per Lifetime Awards",
+      "items": [
+        {
+          "title": "800 Series",
+          "description": "Men or Women"
+        },
+        {
+          "title": "700 Series",
+          "description": "Women, Men with average < 190"
+        },
+        {
+          "title": "600 Series",
+          "description": "Women with average < 170"
+        },
+        {
+          "title": "300 Game",
+          "description": "Men or Women"
+        }
+      ]
+    },
+    {
+      "type": "list",
+      "heading": "Once Per Season Awards",
+      "items": [
+        {
+          "title": "Triplicate",
+          "description": "Three identical game scores in a series"
+        },
+        {
+          "title": "Clean Series",
+          "description": "Series with all strikes and spares"
+        },
+        {
+          "title": "All Spare Game",
+          "description": "Game with all spares"
+        },
+        {
+          "title": "Dutch 200 Game",
+          "description": "Alternating strikes and spares for 200+"
+        },
+        {
+          "title": "11 in a Row",
+          "description": "11 consecutive strikes"
+        },
+        {
+          "title": "60 Pins Over Average (Men)",
+          "description": "Single game 60+ pins over average"
+        },
+        {
+          "title": "120 Pins Over Average (Men)",
+          "description": "Series 120+ pins over average"
+        },
+        {
+          "title": "40 Pins Over Average (Women)",
+          "description": "Single game 40+ pins over average"
+        },
+        {
+          "title": "80 Pins Over Average (Women)",
+          "description": "Series 80+ pins over average"
+        },
+        {
+          "title": "7-10 Split",
+          "description": "Convert the 7-10 split"
+        },
+        {
+          "title": "Big 4 Split",
+          "description": "Convert the 4-6-7-10 split"
+        },
+        {
+          "title": "Lily Split",
+          "description": "Convert the 5-7-10 split"
+        },
+        {
+          "title": "Greek Church Split",
+          "description": "Convert the 4-6-7-9-10 or 4-6-7-8-10 split"
+        }
+      ]
     }
   ]
 }

@@ -1,0 +1,18 @@
+{
+  "name": "Rolling Thunder Lanes",
+  "address": "934 Byrd Ave",
+  "city": "Neenah",
+  "state": "WI",
+  "zip": "54956",
+  "phone": "",
+  "email": "",
+  "website": "https://rollingthunderlanes.com/",
+  "lanes": 20,
+  "features": [
+    "Automatic scoring",
+    "League bowling",
+    "Tournament host",
+    "Food and beverages",
+    "Pro shop"
+  ]
+}

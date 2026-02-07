@@ -11,6 +11,32 @@
       "type": "text",
       "heading": "Tournament Information",
       "content": "The Greater Fox Cities Bowling Association hosts several tournaments throughout the year. Check back regularly for updates on upcoming events and registration information."
+    },
+    {
+      "type": "list",
+      "heading": "2025-2026 Tournament Schedule",
+      "items": [
+        {
+          "title": "Youth Association Tournament",
+          "description": "November 1-2 / 8-9 / 15-16, 2025 at Electric City Lanes, Kaukauna"
+        },
+        {
+          "title": "Match Play (Masters)",
+          "description": "January 3, 2026 at Super Bowl, Appleton"
+        },
+        {
+          "title": "Match Play (Seniors)",
+          "description": "January 4, 2026 at Super Bowl, Appleton"
+        },
+        {
+          "title": "Open Association Tournament",
+          "description": "January 10-11 / 17-18, 2026 at Rolling Thunder Lanes, Neenah"
+        },
+        {
+          "title": "Women's Association Tournament",
+          "description": "January 10-11 / 17-18, 2026 at Rolling Thunder Lanes, Neenah"
+        }
+      ]
     }
   ]
 }

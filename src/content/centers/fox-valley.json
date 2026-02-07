@@ -1,18 +1,18 @@
 {
-  "name": "Fox Valley Lanes",
-  "address": "456 Strike Avenue",
-  "city": "Neenah",
+  "name": "Bowlero Sabre Lanes",
+  "address": "1330 Midway Rd",
+  "city": "Menasha",
   "state": "WI",
-  "zip": "54956",
-  "phone": "(920) 555-0200",
-  "email": "contact@foxvalleylanes.com",
-  "website": "https://www.foxvalleylanes.com",
-  "lanes": 24,
+  "zip": "54952",
+  "phone": "",
+  "email": "",
+  "website": "https://www.bowlero.com/location/sabre-lanes",
+  "lanes": 32,
   "features": [
-    "Cosmic bowling",
     "Automatic scoring",
-    "Snack bar",
-    "League bowling",
-    "Pro shop"
+    "Cosmic bowling",
+    "Arcade",
+    "Food and beverages",
+    "League bowling"
   ]
 }

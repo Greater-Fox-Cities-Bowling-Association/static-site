@@ -9,8 +9,94 @@
   "sections": [
     {
       "type": "text",
-      "heading": "Get in Touch",
-      "content": "Have questions about tournaments, membership, or anything else? Contact the Greater Fox Cities Bowling Association."
+      "heading": "Join Our Board",
+      "content": "We are looking for people to join our Board of Directors and future Officer positions. Please consider applying and help make our association even better.\n\n[Application Form](https://www.greaterfoxcitiesba.com/wp-content/uploads/2024/04/Greater-Fox-Cities-BoardMemberApplication.doc)"
+    },
+    {
+      "type": "text",
+      "heading": "Association Emails",
+      "content": "- bethkusbc@gmail.com\n- gfcba920@gmail.com"
+    },
+    {
+      "type": "text",
+      "heading": "Social Media",
+      "content": "[Greater Fox Cities USBC on Facebook](https://www.facebook.com/groups/170723710059698)"
+    },
+    {
+      "type": "list",
+      "heading": "Association Officers",
+      "items": [
+        {
+          "title": "Andrew Belonger",
+          "description": "President"
+        },
+        {
+          "title": "Annette Zelinski",
+          "description": "Vice President"
+        },
+        {
+          "title": "Becky Landgraf",
+          "description": "Sergeant at Arms"
+        },
+        {
+          "title": "Beth Kosiorek",
+          "description": "Association Manager"
+        },
+        {
+          "title": "Keith Koch & Terry Anderson",
+          "description": "Historian"
+        }
+      ]
+    },
+    {
+      "type": "list",
+      "heading": "Board of Directors",
+      "items": [
+        {
+          "title": "Ryan Duescher",
+          "description": "Board Member"
+        },
+        {
+          "title": "Carlene Enama",
+          "description": "Board Member"
+        },
+        {
+          "title": "Rhonda Hansen",
+          "description": "Board Member"
+        },
+        {
+          "title": "Jim Kading",
+          "description": "Board Member"
+        },
+        {
+          "title": "Matt Mattson",
+          "description": "Board Member"
+        },
+        {
+          "title": "Glenn Monte",
+          "description": "Board Member"
+        },
+        {
+          "title": "Michele Minkebige",
+          "description": "Board Member"
+        },
+        {
+          "title": "Caroline Pirkola",
+          "description": "Board Member"
+        },
+        {
+          "title": "Holland Rittmann",
+          "description": "Board Member"
+        },
+        {
+          "title": "Megan Salentine",
+          "description": "Board Member"
+        },
+        {
+          "title": "Amy Young",
+          "description": "Board Member"
+        }
+      ]
     }
   ]
 }

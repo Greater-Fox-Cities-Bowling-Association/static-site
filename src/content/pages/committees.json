@@ -10,7 +10,263 @@
     {
       "type": "text",
       "heading": "Our Committees",
-      "content": "The Greater Fox Cities BA is organized into several committees that manage different aspects of the association's operations and events."
+      "content": "The Greater Fox Cities BA is organized into several committees that manage different aspects of the association's operations and events.\n\n*Note: * denotes non-board member, **bold** denotes committee chair. Association President and Association Manager are ad-hoc members of all committees.*"
+    },
+    {
+      "type": "list",
+      "heading": "Tournament / All-Association Team",
+      "items": [
+        {
+          "title": "Carlene Enama",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Ryan Duescher",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Becky Landgraf",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Matt Mattson",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Michele Minkebige",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Glenn Monte",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Caroline Pirkola",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Holland Rittmann",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Megan Salentine",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Amy Young",
+          "description": "Committee Member"
+        }
+      ]
+    },
+    {
+      "type": "list",
+      "heading": "Awards Committee",
+      "items": [
+        {
+          "title": "Carlene Enama",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Becky Landgraf",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Matt Mattson",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Holland Rittmann",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Megan Salentine",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Amy Young",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Annette Zelinski",
+          "description": "Committee Member"
+        }
+      ]
+    },
+    {
+      "type": "list",
+      "heading": "Hall-of-Fame Committee",
+      "items": [
+        {
+          "title": "Ryan Duescher",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Rhonda Hansen",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Becky Landgraf",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Holland Rittmann",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Amy Young",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Annette Zelinski",
+          "description": "Committee Member"
+        }
+      ]
+    },
+    {
+      "type": "list",
+      "heading": "Audit / Finance Committee",
+      "items": [
+        {
+          "title": "Ryan Duescher",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Rhonda Hansen",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Beth Kosiorek",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Glenn Monte",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Megan Salentine",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Mary Jo Woods",
+          "description": "Non-Board Member"
+        },
+        {
+          "title": "Annette Zelinski",
+          "description": "Committee Member"
+        }
+      ]
+    },
+    {
+      "type": "list",
+      "heading": "Scholarship Committee",
+      "items": [
+        {
+          "title": "Carlene Enama",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Jim Kading",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Michele Minkebige",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Holland Rittmann",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Megan Salentine",
+          "description": "Committee Member"
+        }
+      ]
+    },
+    {
+      "type": "list",
+      "heading": "Nominating Committee",
+      "items": [
+        {
+          "title": "Ryan Duescher",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Carlene Enama",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Rhonda Hansen",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Michele Minkebige",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Caroline Pirkola",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Holland Rittmann",
+          "description": "Committee Member"
+        }
+      ]
+    },
+    {
+      "type": "list",
+      "heading": "Legislative Committee",
+      "items": [
+        {
+          "title": "Ryan Duescher",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Jim Kading",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Matt Mattson",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Annette Zelinski",
+          "description": "Committee Member"
+        }
+      ]
+    },
+    {
+      "type": "list",
+      "heading": "Youth Committee",
+      "items": [
+        {
+          "title": "Carlene Enama",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Rhonda Hansen",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Becky Landgraf",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Caroline Pirkola",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Megan Salentine",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Amy Young",
+          "description": "Committee Member"
+        },
+        {
+          "title": "Holland Rittmann",
+          "description": "Committee Member"
+        }
+      ]
     }
   ]
 }

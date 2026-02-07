@@ -1,0 +1,16 @@
+{
+  "name": "Split Happens",
+  "address": "106 S. Main St",
+  "city": "Brillion",
+  "state": "WI",
+  "zip": "54110",
+  "phone": "",
+  "email": "",
+  "website": "https://www.facebook.com/profile.php?id=100046971175071",
+  "lanes": 8,
+  "features": [
+    "League bowling",
+    "Small town bowling",
+    "Food and beverages"
+  ]
+}

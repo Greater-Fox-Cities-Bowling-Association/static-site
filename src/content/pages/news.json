@@ -11,6 +11,37 @@
       "type": "text",
       "heading": "Latest News",
       "content": "Stay up to date with the latest news, announcements, and updates from the Greater Fox Cities Bowling Association."
+    },
+    {
+      "type": "text",
+      "heading": "New Wisconsin State Hall of Famers!",
+      "content": "Congrats to our association's own Pam Haertl (GFCUSBC Hall-of-Fame Class of 1992), Rob Schuh (GFCUSBC Hall-of-Fame Class of 2015), and Melissa Lang for their well-deserved induction into the Wisconsin State Bowling Hall of Fame! Read more about their accomplishments [here](https://wibowl.com/wisconsin-bowling-hall-of-fame-announces-2025-inductees/)!"
+    },
+    {
+      "type": "list",
+      "heading": "2025-2026 Association Tournament Schedule",
+      "items": [
+        {
+          "title": "Youth Association Tournament",
+          "description": "November 1-2 / 8-9 / 15-16, 2025 - Electric City Lanes, Kaukauna"
+        },
+        {
+          "title": "Match Play (Masters)",
+          "description": "January 3, 2026 - TBD"
+        },
+        {
+          "title": "Match Play (Seniors)",
+          "description": "January 4, 2026 - TBD"
+        },
+        {
+          "title": "Open Association Tournament",
+          "description": "January 10-11 / 17-18, 2026 - Rolling Thunder Lanes, Neenah"
+        },
+        {
+          "title": "Women's Association Tournament",
+          "description": "January 10-11 / 17-18, 2026 - Rolling Thunder Lanes, Neenah"
+        }
+      ]
     }
   ]
 }

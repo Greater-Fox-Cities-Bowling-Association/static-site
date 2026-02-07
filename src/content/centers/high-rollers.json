@@ -1,18 +1,19 @@
 {
-  "name": "High Rollers Bowl",
-  "address": "123 Bowling Lane",
+  "name": "Bowlero Super Bowl",
+  "address": "2222 E Northland Ave",
   "city": "Appleton",
   "state": "WI",
   "zip": "54911",
-  "phone": "(920) 555-0100",
-  "email": "info@highrollersbowl.com",
-  "website": "https://www.highrollersbowl.com",
-  "lanes": 32,
+  "phone": "",
+  "email": "",
+  "website": "https://www.bowlero.com/location/super-bowl-family-entertainment-center",
+  "lanes": 40,
   "features": [
     "Automatic scoring",
-    "Pro shop",
-    "Lounge and bar",
-    "League bowling",
-    "Birthday parties"
+    "Cosmic bowling",
+    "Arcade",
+    "Food and beverages",
+    "Family entertainment center",
+    "League bowling"
   ]
 }
