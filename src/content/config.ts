@@ -1,35 +1,6 @@
 import { defineCollection, z } from 'astro:content';
 
-// Schema for page content
-const pagesCollection = defineCollection({
-  type: 'data',
-  schema: z.object({
-    title: z.string(),
-    description: z.string(),
-    slug: z.string(),
-    hero: z.object({
-      heading: z.string(),
-      subheading: z.string().optional(),
-      image: z.string().optional(),
-      ctaText: z.string().optional(),
-      ctaLink: z.string().optional(),
-    }).optional(),
-    sections: z.array(z.object({
-      type: z.enum(['text', 'cards', 'list', 'table', 'hero']),
-      heading: z.string().optional(),
-      content: z.string().optional(),
-      link: z.object({
-        text: z.string(),
-        url: z.string(),
-      }).optional(),
-      links: z.array(z.object({
-        text: z.string(),
-        url: z.string(),
-      })).optional(),
-      items: z.array(z.any()).optional(),
-    })).optional(),
-  }),
-});
+// Pages collection removed - will be recreated when CMS is built
 
 // Schema for bowling centers
 const centersCollection = defineCollection({
@@ -127,7 +98,7 @@ const committeesCollection = defineCollection({
 });
 
 export const collections = {
-  'pages': pagesCollection,
+  // 'pages': Pages collection will be recreated with new CMS schema
   'centers': centersCollection,
   'tournaments': tournamentsCollection,
   'honors': honorsCollection,

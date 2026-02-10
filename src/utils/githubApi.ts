@@ -8,6 +8,24 @@ interface GitHubCommitOptions {
   branch?: string;
 }
 
+interface GitHubFileResponse {
+  name: string;
+  path: string;
+  sha: string;
+  size: number;
+  url: string;
+  html_url: string;
+  git_url: string;
+  download_url: string | null;
+  type: 'file' | 'dir';
+  content?: string; // Base64 encoded, only present when getting file content
+  encoding?: 'base64';
+}
+
+const DEFAULT_OWNER = 'myoung-admin';
+const DEFAULT_REPO = 'gfcba';
+const PAGES_PATH = 'src/content/pages';
+
 export async function commitToGitHub({
   token,
   owner,
@@ -84,4 +102,188 @@ export function generateFilename(collectionType: string, data: any, originalFile
     default:
       return sanitize(originalFilename.replace('.csv', '')) + '.json';
   }
+}
+
+// =============================================================================
+// Page Management API Functions
+// =============================================================================
+
+/**
+ * Fetch all pages from the GitHub repository
+ */
+export async function fetchPagesDirectory(
+  token: string,
+  owner: string = DEFAULT_OWNER,
+  repo: string = DEFAULT_REPO
+): Promise<{ success: boolean; files?: GitHubFileResponse[]; error?: string }> {
+  try {
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${PAGES_PATH}`;
+    
+    const response = await fetch(apiUrl, {
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        // Directory doesn't exist yet
+        return { success: true, files: [] };
+      }
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to fetch pages directory');
+    }
+
+    const data: GitHubFileResponse[] = await response.json();
+    
+    // Filter to only JSON files
+    const jsonFiles = data.filter(file => 
+      file.type === 'file' && file.name.endsWith('.json')
+    );
+
+    return { success: true, files: jsonFiles };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error occurred'
+    };
+  }
+}
+
+/**
+ * Fetch a single page's content by slug
+ */
+export async function fetchPageContent(
+  slug: string,
+  token: string,
+  owner: string = DEFAULT_OWNER,
+  repo: string = DEFAULT_REPO
+): Promise<{ success: boolean; content?: any; sha?: string; error?: string }> {
+  try {
+    const filename = `${slug}.json`;
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${PAGES_PATH}/${filename}`;
+    
+    const response = await fetch(apiUrl, {
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        return { success: false, error: 'Page not found' };
+      }
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to fetch page content');
+    }
+
+    const data: GitHubFileResponse = await response.json();
+    
+    if (!data.content) {
+      throw new Error('No content in response');
+    }
+
+    // Decode base64 content
+    const decodedContent = atob(data.content);
+    const jsonContent = JSON.parse(decodedContent);
+
+    return { 
+      success: true, 
+      content: jsonContent,
+      sha: data.sha 
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error occurred'
+    };
+  }
+}
+
+/**
+ * Delete a page file from GitHub
+ */
+export async function deletePageFile(
+  slug: string,
+  token: string,
+  owner: string = DEFAULT_OWNER,
+  repo: string = DEFAULT_REPO
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const filename = `${slug}.json`;
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${PAGES_PATH}/${filename}`;
+    
+    // First, get the file SHA (required for deletion)
+    const getResponse = await fetch(apiUrl, {
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+
+    if (!getResponse.ok) {
+      if (getResponse.status === 404) {
+        return { success: false, error: 'Page not found' };
+      }
+      const error = await getResponse.json();
+      throw new Error(error.message || 'Failed to get page for deletion');
+    }
+
+    const fileData: GitHubFileResponse = await getResponse.json();
+
+    // Delete the file
+    const deleteResponse = await fetch(apiUrl, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message: `Delete page: ${slug}`,
+        sha: fileData.sha,
+        branch: 'main'
+      })
+    });
+
+    if (!deleteResponse.ok) {
+      const error = await deleteResponse.json();
+      throw new Error(error.message || 'Failed to delete page');
+    }
+
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error occurred'
+    };
+  }
+}
+
+/**
+ * Create or update a page file
+ */
+export async function savePageFile(
+  slug: string,
+  content: any,
+  token: string,
+  owner: string = DEFAULT_OWNER,
+  repo: string = DEFAULT_REPO
+): Promise<{ success: boolean; error?: string }> {
+  const filename = `${slug}.json`;
+  const path = `${PAGES_PATH}/${filename}`;
+  const contentString = JSON.stringify(content, null, 2);
+  const message = `Update page: ${content.title || slug}`;
+
+  return commitToGitHub({
+    token,
+    owner,
+    repo,
+    path,
+    content: contentString,
+    message,
+    branch: 'main'
+  });
 }
