@@ -1,0 +1,55 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import HeroSection from '../components/astro/sections/HeroSection.astro';
+import TextSection from '../components/astro/sections/TextSection.astro';
+import CardGridSection from '../components/astro/sections/CardGridSection.astro';
+import CtaSection from '../components/astro/sections/CtaSection.astro';
+
+// Generate static paths for all published pages
+export async function getStaticPaths() {
+  const pages = await getCollection('pages');
+  
+  return pages
+    .filter(page => {
+      // In production, only show published pages
+      // In dev, show all pages
+      return import.meta.env.DEV || page.data.status === 'published';
+    })
+    .map(page => ({
+      params: { slug: page.data.slug },
+      props: { page: page.data },
+    }));
+}
+
+const { slug } = Astro.params;
+
+// Get the page data
+const page = await getEntry('pages', slug!);
+
+if (!page) {
+  return Astro.redirect('/404');
+}
+
+const { title, metaDescription, sections } = page.data;
+
+// Sort sections by order
+const sortedSections = [...sections].sort((a, b) => a.order - b.order);
+---
+
+<BaseLayout title={title} description={metaDescription}>
+  {sortedSections.map((section) => {
+    switch (section.type) {
+      case 'hero':
+        return <HeroSection section={section} />;
+      case 'text':
+        return <TextSection section={section} />;
+      case 'cardGrid':
+        return <CardGridSection section={section} />;
+      case 'cta':
+        return <CtaSection section={section} />;
+      default:
+        return null;
+    }
+  })}
+</BaseLayout>

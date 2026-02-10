@@ -1,0 +1,30 @@
+---
+import type { CtaSection } from '../../../types/cms';
+
+interface Props {
+  section: CtaSection;
+}
+
+const { section } = Astro.props;
+const { heading, buttonText, buttonLink, style } = section;
+
+const buttonStyles = {
+  primary: 'bg-blue-600 hover:bg-blue-700 text-white',
+  secondary: 'bg-gray-800 hover:bg-gray-900 text-white',
+};
+---
+
+<section class="py-20 bg-gradient-to-br from-blue-600 to-blue-800">
+  <div class="container mx-auto px-4 text-center">
+    <h2 class="text-3xl md:text-5xl font-bold text-white mb-8">
+      {heading}
+    </h2>
+    
+    <a 
+      href={buttonLink} 
+      class={`inline-block font-semibold px-10 py-4 rounded-lg transition-colors ${buttonStyles[style]}`}
+    >
+      {buttonText}
+    </a>
+  </div>
+</section>

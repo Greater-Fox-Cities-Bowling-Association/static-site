@@ -97,8 +97,71 @@ const committeesCollection = defineCollection({
   }),
 });
 
+// Pages collection - CMS-managed pages
+const cardSchema = z.object({
+  title: z.string(),
+  description: z.string(),
+  imageUrl: z.string().optional(),
+  link: z.string().optional(),
+});
+
+const baseSectionSchema = z.object({
+  id: z.string(),
+  order: z.number(),
+});
+
+const heroSectionSchema = baseSectionSchema.extend({
+  type: z.literal('hero'),
+  title: z.string(),
+  subtitle: z.string().optional(),
+  backgroundImage: z.string().optional(),
+  ctaText: z.string().optional(),
+  ctaLink: z.string().optional(),
+});
+
+const textSectionSchema = baseSectionSchema.extend({
+  type: z.literal('text'),
+  heading: z.string().optional(),
+  content: z.string(),
+});
+
+const cardGridSectionSchema = baseSectionSchema.extend({
+  type: z.literal('cardGrid'),
+  heading: z.string().optional(),
+  cards: z.array(cardSchema),
+  columns: z.union([z.literal(2), z.literal(3), z.literal(4)]),
+});
+
+const ctaSectionSchema = baseSectionSchema.extend({
+  type: z.literal('cta'),
+  heading: z.string(),
+  buttonText: z.string(),
+  buttonLink: z.string(),
+  style: z.enum(['primary', 'secondary']),
+});
+
+const sectionSchema = z.discriminatedUnion('type', [
+  heroSectionSchema,
+  textSectionSchema,
+  cardGridSectionSchema,
+  ctaSectionSchema,
+]);
+
+const pagesCollection = defineCollection({
+  type: 'data',
+  schema: z.object({
+    slug: z.string(),
+    title: z.string(),
+    metaDescription: z.string().optional(),
+    status: z.enum(['draft', 'published']),
+    sections: z.array(sectionSchema),
+    createdAt: z.string().optional(),
+    updatedAt: z.string().optional(),
+  }),
+});
+
 export const collections = {
-  // 'pages': Pages collection will be recreated with new CMS schema
+  'pages': pagesCollection,
   'centers': centersCollection,
   'tournaments': tournamentsCollection,
   'honors': honorsCollection,
