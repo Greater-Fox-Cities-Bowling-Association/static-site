@@ -26,24 +26,6 @@ const DEFAULT_OWNER = 'myoung-admin';
 const DEFAULT_REPO = 'gfcba';
 const PAGES_PATH = 'src/content/pages';
 
-/**
- * Get the target branch for publishing
- * In dev mode: uses current branch (from PUBLIC_GIT_BRANCH env var, defaults to 'main')
- * In production: always uses 'main'
- */
-function getTargetBranch(): string {
-  // In production, always use main branch
-  if (import.meta.env.PROD) {
-    console.log('📍 CMS: Publishing to main branch (production mode)');
-    return 'main';
-  }
-  
-  // In dev mode, use the current branch from environment variable
-  const branch = import.meta.env.PUBLIC_GIT_BRANCH || 'main';
-  console.log(`📍 CMS: Publishing to ${branch} branch (dev mode)`);
-  return branch;
-}
-
 export async function commitToGitHub({
   token,
   owner,
@@ -244,7 +226,30 @@ export async function deletePageFile(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const filename = `${slug}.json`;
-    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${PAGES_PATH}/${filename}`;
+    const path = `${PAGES_PATH}/${filename}`;
+
+    console.log('🗑️ deletePageFile:', { slug, path, mode: import.meta.env.DEV ? 'DEV (local)' : 'PRODUCTION (GitHub)' });
+
+    // DEV MODE: Delete from local filesystem via API endpoint
+    if (import.meta.env.DEV) {
+      const response = await fetch('/api/delete-page', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path })
+      });
+
+      const result = await response.json();
+      
+      if (!response.ok) {
+        return { success: false, error: result.error || 'Failed to delete file locally' };
+      }
+
+      console.log('✅ Deleted local file:', path);
+      return { success: true };
+    }
+
+    // PRODUCTION MODE: Delete from GitHub
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
     
     // First, get the file SHA (required for deletion)
     const getResponse = await fetch(apiUrl, {
@@ -275,7 +280,7 @@ export async function deletePageFile(
       body: JSON.stringify({
         message: `Delete page: ${slug}`,
         sha: fileData.sha,
-        branch: getTargetBranch()
+        branch: 'main' // Always use main in production
       })
     });
 
@@ -312,10 +317,36 @@ export async function savePageFile(
     updatedAt: new Date().toISOString()
   };
   
+  console.log('💾 savePageFile:', { slug, path, title: content.title, mode: import.meta.env.DEV ? 'DEV (local)' : 'PRODUCTION (GitHub)' });
+
+  // DEV MODE: Save to local filesystem via API endpoint
+  if (import.meta.env.DEV) {
+    try {
+      const response = await fetch('/api/save-page', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path, content: contentWithTimestamp })
+      });
+
+      const result = await response.json();
+      
+      if (!response.ok) {
+        return { success: false, error: result.error || 'Failed to save file locally' };
+      }
+
+      console.log('✅ Saved to local file:', path);
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to save file locally'
+      };
+    }
+  }
+
+  // PRODUCTION MODE: Commit to GitHub
   const contentString = JSON.stringify(contentWithTimestamp, null, 2);
   const message = `Update page: ${content.title || slug}`;
-
-  console.log('savePageFile:', { slug, path, title: content.title });
 
   return commitToGitHub({
     token,
@@ -324,6 +355,6 @@ export async function savePageFile(
     path,
     content: contentString,
     message,
-    branch: getTargetBranch()
+    branch: 'main' // Always use main in production
   });
 }
