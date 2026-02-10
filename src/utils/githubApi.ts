@@ -26,6 +26,24 @@ const DEFAULT_OWNER = 'myoung-admin';
 const DEFAULT_REPO = 'gfcba';
 const PAGES_PATH = 'src/content/pages';
 
+/**
+ * Get the target branch for publishing
+ * In dev mode: uses current branch (from PUBLIC_GIT_BRANCH env var, defaults to 'main')
+ * In production: always uses 'main'
+ */
+function getTargetBranch(): string {
+  // In production, always use main branch
+  if (import.meta.env.PROD) {
+    console.log('📍 CMS: Publishing to main branch (production mode)');
+    return 'main';
+  }
+  
+  // In dev mode, use the current branch from environment variable
+  const branch = import.meta.env.PUBLIC_GIT_BRANCH || 'main';
+  console.log(`📍 CMS: Publishing to ${branch} branch (dev mode)`);
+  return branch;
+}
+
 export async function commitToGitHub({
   token,
   owner,
@@ -36,12 +54,14 @@ export async function commitToGitHub({
   branch = 'main'
 }: GitHubCommitOptions): Promise<{ success: boolean; error?: string }> {
   try {
+    // Include branch in the query string when checking for existing file
     const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+    const apiUrlWithBranch = `${apiUrl}?ref=${branch}`;
     
     // Check if file exists to get SHA
     let sha: string | undefined;
     try {
-      const existingFile = await fetch(apiUrl, {
+      const existingFile = await fetch(apiUrlWithBranch, {
         headers: {
           'Authorization': `token ${token}`,
           'Accept': 'application/vnd.github.v3+json'
@@ -73,12 +93,14 @@ export async function commitToGitHub({
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to commit to GitHub');
+      const errorData = await response.json();
+      console.error('GitHub API Error:', errorData);
+      throw new Error(errorData.message || `Failed to commit to GitHub (${response.status})`);
     }
 
     return { success: true };
   } catch (error) {
+    console.error('commitToGitHub error:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error occurred'
@@ -244,7 +266,7 @@ export async function deletePageFile(
       body: JSON.stringify({
         message: `Delete page: ${slug}`,
         sha: fileData.sha,
-        branch: 'main'
+        branch: getTargetBranch()
       })
     });
 
@@ -274,8 +296,17 @@ export async function savePageFile(
 ): Promise<{ success: boolean; error?: string }> {
   const filename = `${slug}.json`;
   const path = `${PAGES_PATH}/${filename}`;
-  const contentString = JSON.stringify(content, null, 2);
+  
+  // Add updatedAt timestamp
+  const contentWithTimestamp = {
+    ...content,
+    updatedAt: new Date().toISOString()
+  };
+  
+  const contentString = JSON.stringify(contentWithTimestamp, null, 2);
   const message = `Update page: ${content.title || slug}`;
+
+  console.log('savePageFile:', { slug, path, title: content.title });
 
   return commitToGitHub({
     token,
@@ -284,6 +315,6 @@ export async function savePageFile(
     path,
     content: contentString,
     message,
-    branch: 'main'
+    branch: getTargetBranch()
   });
 }

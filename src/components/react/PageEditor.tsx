@@ -169,7 +169,10 @@ export default function PageEditor({ slug, token, onSave, onCancel }: PageEditor
 
     setSaving(true);
     try {
+      console.log('Publishing page:', { slug: page.slug, title: page.title });
       const result = await savePageFile(page.slug, page, token);
+      
+      console.log('Publish result:', result);
       
       if (result.success) {
         // Delete draft after successful publish
@@ -180,9 +183,11 @@ export default function PageEditor({ slug, token, onSave, onCancel }: PageEditor
         alert('Page published successfully!');
         onSave();
       } else {
-        alert(`Failed to publish: ${result.error}`);
+        console.error('Publish failed:', result.error);
+        alert(`Failed to publish: ${result.error || 'Unknown error'}`);
       }
     } catch (error) {
+      console.error('Publish error:', error);
       alert(`Error publishing page: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setSaving(false);
