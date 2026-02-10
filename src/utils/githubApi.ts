@@ -101,6 +101,15 @@ export async function commitToGitHub({
     return { success: true };
   } catch (error) {
     console.error('commitToGitHub error:', error);
+    
+    // Check if this is a branch-not-found error (404)
+    if (error instanceof Error && error.message.includes('Not Found')) {
+      return {
+        success: false,
+        error: `Branch "${branch}" not found on remote. Push your branch to GitHub first, or switch to main branch to publish.`
+      };
+    }
+    
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error occurred'
