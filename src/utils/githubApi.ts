@@ -238,9 +238,20 @@ export async function deletePageFile(
         body: JSON.stringify({ path })
       });
 
-      const result = await response.json();
+      let result;
+      try {
+        result = await response.json();
+      } catch (jsonError) {
+        const text = await response.text();
+        console.error('Server response (not JSON):', text);
+        return { 
+          success: false, 
+          error: `Server error: ${response.status}. Check dev server console for details.` 
+        };
+      }
       
       if (!response.ok) {
+        console.error('Server returned error:', result);
         return { success: false, error: result.error || 'Failed to delete file locally' };
       }
 
@@ -328,15 +339,27 @@ export async function savePageFile(
         body: JSON.stringify({ path, content: contentWithTimestamp })
       });
 
-      const result = await response.json();
+      let result;
+      try {
+        result = await response.json();
+      } catch (jsonError) {
+        const text = await response.text();
+        console.error('Server response (not JSON):', text);
+        return { 
+          success: false, 
+          error: `Server error: ${response.status}. Check dev server console for details.` 
+        };
+      }
       
       if (!response.ok) {
+        console.error('Server returned error:', result);
         return { success: false, error: result.error || 'Failed to save file locally' };
       }
 
       console.log('✅ Saved to local file:', path);
       return { success: true };
     } catch (error) {
+      console.error('Save file error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to save file locally'

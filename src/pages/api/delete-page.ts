@@ -1,5 +1,8 @@
 import type { APIRoute } from 'astro';
 import { unlinkSync, existsSync } from 'fs';
+import { resolve } from 'path';
+
+export const prerender = false;
 
 export const POST: APIRoute = async ({ request }) => {
   // Only allow in development
@@ -11,7 +14,8 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   try {
-    const { path } = await request.json();
+    const data = await request.json();
+    const { path } = data;
     
     if (!path) {
       return new Response(JSON.stringify({ error: 'Missing path' }), {
@@ -20,9 +24,18 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
+    // Convert to absolute path from project root
+    const projectRoot = resolve(process.cwd());
+    const absolutePath = resolve(projectRoot, path);
+    
+    console.log('🗑️ Deleting:', absolutePath);
+
     // Delete file if it exists
-    if (existsSync(path)) {
-      unlinkSync(path);
+    if (existsSync(absolutePath)) {
+      unlinkSync(absolutePath);
+      console.log('✅ File deleted successfully');
+    } else {
+      console.log('⚠️ File does not exist');
     }
 
     return new Response(JSON.stringify({ success: true }), {
@@ -30,7 +43,7 @@ export const POST: APIRoute = async ({ request }) => {
       headers: { 'Content-Type': 'application/json' }
     });
   } catch (error) {
-    console.error('Error deleting file:', error);
+    console.error('❌ Error deleting file:', error);
     return new Response(JSON.stringify({ 
       error: error instanceof Error ? error.message : 'Failed to delete file' 
     }), {
