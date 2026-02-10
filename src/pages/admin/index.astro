@@ -1,5 +1,9 @@
 ---
 import ImportAdmin from '../../components/react/ImportAdmin';
+
+// Check if we're in development mode and get the token
+const isDev = import.meta.env.DEV;
+const devToken = isDev ? import.meta.env.GITHUB_TOKEN : undefined;
 ---
 
 <!DOCTYPE html>
@@ -20,6 +24,6 @@ import ImportAdmin from '../../components/react/ImportAdmin';
   </style>
 </head>
 <body>
-  <ImportAdmin client:load />
+  <ImportAdmin client:load devToken={devToken} isDev={isDev} />
 </body>
 </html>

@@ -6,7 +6,12 @@ import { detectCollectionType, mapHonorsCSV, mapCentersCSV, mapTournamentsCSV, m
 
 type Step = 'auth' | 'select-type' | 'upload' | 'preview';
 
-export default function ImportAdmin() {
+interface ImportAdminProps {
+  devToken?: string;
+  isDev?: boolean;
+}
+
+export default function ImportAdmin({ devToken, isDev = false }: ImportAdminProps) {
   const [step, setStep] = useState<Step>('auth');
   const [token, setToken] = useState('');
   const [username, setUsername] = useState('');
@@ -17,6 +22,34 @@ export default function ImportAdmin() {
 
   // Check for stored auth on mount
   useEffect(() => {
+    // In development mode, use the dev token automatically
+    if (isDev && devToken) {
+      // Verify the token first
+      fetch('https://api.github.com/user', {
+        headers: {
+          'Authorization': `token ${devToken}`,
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      })
+        .then(response => {
+          if (response.ok) {
+            return response.json();
+          }
+          throw new Error('Invalid dev token');
+        })
+        .then(userData => {
+          setToken(devToken);
+          setUsername(userData.login);
+          setStep('select-type');
+        })
+        .catch(error => {
+          console.error('Dev token authentication failed:', error);
+          // Fall back to normal auth flow
+        });
+      return;
+    }
+
+    // Otherwise, check localStorage
     const storedToken = localStorage.getItem('github_token');
     const storedUser = localStorage.getItem('github_user');
     
@@ -25,7 +58,7 @@ export default function ImportAdmin() {
       setUsername(storedUser);
       setStep('select-type');
     }
-  }, []);
+  }, [isDev, devToken]);
 
   const handleAuthenticated = (token: string, username: string) => {
     setToken(token);
@@ -94,7 +127,14 @@ export default function ImportAdmin() {
         <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">🎳 GFCBA Data Import</h1>
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl font-bold text-gray-900">🎳 GFCBA Data Import</h1>
+                {isDev && (
+                  <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-semibold rounded">
+                    DEV MODE
+                  </span>
+                )}
+              </div>
               <p className="text-sm text-gray-600">Logged in as {username}</p>
             </div>
             <button
