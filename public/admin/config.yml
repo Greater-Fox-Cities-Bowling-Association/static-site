@@ -4,50 +4,9 @@ backend:
 media_folder: "public/images"
 public_folder: "/images"
 
-collections:
-  - name: "pages"
-    label: "Pages"
-    folder: "src/content/pages"
-    create: false
-    extension: "json"
-    format: "json"
-    fields:
-      - { label: "Title", name: "title", widget: "string" }
-      - { label: "Description", name: "description", widget: "text" }
-      - { label: "Slug", name: "slug", widget: "string" }
-      - label: "Hero"
-        name: "hero"
-        widget: "object"
-        required: false
-        fields:
-          - { label: "Heading", name: "heading", widget: "string" }
-          - { label: "Subheading", name: "subheading", widget: "string", required: false }
-          - { label: "Image", name: "image", widget: "image", required: false }
-          - { label: "CTA Text", name: "ctaText", widget: "string", required: false }
-          - { label: "CTA Link", name: "ctaLink", widget: "string", required: false }
-      - label: "Sections"
-        name: "sections"
-        widget: "list"
-        required: false
-        fields:
-          - { label: "Type", name: "type", widget: "select", options: ["text", "cards", "list", "table", "hero"] }
-          - { label: "Heading", name: "heading", widget: "string", required: false }
-          - { label: "Content", name: "content", widget: "text", required: false }
-          - label: "Single Link"
-            name: "link"
-            widget: "object"
-            required: false
-            fields:
-              - { label: "Link Text", name: "text", widget: "string" }
-              - { label: "URL", name: "url", widget: "string" }
-          - label: "Multiple Links"
-            name: "links"
-            widget: "list"
-            required: false
-            fields:
-              - { label: "Link Text", name: "text", widget: "string" }
-              - { label: "URL", name: "url", widget: "string" }
+# Pages collection removed - custom CMS will handle page management
 
+collections:
   - name: "centers"
     label: "Bowling Centers"
     folder: "src/content/centers"
