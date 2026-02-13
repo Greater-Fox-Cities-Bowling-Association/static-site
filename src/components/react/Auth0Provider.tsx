@@ -1,15 +1,15 @@
-import { Auth0Provider as Auth0ProviderSDK } from '@auth0/auth0-react';
-import type { ReactNode } from 'react';
+import { Auth0Provider as Auth0ProviderSDK } from "@auth0/auth0-react";
+import type { ReactNode } from "react";
 
 interface Auth0ProviderProps {
   children: ReactNode;
 }
 
 export default function Auth0Provider({ children }: Auth0ProviderProps) {
-  const domain = import.meta.env.PUBLIC_AUTH0_DOMAIN || '';
-  const clientId = import.meta.env.PUBLIC_AUTH0_CLIENT_ID || '';
-  const redirectUri = typeof window !== 'undefined' ? window.location.origin + '/admin' : '';
-  console.log('Auth0 Debug:', { domain, clientId, redirectUri }); // Add this
+  const domain = import.meta.env.PUBLIC_AUTH0_DOMAIN || "";
+  const clientId = import.meta.env.PUBLIC_AUTH0_CLIENT_ID || "";
+  const redirectUri =
+    typeof window !== "undefined" ? window.location.origin + "/admin" : "";
 
   if (!domain || !clientId) {
     return (
@@ -42,8 +42,10 @@ export default function Auth0Provider({ children }: Auth0ProviderProps) {
       clientId={clientId}
       authorizationParams={{
         redirect_uri: redirectUri,
+        scope: "openid profile email",
       }}
       cacheLocation="localstorage"
+      useRefreshTokens={true}
     >
       {children}
     </Auth0ProviderSDK>

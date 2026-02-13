@@ -9,8 +9,8 @@ type Step = "select-type" | "upload" | "preview";
 type Mode = "csv" | "pages" | "page-editor";
 
 export default function ImportAdmin() {
-  const { isLoading, error, isAuthenticated, user, logout } = useAuth0();
-  console.log("Auth0 State:", { isLoading, isAuthenticated, error });
+  const { isLoading, error, isAuthenticated, user, logout, getIdTokenClaims } =
+    useAuth0();
 
   const [step, setStep] = useState<Step>("select-type");
   const [mode, setMode] = useState<Mode>("csv");
@@ -28,28 +28,47 @@ export default function ImportAdmin() {
 
   // Get GitHub token from Auth0 custom claims
   useEffect(() => {
-    if (isAuthenticated && user) {
-      // Check if user has the GitHub token in custom claims (from Auth0 Action)
-      const token = (user as any)["https://gfcba.com/github_token"];
+    const fetchTokenClaims = async () => {
+      if (isAuthenticated) {
+        try {
+          // Get fresh token claims
+          const claims = await getIdTokenClaims();
 
-      if (token) {
-        setGithubToken(token);
-        setGithubUser("fox-cities-bowling-association");
-        localStorage.setItem("github_token", token);
-        localStorage.setItem("github_user", "fox-cities-bowling-association");
-        console.log("GitHub token received from Auth0");
-      } else {
-        console.warn("No GitHub token found in Auth0 claims");
-        // Fallback: check for stored token
-        const storedToken = localStorage.getItem("github_token");
-        const storedUser = localStorage.getItem("github_user");
-        if (storedToken && storedUser) {
-          setGithubToken(storedToken);
-          setGithubUser(storedUser);
+          // Check for GitHub token in custom claim
+          const token = claims?.["https://gfcba.com/github_token"];
+
+          if (token) {
+            setGithubToken(token);
+            setGithubUser("fox-cities-bowling-association");
+            localStorage.setItem("github_token", token);
+            localStorage.setItem(
+              "github_user",
+              "fox-cities-bowling-association",
+            );
+          } else {
+            console.warn("❌ No GitHub token found in ID token claims");
+            console.warn("Expected claim: https://gfcba.com/github_token");
+            console.warn(
+              "Available custom claims:",
+              Object.keys(claims || {}).filter((k) => k.includes("http")),
+            );
+
+            // Fallback: check for stored token
+            const storedToken = localStorage.getItem("github_token");
+            const storedUser = localStorage.getItem("github_user");
+            if (storedToken && storedUser) {
+              setGithubToken(storedToken);
+              setGithubUser(storedUser);
+            }
+          }
+        } catch (err) {
+          console.error("Error fetching token claims:", err);
         }
       }
-    }
-  }, [isAuthenticated, user]);
+    };
+
+    fetchTokenClaims();
+  }, [isAuthenticated, getIdTokenClaims]);
 
   if (isLoading) {
     return (
