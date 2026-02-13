@@ -2,7 +2,6 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { useState, useEffect } from "react";
 import Papa from "papaparse";
 import Auth0Login from "./Auth0Login";
-import GitHubAuth from "./GitHubAuth";
 import PageList from "./PageList";
 import PageEditor from "./PageEditor";
 
@@ -27,15 +26,30 @@ export default function ImportAdmin() {
 
   const githubRepo = `${import.meta.env.PUBLIC_GITHUB_OWNER || import.meta.env.GITHUB_OWNER}/${import.meta.env.PUBLIC_GITHUB_REPO || import.meta.env.GITHUB_REPO}`;
 
-  // Check for stored GitHub token on mount
+  // Get GitHub token from Auth0 custom claims
   useEffect(() => {
-    const storedToken = localStorage.getItem("github_token");
-    const storedUser = localStorage.getItem("github_user");
-    if (storedToken && storedUser) {
-      setGithubToken(storedToken);
-      setGithubUser(storedUser);
+    if (isAuthenticated && user) {
+      // Check if user has the GitHub token in custom claims (from Auth0 Action)
+      const token = (user as any)["https://gfcba.com/github_token"];
+
+      if (token) {
+        setGithubToken(token);
+        setGithubUser("fox-cities-bowling-association");
+        localStorage.setItem("github_token", token);
+        localStorage.setItem("github_user", "fox-cities-bowling-association");
+        console.log("GitHub token received from Auth0");
+      } else {
+        console.warn("No GitHub token found in Auth0 claims");
+        // Fallback: check for stored token
+        const storedToken = localStorage.getItem("github_token");
+        const storedUser = localStorage.getItem("github_user");
+        if (storedToken && storedUser) {
+          setGithubToken(storedToken);
+          setGithubUser(storedUser);
+        }
+      }
     }
-  }, []);
+  }, [isAuthenticated, user]);
 
   if (isLoading) {
     return (
@@ -107,13 +121,6 @@ export default function ImportAdmin() {
     });
   };
 
-  const handleGitHubLogout = () => {
-    localStorage.removeItem("github_token");
-    localStorage.removeItem("github_user");
-    setGithubToken("");
-    setGithubUser("");
-  };
-
   const handleEditPage = (slug: string) => {
     setEditingSlug(slug);
     setMode("page-editor");
@@ -158,15 +165,22 @@ export default function ImportAdmin() {
       </header>
 
       {!githubToken ? (
-        <GitHubAuth
-          onAuthenticated={(token, username) => {
-            setGithubToken(token);
-            setGithubUser(username);
-          }}
-        />
+        <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">
+          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full mx-4">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                Setting up GitHub access...
+              </h2>
+              <p className="text-gray-600">
+                Please wait while we configure your repository access
+              </p>
+            </div>
+          </div>
+        </div>
       ) : (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="bg-white rounded-lg shadow-sm p-4 mb-6 flex items-center justify-between">
+          <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
             <div className="flex items-center gap-3">
               <div className="text-2xl">✓</div>
               <div>
@@ -178,12 +192,6 @@ export default function ImportAdmin() {
                 </p>
               </div>
             </div>
-            <button
-              onClick={handleGitHubLogout}
-              className="px-3 py-1 text-sm text-gray-600 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              Disconnect
-            </button>
           </div>
 
           <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
