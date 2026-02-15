@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
-import { fetchPagesDirectory, deletePageFile } from '../../utils/githubApi';
-import { hasDraft } from '../../utils/draftStore';
-import type { PageContent } from '../../types/cms';
+import { useState, useEffect } from "react";
+import { fetchPagesDirectory, deletePageFile } from "../../utils/githubApi";
+import { hasDraft } from "../../utils/draftStore";
+import type { PageContent } from "../../types/cms";
 
 interface PageListProps {
   token: string;
@@ -11,47 +11,52 @@ interface PageListProps {
 
 interface PageListItem {
   slug: string;
- title: string;
-  status: 'draft' | 'published';
+  title: string;
+  status: "draft" | "published";
   hasDraft: boolean;
   updatedAt: string | undefined;
 }
 
-export default function PageList({ token, onEdit, onCreateNew }: PageListProps) {
+export default function PageList({
+  token,
+  onEdit,
+  onCreateNew,
+}: PageListProps) {
   const [pages, setPages] = useState<PageListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
   const loadPages = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
+      console.log(token);
       const result = await fetchPagesDirectory(token);
-      
+
       if (!result.success) {
-        setError(result.error || 'Failed to load pages');
+        setError(result.error || "Failed to load pages");
         setPages([]);
         return;
       }
 
       const files = result.files || [];
-      
+
       // Fetch content for each page
       const pageItems: PageListItem[] = await Promise.all(
         files.map(async (file) => {
-          const slug = file.name.replace('.json', '');
-          
+          const slug = file.name.replace(".json", "");
+
           try {
             const response = await fetch(file.download_url!);
             const content: PageContent = await response.json();
-            
+
             return {
               slug,
               title: content.title || slug,
-              status: content.status || 'published',
+              status: content.status || "published",
               hasDraft: hasDraft(slug),
               updatedAt: content.updatedAt,
             };
@@ -59,17 +64,17 @@ export default function PageList({ token, onEdit, onCreateNew }: PageListProps) 
             return {
               slug,
               title: slug,
-              status: 'published' as const,
+              status: "published" as const,
               hasDraft: hasDraft(slug),
               updatedAt: undefined,
             };
           }
-        })
+        }),
       );
 
       setPages(pageItems);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
       setLoading(false);
     }
@@ -91,21 +96,24 @@ export default function PageList({ token, onEdit, onCreateNew }: PageListProps) 
 
     try {
       const result = await deletePageFile(slug, token);
-      
+
       if (result.success) {
-        setPages(pages.filter(p => p.slug !== slug));
+        setPages(pages.filter((p) => p.slug !== slug));
         setDeleteConfirm(null);
       } else {
         alert(`Failed to delete: ${result.error}`);
       }
     } catch (err) {
-      alert(`Error deleting page: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      alert(
+        `Error deleting page: ${err instanceof Error ? err.message : "Unknown error"}`,
+      );
     }
   };
 
-  const filteredPages = pages.filter(page =>
-    page.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    page.slug.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredPages = pages.filter(
+    (page) =>
+      page.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      page.slug.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   if (loading) {
@@ -196,7 +204,9 @@ export default function PageList({ token, onEdit, onCreateNew }: PageListProps) 
                 <tr key={page.slug} className="hover:bg-gray-50">
                   <td className="px-6 py-4">
                     <div className="flex items-center">
-                      <span className="font-medium text-gray-900">{page.title}</span>
+                      <span className="font-medium text-gray-900">
+                        {page.title}
+                      </span>
                       {page.hasDraft && (
                         <span className="ml-2 px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded">
                           Draft
@@ -208,11 +218,13 @@ export default function PageList({ token, onEdit, onCreateNew }: PageListProps) 
                     {page.slug}
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-2 py-1 text-xs rounded ${
-                      page.status === 'published'
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-gray-100 text-gray-800'
-                    }`}>
+                    <span
+                      className={`px-2 py-1 text-xs rounded ${
+                        page.status === "published"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-gray-100 text-gray-800"
+                      }`}
+                    >
                       {page.status}
                     </span>
                   </td>
@@ -227,11 +239,13 @@ export default function PageList({ token, onEdit, onCreateNew }: PageListProps) 
                       onClick={() => handleDelete(page.slug)}
                       className={`${
                         deleteConfirm === page.slug
-                          ? 'text-red-700 font-bold'
-                          : 'text-red-600 hover:text-red-800'
+                          ? "text-red-700 font-bold"
+                          : "text-red-600 hover:text-red-800"
                       }`}
                     >
-                      {deleteConfirm === page.slug ? 'Confirm Delete?' : 'Delete'}
+                      {deleteConfirm === page.slug
+                        ? "Confirm Delete?"
+                        : "Delete"}
                     </button>
                     {deleteConfirm === page.slug && (
                       <button
