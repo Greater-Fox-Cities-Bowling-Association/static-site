@@ -81,7 +81,64 @@ All content is managed through JSON files in the `src/content/` directory. This 
 
 Each content type has a defined schema in `src/content/config.ts` for validation.
 
-## 🚢 Deployment
+## 🔐 Admin Panel
+
+The site includes a powerful admin panel at `/admin` for importing CSV data and managing content.
+
+### Two-Layer Authentication
+
+For security and proper audit trails, the admin panel uses a two-layer authentication approach:
+
+**Layer 1: Auth0 Login**
+
+- Controls who can access the admin dashboard
+- Secure, industry-standard authentication
+- Support for social logins (Google, GitHub, etc.)
+- [Setup Guide](./AUTH0-SETUP.md)
+
+**Layer 2: GitHub OAuth**
+
+- After Auth0 login, users connect their GitHub account
+- Uses their personal GitHub credentials for making commits
+- Ensures proper attribution (commits show real usernames)
+- Users must have write access to your repository
+- [Setup Guide](./GITHUB-OAUTH-SETUP.md)
+
+### Features
+
+- **CSV Import:** Bulk import bowling center data, tournament results, and honors
+- **Page Editor:** Visual page builder with drag-and-drop sections
+- **Live Preview:** See changes before committing
+- **Git Integration:** Changes are committed directly to your GitHub repository
+- **Type Safety:** Automatic validation against content schemas
+- **Multi-user Support:** Team members can log in with their own accounts
+
+### Quick Start
+
+1. **Setup Authentication** (one-time):
+   - Follow [AUTH0-SETUP.md](./AUTH0-SETUP.md) to configure Auth0
+   - Follow [GITHUB-OAUTH-SETUP.md](./GITHUB-OAUTH-SETUP.md) to configure GitHub OAuth
+   - Add environment variables to `.env`
+
+2. **Access Admin Panel**:
+   - Visit `https://yourdomain.com/admin`
+   - Sign in with Auth0
+   - Connect your GitHub account
+   - Start managing content!
+
+3. **Import CSV Data**:
+   - Select data type (honors, tournaments, centers, news)
+   - Upload CSV file
+   - Preview and confirm changes
+   - Changes are committed to GitHub
+
+For detailed setup instructions, see:
+
+- [AUTH0-SETUP.md](./AUTH0-SETUP.md) - Auth0 configuration
+- [GITHUB-OAUTH-SETUP.md](./GITHUB-OAUTH-SETUP.md) - GitHub OAuth configuration
+- [SECRETS.md](./SECRETS.md) - All environment variables
+
+## �🚢 Deployment
 
 The site automatically deploys to Static.app when changes are pushed to the `main` branch.
 

@@ -12,6 +12,7 @@
   "dependencies": {
     "@astrojs/react": "^3.6.0",
     "@astrojs/tailwind": "^5.1.0",
+    "@auth0/auth0-react": "^2.13.0",
     "@types/papaparse": "^5.5.2",
     "astro": "^4.16.0",
     "papaparse": "^5.5.3",

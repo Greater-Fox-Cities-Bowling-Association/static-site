@@ -39,7 +39,7 @@ export async function commitToGitHub({
     // Include branch in the query string when checking for existing file
     const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
     const apiUrlWithBranch = `${apiUrl}?ref=${branch}`;
-    
+  
     // Check if file exists to get SHA
     let sha: string | undefined;
     try {

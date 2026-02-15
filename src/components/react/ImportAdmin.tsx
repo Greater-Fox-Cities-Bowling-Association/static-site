@@ -1,306 +1,392 @@
-import { useState, useEffect } from 'react';
-import GitHubAuth from './GitHubAuth';
-import CSVImporter from './CSVImporter';
-import DataPreview from './DataPreview';
-import PageList from './PageList';
-import PageEditor from './PageEditor';
-import { detectCollectionType, mapHonorsCSV, mapCentersCSV, mapTournamentsCSV, mapNewsCSV } from '../../utils/csvMappers';
+import { useAuth0 } from "@auth0/auth0-react";
+import { useState, useEffect } from "react";
+import Papa from "papaparse";
+import Auth0Login from "./Auth0Login";
+import PageList from "./PageList";
+import PageEditor from "./PageEditor";
 
-type Step = 'auth' | 'select-type' | 'upload' | 'preview';
-type Mode = 'csv' | 'pages' | 'page-editor';
+type Step = "select-type" | "upload" | "preview";
+type Mode = "csv" | "pages" | "page-editor";
 
-interface ImportAdminProps {
-  devToken?: string;
-  isDev?: boolean;
-}
+export default function ImportAdmin() {
+  const { isLoading, error, isAuthenticated, user, logout, getIdTokenClaims } =
+    useAuth0();
 
-export default function ImportAdmin({ devToken, isDev = false }: ImportAdminProps) {
-  const [step, setStep] = useState<Step>('auth');
-  const [mode, setMode] = useState<Mode>('csv');
-  const [token, setToken] = useState('');
-  const [username, setUsername] = useState('');
-  const [collectionType, setCollectionType] = useState<string>('');
+  const [step, setStep] = useState<Step>("select-type");
+  const [mode, setMode] = useState<Mode>("csv");
+  const [collectionType, setCollectionType] = useState<string>("");
   const [, setRawData] = useState<any[]>([]);
   const [mappedData, setMappedData] = useState<any>(null);
-  const [filename, setFilename] = useState('');
+  const [filename, setFilename] = useState("");
   const [editingSlug, setEditingSlug] = useState<string | undefined>(undefined);
 
-  // Check for stored auth on mount
+  // GitHub authentication state
+  const [githubToken, setGithubToken] = useState<string>("");
+  const [githubUser, setGithubUser] = useState<string>("");
+
+  const githubRepo = `${import.meta.env.PUBLIC_GITHUB_OWNER || import.meta.env.GITHUB_OWNER}/${import.meta.env.PUBLIC_GITHUB_REPO || import.meta.env.GITHUB_REPO}`;
+
+  // Get GitHub token from Auth0 custom claims
   useEffect(() => {
-    // In development mode, use the dev token automatically
-    if (isDev && devToken) {
-      // Verify the token first
-      fetch('https://api.github.com/user', {
-        headers: {
-          'Authorization': `token ${devToken}`,
-          'Accept': 'application/vnd.github.v3+json'
-        }
-      })
-        .then(response => {
-          if (response.ok) {
-            return response.json();
+    const fetchTokenClaims = async () => {
+      if (isAuthenticated) {
+        try {
+          // Get fresh token claims
+          const claims = await getIdTokenClaims();
+
+          // Check for GitHub token in custom claim
+          const token = claims?.["https://gfcba.com/github_token"];
+
+          if (token) {
+            setGithubToken(token);
+            setGithubUser("fox-cities-bowling-association");
+            localStorage.setItem("github_token", token);
+            localStorage.setItem(
+              "github_user",
+              "fox-cities-bowling-association",
+            );
+          } else {
+            console.warn("❌ No GitHub token found in ID token claims");
+            console.warn("Expected claim: https://gfcba.com/github_token");
+            console.warn(
+              "Available custom claims:",
+              Object.keys(claims || {}).filter((k) => k.includes("http")),
+            );
+
+            // Fallback: check for stored token
+            const storedToken = localStorage.getItem("github_token");
+            const storedUser = localStorage.getItem("github_user");
+            if (storedToken && storedUser) {
+              setGithubToken(storedToken);
+              setGithubUser(storedUser);
+            }
           }
-          throw new Error('Invalid dev token');
-        })
-        .then(userData => {
-          setToken(devToken);
-          setUsername(userData.login);
-          setStep('select-type');
-        })
-        .catch(error => {
-          console.error('Dev token authentication failed:', error);
-          // Fall back to normal auth flow
-        });
-      return;
-    }
+        } catch (err) {
+          console.error("Error fetching token claims:", err);
+        }
+      }
+    };
 
-    // Otherwise, check localStorage
-    const storedToken = localStorage.getItem('github_token');
-    const storedUser = localStorage.getItem('github_user');
-    
-    if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUsername(storedUser);
-      setStep('select-type');
-    }
-  }, [isDev, devToken]);
+    fetchTokenClaims();
+  }, [isAuthenticated, getIdTokenClaims]);
 
-  const handleAuthenticated = (token: string, username: string) => {
-    setToken(token);
-    setUsername(username);
-    setStep('select-type');
-  };
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">
+              Initializing Authentication...
+            </h2>
+            <p className="text-gray-600">
+              Please wait while we set up your session
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
+          <div className="text-center">
+            <div className="text-5xl mb-4">❌</div>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">
+              Authentication Error
+            </h2>
+            <p className="text-gray-600 mb-4">{error.message}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Auth0Login onAuthenticated={() => {}} />;
+  }
 
   const handleTypeSelect = (type: string) => {
     setCollectionType(type);
-    setStep('upload');
+    setStep("upload");
   };
 
   const handleDataParsed = (data: any[], fname: string) => {
     setRawData(data);
     setFilename(fname);
 
-    // Auto-detect collection type if not selected
-    const detectedType = collectionType || detectCollectionType(fname);
-    if (!detectedType) {
-      alert('Could not detect collection type. Please select one manually.');
-      setStep('select-type');
-      return;
-    }
-
-    // Map CSV to JSON structure
-    let mapped: any;
-    switch (detectedType) {
-      case 'honors':
-        mapped = mapHonorsCSV(data, fname);
-        break;
-      case 'centers':
-        mapped = mapCentersCSV(data);
-        break;
-      case 'tournaments':
-        mapped = mapTournamentsCSV(data);
-        break;
-      case 'news':
-        mapped = mapNewsCSV(data);
-        break;
-      default:
-        alert('Invalid collection type');
-        return;
-    }
-
+    const mapped = mapCsvData(data, collectionType);
     setMappedData(mapped);
-    setCollectionType(detectedType);
-    setStep('preview');
+    setStep("preview");
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('github_token');
-    localStorage.removeItem('github_user');
-    setToken('');
-    setUsername('');
-    setStep('auth');
+    localStorage.removeItem("github_token");
+    localStorage.removeItem("github_user");
+    setGithubToken("");
+    setGithubUser("");
+    logout({
+      logoutParams: {
+        returnTo: window.location.origin + "/admin",
+      },
+    });
   };
 
   const handleEditPage = (slug: string) => {
     setEditingSlug(slug);
-    setMode('page-editor');
+    setMode("page-editor");
   };
 
   const handleCreateNewPage = () => {
     setEditingSlug(undefined);
-    setMode('page-editor');
+    setMode("page-editor");
   };
 
   const handlePageSaved = () => {
+    setMode("pages");
     setEditingSlug(undefined);
-    setMode('pages');
   };
 
   const handleCancelEdit = () => {
+    setMode("pages");
     setEditingSlug(undefined);
-    setMode('pages');
   };
 
-  if (step === 'auth') {
-    return <GitHubAuth onAuthenticated={handleAuthenticated} />;
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <header className="bg-white shadow-sm border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
             <div>
-              <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-bold text-gray-900">🎳 GFCBA CMS</h1>
-                {isDev && (
-                  <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-semibold rounded">
-                    DEV MODE
-                  </span>
-                )}
-              </div>
-              <p className="text-sm text-gray-600">Logged in as {username}</p>
+              <h1 className="text-2xl font-bold text-gray-900">
+                🏆 GFCBA Admin Panel
+              </h1>
+              <p className="text-sm text-gray-600 mt-1">
+                Logged in as {user?.email}
+              </p>
             </div>
             <button
               onClick={handleLogout}
-              className="text-sm text-gray-600 hover:text-gray-900"
+              className="px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
             >
               Logout
             </button>
           </div>
         </div>
-
-        {/* Tab Navigation */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex border-b border-gray-200">
-            <button
-              onClick={() => {
-                setMode('csv');
-                setStep('select-type');
-              }}
-              className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
-                mode === 'csv'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
-              }`}
-            >
-              CSV Import
-            </button>
-            <button
-              onClick={() => setMode('pages')}
-              className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
-                mode === 'pages' || mode === 'page-editor'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
-              }`}
-            >
-              Pages
-            </button>
-          </div>
-        </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        {/* CSV Import Mode */}
-        {mode === 'csv' && (
-          <>
-            {/* Progress Steps */}
-            <div className="mb-8">
-              <div className="flex items-center justify-center space-x-4">
-                {['Select Type', 'Upload CSV', 'Preview & Publish'].map((label, idx) => (
-                  <div key={label} className="flex items-center">
-                    <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
-                      idx < (['select-type', 'upload', 'preview'].indexOf(step) + 1)
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-300 text-gray-600'
-                    } font-semibold text-sm`}>
-                      {idx + 1}
-                    </div>
-                    <span className="ml-2 text-sm font-medium text-gray-700">{label}</span>
-                    {idx < 2 && <span className="mx-4 text-gray-400">→</span>}
-                  </div>
-                ))}
+      {!githubToken ? (
+        <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">
+          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full mx-4">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                Setting up GitHub access...
+              </h2>
+              <p className="text-gray-600">
+                Please wait while we configure your repository access
+              </p>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+            <div className="flex items-center gap-3">
+              <div className="text-2xl">✓</div>
+              <div>
+                <p className="text-sm font-medium text-gray-900">
+                  Connected to GitHub as @{githubUser}
+                </p>
+                <p className="text-xs text-gray-600">
+                  Repository: {githubRepo}
+                </p>
               </div>
             </div>
+          </div>
 
-            {/* Step Content */}
-            {step === 'select-type' && (
-              <div className="max-w-4xl mx-auto">
-                <div className="bg-white rounded-lg shadow-lg p-8">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                    What type of data are you importing?
-                  </h2>
-                  <div className="grid grid-cols-2 gap-4">
-                    {[
-                      { type: 'honors', label: '🏆 Honors & Awards', desc: '300 games, high scores, achievements' },
-                      { type: 'tournaments', label: '🎯 Tournaments', desc: 'Tournament schedules and results' },
-                      { type: 'centers', label: '🎳 Bowling Centers', desc: 'Center information and details' },
-                      { type: 'news', label: '📰 News Articles', desc: 'News and announcements' },
-                    ].map(({ type, label, desc }) => (
-                      <button
-                        key={type}
-                        onClick={() => handleTypeSelect(type)}
-                        className="p-6 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all text-left"
-                      >
-                        <div className="text-xl font-semibold mb-2">{label}</div>
-                        <div className="text-sm text-gray-600">{desc}</div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
+          <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              Select Mode
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <button
+                onClick={() => setMode("csv")}
+                className={`p-4 rounded-lg border-2 transition-all ${
+                  mode === "csv"
+                    ? "border-blue-600 bg-blue-50"
+                    : "border-gray-200 hover:border-blue-300"
+                }`}
+              >
+                <div className="text-3xl mb-2">📊</div>
+                <h3 className="font-semibold text-gray-900">CSV Import</h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  Import data from CSV files
+                </p>
+              </button>
+              <button
+                onClick={() => setMode("pages")}
+                className={`p-4 rounded-lg border-2 transition-all ${
+                  mode === "pages" || mode === "page-editor"
+                    ? "border-blue-600 bg-blue-50"
+                    : "border-gray-200 hover:border-blue-300"
+                }`}
+              >
+                <div className="text-3xl mb-2">📄</div>
+                <h3 className="font-semibold text-gray-900">Page Manager</h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  Create and edit dynamic pages
+                </p>
+              </button>
+            </div>
+          </div>
 
-            {step === 'upload' && (
-              <div className="max-w-4xl mx-auto">
-                <div className="mb-6">
-                  <button
-                    onClick={() => setStep('select-type')}
-                    className="text-blue-600 hover:text-blue-700 font-medium"
-                  >
-                    ← Change Type
-                  </button>
-                </div>
-                <CSVImporter 
-                  onDataParsed={handleDataParsed}
-                  collectionType={collectionType as any}
-                />
-              </div>
-            )}
+          {mode === "csv" && (
+            <CsvImportPanel
+              step={step}
+              collectionType={collectionType}
+              mappedData={mappedData}
+              filename={filename}
+              onTypeSelect={handleTypeSelect}
+              onDataParsed={handleDataParsed}
+              onBack={() => setStep("select-type")}
+            />
+          )}
 
-            {step === 'preview' && mappedData && (
-              <DataPreview
-                data={mappedData}
-                collectionType={collectionType}
-                filename={filename}
-                onBack={() => setStep('upload')}
-                token={token}
-                repo="myoung-admin/gfcba"
-              />
-            )}
-          </>
-        )}
+          {mode === "pages" && (
+            <PageList
+              token={githubToken}
+              onEdit={handleEditPage}
+              onCreateNew={handleCreateNewPage}
+            />
+          )}
 
-        {/* Pages Management Mode */}
-        {mode === 'pages' && (
-          <PageList
-            token={token}
-            onEdit={handleEditPage}
-            onCreateNew={handleCreateNewPage}
-          />
-        )}
-
-        {/* Page Editor Mode */}
-        {mode === 'page-editor' && (
-          <PageEditor
-            slug={editingSlug}
-            token={token}
-            onSave={handlePageSaved}
-            onCancel={handleCancelEdit}
-          />
-        )}
-      </main>
+          {mode === "page-editor" && (
+            <PageEditor
+              slug={editingSlug}
+              token={githubToken}
+              onSave={handlePageSaved}
+              onCancel={handleCancelEdit}
+            />
+          )}
+        </div>
+      )}
     </div>
   );
+}
+
+function mapCsvData(data: any[], collectionType: string) {
+  return data;
+}
+
+function CsvImportPanel({
+  step,
+  collectionType,
+  mappedData,
+  filename,
+  onTypeSelect,
+  onDataParsed,
+  onBack,
+}: any) {
+  const [, setFile] = useState<File | null>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+      Papa.parse(selectedFile, {
+        header: true,
+        skipEmptyLines: true,
+        complete: (results) => {
+          onDataParsed(results.data, selectedFile.name);
+        },
+      });
+    }
+  };
+
+  if (step === "select-type") {
+    return (
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          Select Collection Type
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {["honors", "tournaments", "centers", "news"].map((type) => (
+            <button
+              key={type}
+              onClick={() => onTypeSelect(type)}
+              className="p-4 rounded-lg border-2 border-gray-200 hover:border-blue-300 transition-all"
+            >
+              <h3 className="font-semibold text-gray-900 capitalize">{type}</h3>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (step === "upload") {
+    return (
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <button
+          onClick={onBack}
+          className="mb-4 text-sm text-gray-600 hover:text-gray-900"
+        >
+          ← Back
+        </button>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          Upload CSV for {collectionType}
+        </h2>
+        <input
+          type="file"
+          accept=".csv"
+          onChange={handleFileChange}
+          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+        />
+      </div>
+    );
+  }
+
+  if (step === "preview") {
+    return (
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <button
+          onClick={onBack}
+          className="mb-4 text-sm text-gray-600 hover:text-gray-900"
+        >
+          ← Back
+        </button>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          Preview: {filename}
+        </h2>
+        <pre className="bg-gray-100 p-4 rounded-lg overflow-auto max-h-96 text-sm">
+          {JSON.stringify(mappedData, null, 2)}
+        </pre>
+        <div className="mt-4 flex gap-3">
+          <button
+            onClick={onBack}
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => alert("Import functionality to be implemented")}
+            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+          >
+            Import Data
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
 }
