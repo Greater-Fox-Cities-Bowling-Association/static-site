@@ -2,23 +2,38 @@ import type { Theme } from '../types/cms';
 
 /**
  * Load the active theme from cache or local files
+ * @param forceRefresh - Skip cache and reload from source
  */
-export async function loadActiveTheme(): Promise<Theme | null> {
+export async function loadActiveTheme(forceRefresh: boolean = false): Promise<Theme | null> {
   try {
-    // First check if theme is cached in session storage
-    const cachedTheme = sessionStorage.getItem('active-theme');
-    if (cachedTheme) {
-      return JSON.parse(cachedTheme);
+    // Check sessionStorage cache (unless forceRefresh is true)
+    if (!forceRefresh && typeof sessionStorage !== 'undefined') {
+      const cachedTheme = sessionStorage.getItem('active-theme');
+      if (cachedTheme) {
+        try {
+          return JSON.parse(cachedTheme);
+        } catch (e) {
+          console.warn('Failed to parse cached theme, reloading from source');
+        }
+      }
     }
 
     // Import all themes dynamically
+    if (typeof import.meta === 'undefined' || !import.meta.glob) {
+      console.warn('import.meta.glob not available, using fallback');
+      return null;
+    }
+
     const themeModules = import.meta.glob('/src/content/themes/*.json', { eager: true });
     
     for (const [, module] of Object.entries(themeModules)) {
       const theme = (module as any).default;
-      if (theme.isActive) {
+      if (theme && theme.isActive) {
         // Cache the theme
-        sessionStorage.setItem('active-theme', JSON.stringify(theme));
+        if (typeof sessionStorage !== 'undefined') {
+          sessionStorage.setItem('active-theme', JSON.stringify(theme));
+        }
+        console.log('✅ Active theme loaded:', theme.id);
         return theme;
       }
     }
@@ -28,10 +43,14 @@ export async function loadActiveTheme(): Promise<Theme | null> {
     const defaultModule = themeModules[defaultPath] as any;
     if (defaultModule) {
       const defaultTheme = defaultModule.default;
-      sessionStorage.setItem('active-theme', JSON.stringify(defaultTheme));
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.setItem('active-theme', JSON.stringify(defaultTheme));
+      }
+      console.log('✅ Default theme loaded (no active theme found):', defaultTheme.id);
       return defaultTheme;
     }
 
+    console.warn('No themes found at all');
     return null;
   } catch (error) {
     console.error('Error loading active theme:', error);
@@ -64,15 +83,26 @@ export function applyThemeToCssVariables(theme: Theme): void {
 
 /**
  * Load and apply the active theme
+ * @param forceRefresh - Skip cache and reload from source
  */
-export async function initializeTheme(): Promise<Theme | null> {
-  const theme = await loadActiveTheme();
-  
-  if (theme) {
-    applyThemeToCssVariables(theme);
+export async function initializeTheme(forceRefresh: boolean = false): Promise<Theme | null> {
+  try {
+    console.log('🎨 Initializing theme system...');
+    const theme = await loadActiveTheme(forceRefresh);
+    
+    if (theme) {
+      console.log(`✅ Applying theme: ${theme.name}`);
+      applyThemeToCssVariables(theme);
+      console.log('✅ Theme CSS variables applied');
+    } else {
+      console.warn('⚠️ No theme loaded, using browser defaults');
+    }
+    
+    return theme;
+  } catch (error) {
+    console.error('❌ Error initializing theme:', error);
+    return null;
   }
-  
-  return theme;
 }
 
 /**

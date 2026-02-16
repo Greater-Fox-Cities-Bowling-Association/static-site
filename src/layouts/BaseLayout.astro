@@ -83,7 +83,31 @@ const activeTheme = await loadActiveTheme();
 
 <script>
   // Initialize theme on client-side
+  // This runs after page load to ensure all DOM elements are ready
   import { initializeTheme } from '../utils/themeLoader';
   
-  initializeTheme().catch(err => console.error('Failed to initialize theme:', err));
+  console.log('🎭 BaseLayout script executing...');
+  
+  // Run immediately
+  (async () => {
+    try {
+      console.log('🎭 Starting theme initialization...');
+      const theme = await initializeTheme();
+      if (theme) {
+        console.log(`🎭 Theme applied: ${theme.name} (${theme.id})`);
+      }
+    } catch (err) {
+      console.error('❌ Failed to initialize theme:', err);
+    }
+  })();
+
+  // Also re-initialize on visibility change (user returns to tab)
+  if (typeof document !== 'undefined') {
+    document.addEventListener('visibilitychange', async () => {
+      if (document.visibilityState === 'visible') {
+        console.log('🎭 Page became visible, checking theme...');
+        await initializeTheme(true);
+      }
+    });
+  }
 </script>

@@ -1,16 +1,20 @@
 # Theme Editor Implementation Guide
 
 ## Overview
+
 I've built a complete theme management system that allows users to create, customize, and manage multiple site-wide themes through an intuitive admin interface. The theme system controls text colors, background colors, fonts, and all primary UI elements across the site.
 
 ## What Was Implemented
 
 ### 1. **Theme Components** (Already Existed)
+
 - **ThemeEditor.tsx** - Comprehensive form for creating and editing themes
 - **ThemeList.tsx** - Shows all available themes with preview of colors/fonts
 
 ### 2. **Theme API Functions** (New in `src/utils/githubApi.ts`)
+
 Added complete API integration:
+
 - `fetchThemesDirectory()` - Loads all available themes
 - `fetchThemeContent()` - Gets a specific theme's data
 - `saveThemeFile()` - Saves new or updated themes
@@ -18,17 +22,20 @@ Added complete API integration:
 - `activateTheme()` - Sets a theme as active and deactivates others
 
 ### 3. **Theme Loading & Application** (New in `src/utils/themeLoader.ts`)
+
 - `loadActiveTheme()` - Loads the active theme from cache or files
 - `applyThemeToCssVariables()` - Applies theme colors as CSS custom properties
 - `initializeTheme()` - Main initialization function
 - `createThemeStyleSheet()` - Creates dynamic theme stylesheet
 
 ### 4. **Admin Interface Integration** (Updated `ImportAdmin.tsx`)
+
 - Added "Theme Manager" button to admin mode selection
 - Integrated ThemeList and ThemeEditor components
 - Added theme navigation handlers and state management
 
 ### 5. **Global Theme Application** (Updated `BaseLayout.astro`)
+
 - Integrated theme loading on page load
 - Applied theme colors/fonts as Astro CSS variables
 - Ensured all pages use the active theme automatically
@@ -63,6 +70,7 @@ Each theme is a JSON file in `src/content/themes/` with this structure:
 ## Available Fonts
 
 The theme editor includes 13 font family options:
+
 - **Sans Serif**: Inter, Outfit, Roboto, Open Sans, Lato, Montserrat, Poppins, Raleway, Nunito
 - **Serif**: Playfair Display, Merriweather, Georgia
 - **System**: system-ui, sans-serif
@@ -70,6 +78,7 @@ The theme editor includes 13 font family options:
 ## How to Use
 
 ### Creating a New Theme
+
 1. Go to Admin Panel (🏆 GFCBA Admin Panel)
 2. Click "Theme Manager" button
 3. Click "+ Create Theme"
@@ -80,18 +89,21 @@ The theme editor includes 13 font family options:
 8. Click "Create Theme" to save
 
 ### Editing a Theme
+
 1. In Theme Manager, find your theme in the list
 2. Click "Edit"
 3. Make your changes
 4. Click "Save Changes"
 
 ### Activating a Theme
+
 1. In Theme Manager, find the theme you want to use
 2. Click "Activate"
 3. The theme is now live across the entire site
 4. All pages will automatically use the active theme's colors and fonts
 
 ### Deleting a Theme
+
 1. In Theme Manager, find a non-active theme
 2. Click "Delete"
 3. Note: You cannot delete the active theme - activate a different theme first
@@ -101,16 +113,19 @@ The theme editor includes 13 font family options:
 The theme system works in three stages:
 
 ### 1. **Server-Side (Astro Build Time)**
+
 - `BaseLayout.astro` loads the active theme during build
 - Theme colors are set as CSS custom properties (`--color-primary`, `--color-text`, etc.)
 - Ensures first paint includes correct theme colors (no flash)
 
 ### 2. **Client-Side Initialization**
+
 - `themeLoader.ts` checks session storage for cached theme
 - If not cached, loads from theme JSON files
 - Applies theme as CSS variables using `setProperty()`
 
 ### 3. **Tailwind CSS Integration**
+
 - The BaseLayout uses Tailwind classes that reference CSS variables
 - As styles update, all components automatically use new theme colors
 - Components can use `var(--color-primary)` for dynamic styling
@@ -133,11 +148,13 @@ Once a theme is active, these CSS variables are available throughout your site:
 ## Development vs Production
 
 ### In Development
+
 - Themes are loaded from local JSON files (faster)
 - Changes save immediately via the `/api/save-page` endpoint
 - Can toggle "Test GitHub API" button to test production behavior
 
 ### In Production
+
 - Themes are loaded from GitHub repository
 - Uses GitHub API authentication
 - Themes are stored as part of your repo's content
@@ -153,6 +170,7 @@ Once a theme is active, these CSS variables are available throughout your site:
 ## Technical Details
 
 ### File Locations
+
 - **Components**: `src/components/react/ThemeEditor.tsx`, `ThemeList.tsx`
 - **API Functions**: `src/utils/githubApi.ts` (bottom of file)
 - **Theme Loader**: `src/utils/themeLoader.ts`
@@ -161,6 +179,7 @@ Once a theme is active, these CSS variables are available throughout your site:
 - **Theme Data**: `src/content/themes/*.json`
 
 ### Type Definition (in `src/types/cms.ts`)
+
 ```typescript
 export interface Theme {
   id: string;
@@ -177,6 +196,7 @@ export interface Theme {
 ## What's Next?
 
 Consider these enhancements:
+
 - Theme preview/live preview on public site
 - Theme import/export functionality
 - Theme duplication (copy existing theme)
@@ -187,17 +207,19 @@ Consider these enhancements:
 ## Troubleshooting
 
 **Theme not applying?**
+
 - Clear `activeTheme` from session storage
 - Check browser console for errors
 - Verify theme ID matches the filename
 
 **Colors not changing?**
+
 - Ensure you've clicked "Activate" on the theme
 - Check that components use the CSS variables
 - Look for inline styles that override CSS variables
 
 **Font not changing?**
+
 - Verify the font is properly imported
 - Check Google Fonts are loading properly
 - Ensure font name matches exactly (case-sensitive)
-

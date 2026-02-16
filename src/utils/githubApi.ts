@@ -1463,9 +1463,20 @@ export async function activateTheme(
       }
     }
 
+    // Clear the cached theme from sessionStorage to force reload
+    if (typeof sessionStorage !== 'undefined') {
+      sessionStorage.removeItem('active-theme');
+    }
+
     logAPIResponse('activateTheme', forceGitHubAPI ? 'GITHUB_API' : 'LOCAL', { 
       activatedTheme: themeIdToActivate
     });
+    
+    // Trigger a page reload to apply the new theme
+    if (typeof window !== 'undefined') {
+      window.location.reload();
+    }
+    
     return { success: true };
   } catch (error) {
     return {
