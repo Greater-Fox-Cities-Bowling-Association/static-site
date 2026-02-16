@@ -196,6 +196,14 @@ export async function fetchPagesDirectory(
   forceGitHubAPI: boolean = false
 ): Promise<{ success: boolean; files?: GitHubFileResponse[]; error?: string }> {
   try {
+    console.log('🔍 fetchPagesDirectory called with:', { 
+      owner, 
+      repo, 
+      forceGitHubAPI,
+      isDev: import.meta.env.DEV,
+      hasToken: !!token && token.length > 0
+    });
+    
     // DEV MODE: Read from local filesystem (unless forced to use GitHub API)
     if (import.meta.env.DEV && !forceGitHubAPI) {
       logAPICall({
@@ -233,12 +241,12 @@ export async function fetchPagesDirectory(
     }
 
     // PRODUCTION MODE: Fetch from GitHub
-    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${PAGES_PATH}`;
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${PAGES_PATH}?ref=main`;
     
     logAPICall({
       function: 'fetchPagesDirectory',
       mode: 'GITHUB_API',
-      params: { owner, repo, path: PAGES_PATH },
+      params: { owner, repo, path: PAGES_PATH, ref: 'main' },
       url: apiUrl,
       method: 'GET'
     });
@@ -251,16 +259,36 @@ export async function fetchPagesDirectory(
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
+      let errorData;
+      try {
+        errorData = JSON.parse(errorText);
+      } catch {
+        errorData = { message: errorText };
+      }
+      
+      console.error('GitHub API Error Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorData,
+        url: apiUrl
+      });
+      
       if (response.status === 404) {
         // Directory doesn't exist yet
         logAPIResponse('fetchPagesDirectory', 'GITHUB_API', { fileCount: 0, message: 'Directory not found (404), returning empty array' });
         return { success: true, files: [] };
       }
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to fetch pages directory');
+      
+      throw new Error(errorData.message || `Failed to fetch pages directory (${response.status})`);
     }
 
     const data: GitHubFileResponse[] = await response.json();
+    
+    console.log('GitHub API Raw Response:', {
+      totalFiles: data.length,
+      files: data.map(f => ({ name: f.name, type: f.type }))
+    });
     
     // Filter to only JSON files
     const jsonFiles = data.filter(file => 
@@ -273,6 +301,7 @@ export async function fetchPagesDirectory(
     });
     return { success: true, files: jsonFiles };
   } catch (error) {
+    console.error('fetchPagesDirectory exception:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error occurred'
@@ -321,12 +350,12 @@ export async function fetchPageContent(
     }
 
     // PRODUCTION MODE: Fetch from GitHub
-    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${PAGES_PATH}/${filename}`;
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${PAGES_PATH}/${filename}?ref=main`;
     
     logAPICall({
       function: 'fetchPageContent',
       mode: 'GITHUB_API',
-      params: { slug, filename, owner, repo },
+      params: { slug, filename, owner, repo, ref: 'main' },
       url: apiUrl,
       method: 'GET'
     });
@@ -430,17 +459,18 @@ export async function deletePageFile(
 
     // PRODUCTION MODE: Delete from GitHub
     const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+    const apiUrlWithRef = `${apiUrl}?ref=main`;
     
     logAPICall({
       function: 'deletePageFile',
       mode: 'GITHUB_API',
-      params: { slug, path, owner, repo },
+      params: { slug, path, owner, repo, ref: 'main' },
       url: apiUrl,
       method: 'DELETE'
     });
 
     // First, get the file SHA (required for deletion)
-    const getResponse = await fetch(apiUrl, {
+    const getResponse = await fetch(apiUrlWithRef, {
       headers: {
         'Authorization': `token ${token}`,
         'Accept': 'application/vnd.github.v3+json'
