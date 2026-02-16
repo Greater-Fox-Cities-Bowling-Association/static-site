@@ -22,8 +22,13 @@ interface GitHubFileResponse {
   encoding?: 'base64';
 }
 
-const DEFAULT_OWNER = 'myoung-admin';
-const DEFAULT_REPO = 'gfcba';
+// Get defaults from environment variables
+const DEFAULT_OWNER = typeof import.meta !== 'undefined' 
+  ? (import.meta.env.PUBLIC_GITHUB_OWNER || import.meta.env.GITHUB_OWNER || 'myoung-admin')
+  : 'myoung-admin';
+const DEFAULT_REPO = typeof import.meta !== 'undefined'
+  ? (import.meta.env.PUBLIC_GITHUB_REPO || import.meta.env.GITHUB_REPO || 'gfcba')
+  : 'gfcba';
 const PAGES_PATH = 'src/content/pages';
 
 export async function commitToGitHub({
@@ -130,6 +135,39 @@ export async function fetchPagesDirectory(
   repo: string = DEFAULT_REPO
 ): Promise<{ success: boolean; files?: GitHubFileResponse[]; error?: string }> {
   try {
+    console.log('📂 fetchPagesDirectory:', { owner, repo, path: PAGES_PATH, mode: import.meta.env.DEV ? 'DEV (local)' : 'PRODUCTION (GitHub)' });
+
+    // DEV MODE: Read from local filesystem
+    if (import.meta.env.DEV) {
+      try {
+        // Dynamically import all JSON files from the pages directory
+        const pageModules = import.meta.glob('/src/content/pages/*.json', { eager: true });
+        
+        const files: GitHubFileResponse[] = Object.entries(pageModules).map(([path, _module]: [string, any]) => {
+          const filename = path.split('/').pop() || '';
+          return {
+            name: filename,
+            path: `${PAGES_PATH}/${filename}`,
+            sha: '', // Not needed for local dev
+            size: 0,
+            url: '',
+            html_url: '',
+            git_url: '',
+            download_url: path,
+            type: 'file' as const,
+          };
+        });
+
+        console.log('✅ Loaded', files.length, 'pages from local filesystem');
+        return { success: true, files };
+      } catch (error) {
+        console.error('Error reading local pages:', error);
+        // If directory doesn't exist yet, return empty array
+        return { success: true, files: [] };
+      }
+    }
+
+    // PRODUCTION MODE: Fetch from GitHub
     const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${PAGES_PATH}`;
     
     const response = await fetch(apiUrl, {
@@ -155,6 +193,7 @@ export async function fetchPagesDirectory(
       file.type === 'file' && file.name.endsWith('.json')
     );
 
+    console.log('✅ Fetched', jsonFiles.length, 'pages from GitHub');
     return { success: true, files: jsonFiles };
   } catch (error) {
     return {
@@ -175,6 +214,25 @@ export async function fetchPageContent(
 ): Promise<{ success: boolean; content?: any; sha?: string; error?: string }> {
   try {
     const filename = `${slug}.json`;
+    console.log('📄 fetchPageContent:', { slug, mode: import.meta.env.DEV ? 'DEV (local)' : 'PRODUCTION (GitHub)' });
+
+    // DEV MODE: Read from local filesystem
+    if (import.meta.env.DEV) {
+      try {
+        const module = await import(`../../content/pages/${filename}`);
+        console.log('✅ Loaded page from local file:', filename);
+        return {
+          success: true,
+          content: module.default,
+          sha: '' // Not needed for local dev
+        };
+      } catch (error) {
+        console.error('Error loading local page:', error);
+        return { success: false, error: 'Page not found locally' };
+      }
+    }
+
+    // PRODUCTION MODE: Fetch from GitHub
     const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${PAGES_PATH}/${filename}`;
     
     const response = await fetch(apiUrl, {
@@ -202,6 +260,7 @@ export async function fetchPageContent(
     const decodedContent = atob(data.content);
     const jsonContent = JSON.parse(decodedContent);
 
+    console.log('✅ Fetched page from GitHub:', filename);
     return { 
       success: true, 
       content: jsonContent,

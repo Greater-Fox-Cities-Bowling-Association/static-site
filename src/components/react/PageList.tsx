@@ -50,8 +50,20 @@ export default function PageList({
           const slug = file.name.replace(".json", "");
 
           try {
-            const response = await fetch(file.download_url!);
-            const content: PageContent = await response.json();
+            // In dev mode, fetch from local path, in production from download_url
+            let content: PageContent;
+
+            if (file.download_url && file.download_url.startsWith("/src/")) {
+              // Dev mode: Use dynamic import
+              const module = await import(`../../content/pages/${file.name}`);
+              content = module.default;
+            } else if (file.download_url) {
+              // Production mode: Fetch from GitHub
+              const response = await fetch(file.download_url);
+              content = await response.json();
+            } else {
+              throw new Error("No download URL available");
+            }
 
             return {
               slug,
@@ -60,7 +72,8 @@ export default function PageList({
               hasDraft: hasDraft(slug),
               updatedAt: content.updatedAt,
             };
-          } catch {
+          } catch (err) {
+            console.error(`Error loading page ${slug}:`, err);
             return {
               slug,
               title: slug,
