@@ -331,7 +331,16 @@ export async function fetchPageContent(
       });
 
       try {
-        const module = await import(`../../content/pages/${filename}`);
+        // Use import.meta.glob to load all pages at build time
+        const pageModules = import.meta.glob('/src/content/pages/*.json', { eager: true });
+        const pagePath = `/src/content/pages/${filename}`;
+        const module = pageModules[pagePath] as any;
+        
+        if (!module) {
+          logAPIResponse('fetchPageContent', 'LOCAL', null, `Page not found: ${pagePath}`);
+          return { success: false, error: 'Page not found locally' };
+        }
+        
         const content = module.default;
         logAPIResponse('fetchPageContent', 'LOCAL', { 
           slug, 

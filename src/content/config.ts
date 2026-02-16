@@ -154,6 +154,7 @@ const pagesCollection = defineCollection({
     title: z.string(),
     metaDescription: z.string().optional(),
     status: z.enum(['draft', 'published']),
+    isLandingPage: z.boolean().optional(),
     sections: z.array(sectionSchema),
     createdAt: z.string().optional(),
     updatedAt: z.string().optional(),

@@ -3,6 +3,7 @@
   "title": "home",
   "metaDescription": "test",
   "status": "draft",
+  "isLandingPage": true,
   "sections": [],
   "updatedAt": "2026-02-10T05:47:35.051Z"
 }

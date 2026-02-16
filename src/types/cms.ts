@@ -66,6 +66,7 @@ export interface PageContent {
   title: string;
   metaDescription?: string;
   status: PageStatus;
+  isLandingPage?: boolean;
   sections: Section[];
   createdAt?: string;
   updatedAt?: string;

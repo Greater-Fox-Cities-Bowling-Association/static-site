@@ -82,8 +82,14 @@ export default function PageEditor({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showAddSection, setShowAddSection] = useState(false);
+  const [existingLandingPage, setExistingLandingPage] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
+    // Check for existing landing page
+    checkForLandingPage();
+
     if (slug) {
       // Try to load draft first
       const draft = loadDraft(slug);
@@ -105,6 +111,40 @@ export default function PageEditor({
       autoSaveDraft(page);
     }
   }, [page, hasUnsavedChanges]);
+
+  const checkForLandingPage = async () => {
+    try {
+      const result = await fetchPagesDirectory(
+        token,
+        undefined,
+        undefined,
+        useGitHubAPI,
+      );
+
+      if (result.success && result.files) {
+        // Check each page for isLandingPage flag
+        for (const file of result.files) {
+          const pageSlug = file.name.replace(".json", "");
+          if (pageSlug === slug) continue; // Skip current page
+
+          const pageResult = await fetchPageContent(
+            pageSlug,
+            token,
+            undefined,
+            undefined,
+            useGitHubAPI,
+          );
+
+          if (pageResult.success && pageResult.content?.isLandingPage) {
+            setExistingLandingPage(pageSlug);
+            break;
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error checking for landing page:", error);
+    }
+  };
 
   const loadPageFromGitHub = async () => {
     if (!slug) return;
@@ -194,6 +234,14 @@ export default function PageEditor({
 
     if (!page.slug.trim()) {
       newErrors.slug = "Slug is required";
+    }
+
+    if (
+      page.isLandingPage &&
+      existingLandingPage &&
+      existingLandingPage !== slug
+    ) {
+      newErrors.isLandingPage = `Another page (${existingLandingPage}) is already set as the landing page`;
     }
 
     setErrors(newErrors);
@@ -391,6 +439,38 @@ export default function PageEditor({
               <option value="draft">Draft</option>
               <option value="published">Published</option>
             </select>
+          </div>
+
+          <div>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={page.isLandingPage || false}
+                onChange={(e) =>
+                  updatePage({ isLandingPage: e.target.checked })
+                }
+                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+              />
+              <span className="text-sm font-medium text-gray-700">
+                Set as landing page (homepage)
+              </span>
+            </label>
+            {page.isLandingPage &&
+              existingLandingPage &&
+              existingLandingPage !== slug && (
+                <p className="mt-1 text-sm text-yellow-600">
+                  Warning: Page "{existingLandingPage}" is currently the landing
+                  page. Saving this will replace it.
+                </p>
+              )}
+            {errors.isLandingPage && (
+              <p className="mt-1 text-sm text-red-500">
+                {errors.isLandingPage}
+              </p>
+            )}
+            <p className="mt-1 text-xs text-gray-500">
+              The landing page will be displayed at the root URL (/)
+            </p>
           </div>
         </div>
       </div>
