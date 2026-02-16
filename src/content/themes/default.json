@@ -2,7 +2,7 @@
   "id": "default",
   "name": "Default Theme",
   "description": "The default blue and gray theme",
-  "isActive": false,
+  "isActive": true,
   "colors": {
     "primary": "#2563eb",
     "secondary": "#64748b",

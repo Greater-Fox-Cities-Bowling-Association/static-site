@@ -18,6 +18,7 @@ import {
   deleteDraft,
   autoSaveDraft,
 } from "../../utils/draftStore";
+import { useTheme } from "../../utils/useTheme";
 import HeroEditor from "./sections/HeroEditor";
 import TextEditor from "./sections/TextEditor";
 import CardGridEditor from "./sections/CardGridEditor";
@@ -88,6 +89,7 @@ export default function PageEditor({
   onCancel,
   useGitHubAPI = false,
 }: PageEditorProps) {
+  const { colors } = useTheme();
   const [page, setPage] = useState<PageContent>(createEmptyPage());
   const [loading, setLoading] = useState(!!slug);
   const [saving, setSaving] = useState(false);
@@ -400,7 +402,7 @@ export default function PageEditor({
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-gray-600">Loading page...</div>
+        <div style={{ color: colors.textSecondary }}>Loading page...</div>
       </div>
     );
   }
@@ -408,21 +410,29 @@ export default function PageEditor({
   return (
     <div className="max-w-5xl mx-auto">
       <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-900">
+        <h2 style={{ color: colors.text }} className="text-2xl font-bold">
           {slug ? "Edit Page" : "Create New Page"}
         </h2>
 
         <div className="flex gap-2">
           <button
             onClick={onCancel}
-            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+            style={{
+              borderColor: colors.secondary,
+              color: colors.text,
+            }}
+            className="px-4 py-2 border rounded-lg hover:opacity-75"
           >
             Cancel
           </button>
 
           <button
             onClick={handleSaveDraft}
-            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+            style={{
+              borderColor: colors.secondary,
+              color: colors.text,
+            }}
+            className="px-4 py-2 border rounded-lg hover:opacity-75"
             disabled={!page.slug}
           >
             Save Draft
@@ -430,7 +440,11 @@ export default function PageEditor({
 
           <button
             onClick={handlePublish}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+            style={{
+              backgroundColor: colors.primary,
+              color: "#ffffff",
+            }}
+            className="px-4 py-2 rounded-lg hover:opacity-90 disabled:opacity-50"
             disabled={saving}
           >
             {saving ? "Publishing..." : "Publish"}
@@ -445,21 +459,38 @@ export default function PageEditor({
       )}
 
       {/* Metadata Section */}
-      <div className="mb-6 p-6 bg-white border border-gray-200 rounded-lg">
-        <h3 className="text-lg font-semibold mb-4">Page Information</h3>
+      <div
+        style={{
+          backgroundColor: colors.background,
+          borderColor: colors.secondary,
+        }}
+        className="mb-6 p-6 border rounded-lg"
+      >
+        <h3
+          style={{ color: colors.text }}
+          className="text-lg font-semibold mb-4"
+        >
+          Page Information
+        </h3>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              style={{ color: colors.text }}
+              className="block text-sm font-medium mb-1"
+            >
               Title <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               value={page.title}
               onChange={(e) => handleTitleChange(e.target.value)}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors.title ? "border-red-500" : "border-gray-300"
-              }`}
+              style={{
+                borderColor: errors.title ? "#ef4444" : colors.secondary,
+                backgroundColor: colors.background,
+                color: colors.text,
+              }}
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2"
               placeholder="Enter page title"
             />
             {errors.title && (
@@ -468,7 +499,10 @@ export default function PageEditor({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              style={{ color: colors.text }}
+              className="block text-sm font-medium mb-1"
+            >
               Slug <span className="text-red-500">*</span>
             </label>
             <input
@@ -477,9 +511,12 @@ export default function PageEditor({
               onChange={(e) =>
                 updatePage({ slug: generateSlug(e.target.value) })
               }
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm ${
-                errors.slug ? "border-red-500" : "border-gray-300"
-              }`}
+              style={{
+                borderColor: errors.slug ? "#ef4444" : colors.secondary,
+                backgroundColor: colors.background,
+                color: colors.text,
+              }}
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 font-mono text-sm"
               placeholder="page-url-slug"
               disabled={!!slug} // Can't change slug when editing
             />
@@ -487,27 +524,41 @@ export default function PageEditor({
               <p className="mt-1 text-sm text-red-500">{errors.slug}</p>
             )}
             {slug && (
-              <p className="mt-1 text-xs text-gray-500">
+              <p
+                style={{ color: colors.textSecondary }}
+                className="mt-1 text-xs"
+              >
                 Slug cannot be changed when editing
               </p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              style={{ color: colors.text }}
+              className="block text-sm font-medium mb-1"
+            >
               Meta Description
             </label>
             <textarea
               value={page.metaDescription || ""}
               onChange={(e) => updatePage({ metaDescription: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              style={{
+                borderColor: colors.secondary,
+                backgroundColor: colors.background,
+                color: colors.text,
+              }}
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2"
               rows={2}
               placeholder="Brief description for SEO (optional)"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              style={{ color: colors.text }}
+              className="block text-sm font-medium mb-1"
+            >
               Status
             </label>
             <select
@@ -515,7 +566,12 @@ export default function PageEditor({
               onChange={(e) =>
                 updatePage({ status: e.target.value as "draft" | "published" })
               }
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              style={{
+                borderColor: colors.secondary,
+                backgroundColor: colors.background,
+                color: colors.text,
+              }}
+              className="px-3 py-2 border rounded-md focus:outline-none focus:ring-2"
             >
               <option value="draft">Draft</option>
               <option value="published">Published</option>
@@ -530,16 +586,23 @@ export default function PageEditor({
                 onChange={(e) =>
                   updatePage({ isLandingPage: e.target.checked })
                 }
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                style={{
+                  borderColor: colors.secondary,
+                  accentColor: colors.primary,
+                }}
+                className="w-4 h-4 rounded focus:ring-2"
               />
-              <span className="text-sm font-medium text-gray-700">
+              <span
+                style={{ color: colors.text }}
+                className="text-sm font-medium"
+              >
                 Set as landing page (homepage)
               </span>
             </label>
             {page.isLandingPage &&
               existingLandingPage &&
               existingLandingPage !== slug && (
-                <p className="mt-1 text-sm text-yellow-600">
+                <p style={{ color: "#ca8a04" }} className="mt-1 text-sm">
                   Warning: Page "{existingLandingPage}" is currently the landing
                   page. Saving this will replace it.
                 </p>
@@ -549,13 +612,16 @@ export default function PageEditor({
                 {errors.isLandingPage}
               </p>
             )}
-            <p className="mt-1 text-xs text-gray-500">
+            <p style={{ color: colors.textSecondary }} className="mt-1 text-xs">
               The landing page will be displayed at the root URL (/)
             </p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              style={{ color: colors.text }}
+              className="block text-sm font-medium mb-2"
+            >
               Page Layout
             </label>
             <div className="space-y-2">
@@ -565,9 +631,15 @@ export default function PageEditor({
                   name="layout"
                   checked={page.useLayout === false}
                   onChange={() => updatePage({ useLayout: false })}
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                  style={{
+                    borderColor: colors.secondary,
+                    accentColor: colors.primary,
+                  }}
+                  className="w-4 h-4 rounded focus:ring-2"
                 />
-                <span className="text-sm text-gray-700">No Layout</span>
+                <span style={{ color: colors.text }} className="text-sm">
+                  No Layout
+                </span>
               </label>
 
               {availableLayouts.map((layout) => (
@@ -584,20 +656,30 @@ export default function PageEditor({
                         layoutId: layout.id,
                       })
                     }
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                    style={{
+                      borderColor: colors.secondary,
+                      accentColor: colors.primary,
+                    }}
+                    className="w-4 h-4 rounded focus:ring-2"
                   />
                   <div>
-                    <div className="text-sm font-medium text-gray-700">
+                    <div
+                      style={{ color: colors.text }}
+                      className="text-sm font-medium"
+                    >
                       {layout.name}
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div
+                      style={{ color: colors.textSecondary }}
+                      className="text-xs"
+                    >
                       {layout.description}
                     </div>
                   </div>
                 </label>
               ))}
             </div>
-            <p className="mt-2 text-xs text-gray-500">
+            <p style={{ color: colors.textSecondary }} className="mt-2 text-xs">
               {availableLayouts.length === 1
                 ? "Only one layout is available, and will be used by default."
                 : "Select a layout for this page, or choose 'No Layout' to render without a layout wrapper."}
@@ -609,18 +691,33 @@ export default function PageEditor({
       {/* Sections */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">Page Sections</h3>
+          <h3 style={{ color: colors.text }} className="text-lg font-semibold">
+            Page Sections
+          </h3>
           <button
             onClick={() => setShowAddSection(!showAddSection)}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+            style={{
+              backgroundColor: colors.accent || "#16a34a",
+              color: "#ffffff",
+            }}
+            className="px-4 py-2 rounded-lg hover:opacity-90"
           >
             + Add Section
           </button>
         </div>
 
         {showAddSection && (
-          <div className="mb-4 p-4 bg-gray-50 border border-gray-300 rounded-lg">
-            <p className="text-sm font-medium text-gray-700 mb-3">
+          <div
+            style={{
+              backgroundColor: colors.background,
+              borderColor: colors.secondary,
+            }}
+            className="mb-4 p-4 border rounded-lg"
+          >
+            <p
+              style={{ color: colors.text }}
+              className="text-sm font-medium mb-3"
+            >
               Select section type:
             </p>
             <div className="grid grid-cols-2 gap-2">

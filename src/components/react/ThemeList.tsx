@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import type { Theme } from "../../types/cms";
+import { useTheme } from "../../utils/useTheme";
 import {
   fetchThemesDirectory,
   fetchThemeContent,
@@ -25,6 +26,9 @@ export default function ThemeList({
   const [error, setError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [activating, setActivating] = useState<string | null>(null);
+
+  // Use theme colors for styling
+  const { colors, fonts } = useTheme();
 
   const owner =
     import.meta.env.PUBLIC_GITHUB_OWNER || import.meta.env.GITHUB_OWNER || "";
@@ -146,27 +150,53 @@ export default function ThemeList({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Themes</h2>
-          <p className="text-gray-600 mt-1">
+          <h2
+            className="text-2xl font-bold"
+            style={{ color: colors.text, fontFamily: fonts.heading }}
+          >
+            Themes
+          </h2>
+          <p
+            className="mt-1"
+            style={{ color: colors.textSecondary, fontFamily: fonts.body }}
+          >
             Manage site-wide themes and color schemes
           </p>
         </div>
         <button
           onClick={onCreateNewTheme}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+          className="px-4 py-2 rounded-lg transition-colors font-medium"
+          style={{
+            backgroundColor: colors.primary,
+            color: "#ffffff",
+          }}
         >
           + Create Theme
         </button>
       </div>
 
       {activeTheme && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div
+          className="rounded-lg p-4"
+          style={{
+            backgroundColor: `${colors.primary}15`,
+            borderColor: colors.primary,
+            borderWidth: "1px",
+          }}
+        >
           <div className="flex items-start justify-between">
             <div>
-              <h3 className="font-semibold text-blue-900">Active Theme</h3>
-              <p className="text-blue-700 mt-1">{activeTheme.name}</p>
+              <h3 className="font-semibold" style={{ color: colors.primary }}>
+                Active Theme
+              </h3>
+              <p className="mt-1" style={{ color: colors.primary }}>
+                {activeTheme.name}
+              </p>
               {activeTheme.description && (
-                <p className="text-sm text-blue-600 mt-1">
+                <p
+                  className="text-sm mt-1"
+                  style={{ color: colors.textSecondary }}
+                >
                   {activeTheme.description}
                 </p>
               )}
@@ -191,11 +221,20 @@ export default function ThemeList({
 
       <div className="grid gap-4">
         {themes.length === 0 ? (
-          <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-            <p className="text-gray-600 mb-4">No themes found</p>
+          <div
+            className="text-center py-12 rounded-lg border-2 border-dashed"
+            style={{
+              backgroundColor: colors.background,
+              borderColor: colors.secondary,
+            }}
+          >
+            <p className="mb-4" style={{ color: colors.textSecondary }}>
+              No themes found
+            </p>
             <button
               onClick={onCreateNewTheme}
-              className="text-blue-600 hover:text-blue-700 font-medium"
+              style={{ color: colors.primary }}
+              className="font-medium hover:underline"
             >
               Create your first theme
             </button>
@@ -204,41 +243,64 @@ export default function ThemeList({
           themes.map((theme) => (
             <div
               key={theme.id}
-              className={`bg-white border rounded-lg p-4 transition-all ${
-                theme.isActive
-                  ? "border-blue-300 shadow-md"
-                  : "border-gray-200 hover:border-gray-300"
-              }`}
+              className="rounded-lg p-4 transition-all"
+              style={{
+                backgroundColor: colors.background,
+                borderColor: theme.isActive ? colors.primary : colors.secondary,
+                borderWidth: "1px",
+                boxShadow: theme.isActive
+                  ? `0 4px 6px rgba(0,0,0,0.1)`
+                  : "none",
+              }}
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-lg font-semibold text-gray-900">
+                    <h3
+                      className="text-lg font-semibold"
+                      style={{ color: colors.text }}
+                    >
                       {theme.name}
                     </h3>
                     {theme.isActive && (
-                      <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded">
+                      <span
+                        className="px-2 py-1 text-xs font-medium rounded"
+                        style={{
+                          backgroundColor: colors.primary + "25",
+                          color: colors.primary,
+                        }}
+                      >
                         Active
                       </span>
                     )}
                   </div>
                   {theme.description && (
-                    <p className="text-gray-600 text-sm mt-1">
+                    <p
+                      style={{ color: colors.textSecondary }}
+                      className="text-sm mt-1"
+                    >
                       {theme.description}
                     </p>
                   )}
 
                   <div className="mt-3 space-y-2">
                     <div>
-                      <p className="text-xs font-medium text-gray-500 mb-1">
+                      <p
+                        style={{ color: colors.textSecondary }}
+                        className="text-xs font-medium mb-1"
+                      >
                         Colors
                       </p>
                       <div className="flex gap-1 flex-wrap">
                         {Object.entries(theme.colors).map(([key, value]) => (
                           <div
                             key={key}
-                            className="w-10 h-10 rounded border border-gray-300 shadow-sm relative group"
-                            style={{ backgroundColor: value }}
+                            className="w-10 h-10 rounded shadow-sm relative group"
+                            style={{
+                              backgroundColor: value,
+                              borderColor: colors.secondary,
+                              borderWidth: "1px",
+                            }}
                           >
                             <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
                               {key}: {value}
@@ -249,10 +311,16 @@ export default function ThemeList({
                     </div>
 
                     <div>
-                      <p className="text-xs font-medium text-gray-500 mb-1">
+                      <p
+                        style={{ color: colors.textSecondary }}
+                        className="text-xs font-medium mb-1"
+                      >
                         Fonts
                       </p>
-                      <div className="text-sm text-gray-700 space-y-1">
+                      <div
+                        style={{ color: colors.text }}
+                        className="text-sm space-y-1"
+                      >
                         <div>
                           <span className="font-medium">Heading:</span>{" "}
                           {theme.fonts.heading}
@@ -269,7 +337,18 @@ export default function ThemeList({
                 <div className="flex gap-2 ml-4">
                   <button
                     onClick={() => onEditTheme(theme.id)}
-                    className="text-blue-600 hover:text-blue-700 px-3 py-1 rounded hover:bg-blue-50 transition-colors text-sm font-medium"
+                    style={{
+                      color: colors.primary,
+                      backgroundColor: "transparent",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor =
+                        colors.primary + "10";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                    }}
+                    className="px-3 py-1 rounded transition-colors text-sm font-medium"
                   >
                     Edit
                   </button>
@@ -278,7 +357,20 @@ export default function ThemeList({
                     <button
                       onClick={() => handleActivate(theme.id)}
                       disabled={activating === theme.id}
-                      className="text-green-600 hover:text-green-700 px-3 py-1 rounded hover:bg-green-50 transition-colors text-sm font-medium disabled:opacity-50"
+                      style={{
+                        color: "#16a34a",
+                        backgroundColor: "transparent",
+                        opacity: activating === theme.id ? 0.5 : 1,
+                      }}
+                      onMouseEnter={(e) => {
+                        if (activating !== theme.id) {
+                          e.currentTarget.style.backgroundColor = "#16a34a10";
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = "transparent";
+                      }}
+                      className="px-3 py-1 rounded transition-colors text-sm font-medium disabled:cursor-not-allowed"
                     >
                       {activating === theme.id ? "Activating..." : "Activate"}
                     </button>
@@ -288,7 +380,20 @@ export default function ThemeList({
                     <button
                       onClick={() => handleDelete(theme.id)}
                       disabled={deleting === theme.id}
-                      className="text-red-600 hover:text-red-700 px-3 py-1 rounded hover:bg-red-50 transition-colors text-sm font-medium disabled:opacity-50"
+                      style={{
+                        color: "#dc2626",
+                        backgroundColor: "transparent",
+                        opacity: deleting === theme.id ? 0.5 : 1,
+                      }}
+                      onMouseEnter={(e) => {
+                        if (deleting !== theme.id) {
+                          e.currentTarget.style.backgroundColor = "#dc262610";
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = "transparent";
+                      }}
+                      className="px-3 py-1 rounded transition-colors text-sm font-medium disabled:cursor-not-allowed"
                     >
                       {deleting === theme.id ? "Deleting..." : "Delete"}
                     </button>

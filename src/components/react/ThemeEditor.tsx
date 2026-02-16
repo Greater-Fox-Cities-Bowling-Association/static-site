@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import type { Theme } from "../../types/cms";
 import { fetchThemeContent, saveThemeFile } from "../../utils/githubApi";
+import { useTheme } from "../../utils/useTheme";
 
 interface ThemeEditorProps {
   themeId: string | undefined; // undefined = creating new theme
@@ -63,6 +64,7 @@ export default function ThemeEditor({
   onCancel,
   useGitHubAPI = false,
 }: ThemeEditorProps) {
+  const { colors: themeColors } = useTheme();
   const [theme, setTheme] = useState<Theme>(createEmptyTheme());
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -187,8 +189,11 @@ export default function ThemeEditor({
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading theme...</p>
+          <div
+            style={{ borderBottomColor: themeColors.primary }}
+            className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4"
+          ></div>
+          <p style={{ color: themeColors.textSecondary }}>Loading theme...</p>
         </div>
       </div>
     );
@@ -198,10 +203,13 @@ export default function ThemeEditor({
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">
+          <h2
+            style={{ color: themeColors.text }}
+            className="text-2xl font-bold"
+          >
             {isCreating ? "Create New Theme" : `Edit Theme: ${theme.name}`}
           </h2>
-          <p className="text-gray-600 mt-1">
+          <p style={{ color: themeColors.textSecondary }} className="mt-1">
             {isCreating
               ? "Design a new theme for your site"
               : "Modify the theme settings"}
@@ -209,40 +217,71 @@ export default function ThemeEditor({
         </div>
         <button
           onClick={onCancel}
-          className="text-gray-600 hover:text-gray-900 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+          style={{
+            color: themeColors.textSecondary,
+            backgroundColor: "transparent",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor =
+              themeColors.secondary + "15";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "transparent";
+          }}
+          className="px-4 py-2 rounded-lg transition-colors"
         >
           Cancel
         </button>
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-800">{error}</p>
+        <div
+          style={{ backgroundColor: "#fee2e2", borderColor: "#fecaca" }}
+          className="border rounded-lg p-4"
+        >
+          <p style={{ color: "#991b1b" }}>{error}</p>
         </div>
       )}
 
-      <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-6">
+      <div
+        style={{
+          backgroundColor: themeColors.background,
+          borderColor: themeColors.secondary,
+        }}
+        className="rounded-lg border p-6 space-y-6"
+      >
         {/* Basic Info */}
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3
+            style={{ color: themeColors.text }}
+            className="text-lg font-semibold"
+          >
             Basic Information
           </h3>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              style={{ color: themeColors.text }}
+              className="block text-sm font-medium mb-1"
+            >
               Theme Name *
             </label>
             <input
               type="text"
               value={theme.name}
               onChange={(e) => updateTheme({ name: e.target.value })}
-              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                validationErrors.name ? "border-red-300" : "border-gray-300"
-              }`}
+              style={{
+                borderColor: validationErrors.name
+                  ? "#ef4444"
+                  : themeColors.secondary,
+                backgroundColor: themeColors.background,
+                color: themeColors.text,
+              }}
+              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-opacity-100"
               placeholder="My Awesome Theme"
             />
             {validationErrors.name && (
-              <p className="text-red-600 text-sm mt-1">
+              <p style={{ color: "#dc2626" }} className="text-sm mt-1">
                 {validationErrors.name}
               </p>
             )}

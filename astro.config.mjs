@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     tailwind()
   ],
-  output: 'hybrid',
+  output: 'static',
   site: 'https://www.greaterfoxcitiesba.com',
   
   // Handle trailing slashes flexibly
