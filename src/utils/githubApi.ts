@@ -22,6 +22,66 @@ interface GitHubFileResponse {
   encoding?: 'base64';
 }
 
+// =============================================================================
+// Debug & Logging Utilities
+// =============================================================================
+
+const DEBUG = typeof import.meta !== 'undefined' ? import.meta.env.DEV : false;
+
+interface APICallDetails {
+  function: string;
+  mode: 'LOCAL' | 'GITHUB_API';
+  params: Record<string, any>;
+  url?: string;
+  method?: string;
+}
+
+function logAPICall(details: APICallDetails) {
+  if (!DEBUG) return;
+  
+  const style = details.mode === 'LOCAL' 
+    ? 'background: #22c55e; color: white; padding: 2px 6px; border-radius: 3px;'
+    : 'background: #3b82f6; color: white; padding: 2px 6px; border-radius: 3px;';
+  
+  console.groupCollapsed(
+    `%c${details.mode}%c ${details.function}`,
+    style,
+    'font-weight: bold;'
+  );
+  console.log('Parameters:', details.params);
+  if (details.url) console.log('API URL:', details.url);
+  if (details.method) console.log('HTTP Method:', details.method);
+  console.groupEnd();
+}
+
+function logAPIResponse(functionName: string, mode: string, response: any, error?: any) {
+  if (!DEBUG) return;
+  
+  if (error) {
+    console.group(`%c❌ ${functionName} - FAILED`, 'color: #ef4444; font-weight: bold;');
+    console.error('Error:', error);
+    console.groupEnd();
+  } else {
+    console.group(`%c✅ ${functionName} - SUCCESS`, 'color: #10b981; font-weight: bold;');
+    console.log('Mode:', mode);
+    console.log('Response:', response);
+    console.groupEnd();
+  }
+}
+
+/**
+ * Compare local vs GitHub API responses (useful for debugging)
+ * Set forceGitHubAPI=true to test production behavior in dev mode
+ */
+export function enableGitHubAPITesting() {
+  console.log(
+    '%c🔍 GitHub API Testing Mode',
+    'background: #f59e0b; color: white; padding: 4px 8px; border-radius: 3px; font-size: 14px; font-weight: bold;'
+  );
+  console.log('Pass forceGitHubAPI: true to any function to test GitHub API in dev mode');
+  console.log('Example: fetchPagesDirectory(token, owner, repo, true)');
+}
+
 // Get defaults from environment variables
 const DEFAULT_OWNER = typeof import.meta !== 'undefined' 
   ? (import.meta.env.PUBLIC_GITHUB_OWNER || import.meta.env.GITHUB_OWNER || 'myoung-admin')
@@ -132,13 +192,18 @@ export function generateFilename(collectionType: string, data: any, originalFile
 export async function fetchPagesDirectory(
   token: string,
   owner: string = DEFAULT_OWNER,
-  repo: string = DEFAULT_REPO
+  repo: string = DEFAULT_REPO,
+  forceGitHubAPI: boolean = false
 ): Promise<{ success: boolean; files?: GitHubFileResponse[]; error?: string }> {
   try {
-    console.log('📂 fetchPagesDirectory:', { owner, repo, path: PAGES_PATH, mode: import.meta.env.DEV ? 'DEV (local)' : 'PRODUCTION (GitHub)' });
+    // DEV MODE: Read from local filesystem (unless forced to use GitHub API)
+    if (import.meta.env.DEV && !forceGitHubAPI) {
+      logAPICall({
+        function: 'fetchPagesDirectory',
+        mode: 'LOCAL',
+        params: { owner, repo, path: PAGES_PATH }
+      });
 
-    // DEV MODE: Read from local filesystem
-    if (import.meta.env.DEV) {
       try {
         // Dynamically import all JSON files from the pages directory
         const pageModules = import.meta.glob('/src/content/pages/*.json', { eager: true });
@@ -158,10 +223,10 @@ export async function fetchPagesDirectory(
           };
         });
 
-        console.log('✅ Loaded', files.length, 'pages from local filesystem');
+        logAPIResponse('fetchPagesDirectory', 'LOCAL', { fileCount: files.length, files: files.map(f => f.name) });
         return { success: true, files };
       } catch (error) {
-        console.error('Error reading local pages:', error);
+        logAPIResponse('fetchPagesDirectory', 'LOCAL', null, error);
         // If directory doesn't exist yet, return empty array
         return { success: true, files: [] };
       }
@@ -170,6 +235,14 @@ export async function fetchPagesDirectory(
     // PRODUCTION MODE: Fetch from GitHub
     const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${PAGES_PATH}`;
     
+    logAPICall({
+      function: 'fetchPagesDirectory',
+      mode: 'GITHUB_API',
+      params: { owner, repo, path: PAGES_PATH },
+      url: apiUrl,
+      method: 'GET'
+    });
+
     const response = await fetch(apiUrl, {
       headers: {
         'Authorization': `token ${token}`,
@@ -180,6 +253,7 @@ export async function fetchPagesDirectory(
     if (!response.ok) {
       if (response.status === 404) {
         // Directory doesn't exist yet
+        logAPIResponse('fetchPagesDirectory', 'GITHUB_API', { fileCount: 0, message: 'Directory not found (404), returning empty array' });
         return { success: true, files: [] };
       }
       const error = await response.json();
@@ -193,7 +267,10 @@ export async function fetchPagesDirectory(
       file.type === 'file' && file.name.endsWith('.json')
     );
 
-    console.log('✅ Fetched', jsonFiles.length, 'pages from GitHub');
+    logAPIResponse('fetchPagesDirectory', 'GITHUB_API', { 
+      fileCount: jsonFiles.length, 
+      files: jsonFiles.map(f => ({ name: f.name, size: f.size, sha: f.sha.substring(0, 7) }))
+    });
     return { success: true, files: jsonFiles };
   } catch (error) {
     return {
@@ -210,24 +287,35 @@ export async function fetchPageContent(
   slug: string,
   token: string,
   owner: string = DEFAULT_OWNER,
-  repo: string = DEFAULT_REPO
+  repo: string = DEFAULT_REPO,
+  forceGitHubAPI: boolean = false
 ): Promise<{ success: boolean; content?: any; sha?: string; error?: string }> {
   try {
     const filename = `${slug}.json`;
-    console.log('📄 fetchPageContent:', { slug, mode: import.meta.env.DEV ? 'DEV (local)' : 'PRODUCTION (GitHub)' });
 
-    // DEV MODE: Read from local filesystem
-    if (import.meta.env.DEV) {
+    // DEV MODE: Read from local filesystem (unless forced to use GitHub API)
+    if (import.meta.env.DEV && !forceGitHubAPI) {
+      logAPICall({
+        function: 'fetchPageContent',
+        mode: 'LOCAL',
+        params: { slug, filename }
+      });
+
       try {
         const module = await import(`../../content/pages/${filename}`);
-        console.log('✅ Loaded page from local file:', filename);
+        const content = module.default;
+        logAPIResponse('fetchPageContent', 'LOCAL', { 
+          slug, 
+          title: content.title,
+          sections: content.sections?.length || 0
+        });
         return {
           success: true,
-          content: module.default,
+          content,
           sha: '' // Not needed for local dev
         };
       } catch (error) {
-        console.error('Error loading local page:', error);
+        logAPIResponse('fetchPageContent', 'LOCAL', null, error);
         return { success: false, error: 'Page not found locally' };
       }
     }
@@ -235,6 +323,14 @@ export async function fetchPageContent(
     // PRODUCTION MODE: Fetch from GitHub
     const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${PAGES_PATH}/${filename}`;
     
+    logAPICall({
+      function: 'fetchPageContent',
+      mode: 'GITHUB_API',
+      params: { slug, filename, owner, repo },
+      url: apiUrl,
+      method: 'GET'
+    });
+
     const response = await fetch(apiUrl, {
       headers: {
         'Authorization': `token ${token}`,
@@ -244,6 +340,7 @@ export async function fetchPageContent(
 
     if (!response.ok) {
       if (response.status === 404) {
+        logAPIResponse('fetchPageContent', 'GITHUB_API', null, 'Page not found (404)');
         return { success: false, error: 'Page not found' };
       }
       const error = await response.json();
@@ -260,7 +357,13 @@ export async function fetchPageContent(
     const decodedContent = atob(data.content);
     const jsonContent = JSON.parse(decodedContent);
 
-    console.log('✅ Fetched page from GitHub:', filename);
+    logAPIResponse('fetchPageContent', 'GITHUB_API', { 
+      slug,
+      title: jsonContent.title,
+      sections: jsonContent.sections?.length || 0,
+      sha: data.sha.substring(0, 7),
+      size: data.size
+    });
     return { 
       success: true, 
       content: jsonContent,
@@ -281,16 +384,23 @@ export async function deletePageFile(
   slug: string,
   token: string,
   owner: string = DEFAULT_OWNER,
-  repo: string = DEFAULT_REPO
+  repo: string = DEFAULT_REPO,
+  forceGitHubAPI: boolean = false
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const filename = `${slug}.json`;
     const path = `${PAGES_PATH}/${filename}`;
 
-    console.log('🗑️ deletePageFile:', { slug, path, mode: import.meta.env.DEV ? 'DEV (local)' : 'PRODUCTION (GitHub)' });
+    // DEV MODE: Delete from local filesystem via API endpoint (unless forced to use GitHub API)
+    if (import.meta.env.DEV && !forceGitHubAPI) {
+      logAPICall({
+        function: 'deletePageFile',
+        mode: 'LOCAL',
+        params: { slug, path },
+        url: '/api/delete-page',
+        method: 'POST'
+      });
 
-    // DEV MODE: Delete from local filesystem via API endpoint
-    if (import.meta.env.DEV) {
       const response = await fetch('/api/delete-page', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -302,7 +412,7 @@ export async function deletePageFile(
         result = await response.json();
       } catch (jsonError) {
         const text = await response.text();
-        console.error('Server response (not JSON):', text);
+        logAPIResponse('deletePageFile', 'LOCAL', null, `Server error: ${response.status}. Response: ${text}`);
         return { 
           success: false, 
           error: `Server error: ${response.status}. Check dev server console for details.` 
@@ -310,17 +420,25 @@ export async function deletePageFile(
       }
       
       if (!response.ok) {
-        console.error('Server returned error:', result);
+        logAPIResponse('deletePageFile', 'LOCAL', null, result.error || 'Server returned error');
         return { success: false, error: result.error || 'Failed to delete file locally' };
       }
 
-      console.log('✅ Deleted local file:', path);
+      logAPIResponse('deletePageFile', 'LOCAL', { path, deleted: true });
       return { success: true };
     }
 
     // PRODUCTION MODE: Delete from GitHub
     const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
     
+    logAPICall({
+      function: 'deletePageFile',
+      mode: 'GITHUB_API',
+      params: { slug, path, owner, repo },
+      url: apiUrl,
+      method: 'DELETE'
+    });
+
     // First, get the file SHA (required for deletion)
     const getResponse = await fetch(apiUrl, {
       headers: {
@@ -331,6 +449,7 @@ export async function deletePageFile(
 
     if (!getResponse.ok) {
       if (getResponse.status === 404) {
+        logAPIResponse('deletePageFile', 'GITHUB_API', null, 'Page not found (404)');
         return { success: false, error: 'Page not found' };
       }
       const error = await getResponse.json();
@@ -359,6 +478,7 @@ export async function deletePageFile(
       throw new Error(error.message || 'Failed to delete page');
     }
 
+    logAPIResponse('deletePageFile', 'GITHUB_API', { path, deleted: true, sha: fileData.sha.substring(0, 7) });
     return { success: true };
   } catch (error) {
     return {
@@ -376,7 +496,8 @@ export async function savePageFile(
   content: any,
   token: string,
   owner: string = DEFAULT_OWNER,
-  repo: string = DEFAULT_REPO
+  repo: string = DEFAULT_REPO,
+  forceGitHubAPI: boolean = false
 ): Promise<{ success: boolean; error?: string }> {
   const filename = `${slug}.json`;
   const path = `${PAGES_PATH}/${filename}`;
@@ -386,11 +507,17 @@ export async function savePageFile(
     ...content,
     updatedAt: new Date().toISOString()
   };
-  
-  console.log('💾 savePageFile:', { slug, path, title: content.title, mode: import.meta.env.DEV ? 'DEV (local)' : 'PRODUCTION (GitHub)' });
 
-  // DEV MODE: Save to local filesystem via API endpoint
-  if (import.meta.env.DEV) {
+  // DEV MODE: Save to local filesystem via API endpoint (unless forced to use GitHub API)
+  if (import.meta.env.DEV && !forceGitHubAPI) {
+    logAPICall({
+      function: 'savePageFile',
+      mode: 'LOCAL',
+      params: { slug, path, title: content.title },
+      url: '/api/save-page',
+      method: 'POST'
+    });
+
     try {
       const response = await fetch('/api/save-page', {
         method: 'POST',
@@ -403,7 +530,7 @@ export async function savePageFile(
         result = await response.json();
       } catch (jsonError) {
         const text = await response.text();
-        console.error('Server response (not JSON):', text);
+        logAPIResponse('savePageFile', 'LOCAL', null, `Server error: ${response.status}. Response: ${text}`);
         return { 
           success: false, 
           error: `Server error: ${response.status}. Check dev server console for details.` 
@@ -411,14 +538,14 @@ export async function savePageFile(
       }
       
       if (!response.ok) {
-        console.error('Server returned error:', result);
+        logAPIResponse('savePageFile', 'LOCAL', null, result.error || 'Server returned error');
         return { success: false, error: result.error || 'Failed to save file locally' };
       }
 
-      console.log('✅ Saved to local file:', path);
+      logAPIResponse('savePageFile', 'LOCAL', { path, success: true });
       return { success: true };
     } catch (error) {
-      console.error('Save file error:', error);
+      logAPIResponse('savePageFile', 'LOCAL', null, error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to save file locally'
@@ -430,7 +557,15 @@ export async function savePageFile(
   const contentString = JSON.stringify(contentWithTimestamp, null, 2);
   const message = `Update page: ${content.title || slug}`;
 
-  return commitToGitHub({
+  logAPICall({
+    function: 'savePageFile (via commitToGitHub)',
+    mode: 'GITHUB_API',
+    params: { slug, path, title: content.title, message },
+    url: `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
+    method: 'PUT'
+  });
+
+  const result = await commitToGitHub({
     token,
     owner,
     repo,
@@ -439,4 +574,12 @@ export async function savePageFile(
     message,
     branch: 'main' // Always use main in production
   });
+
+  if (result.success) {
+    logAPIResponse('savePageFile', 'GITHUB_API', { path, committed: true });
+  } else {
+    logAPIResponse('savePageFile', 'GITHUB_API', null, result.error);
+  }
+
+  return result;
 }

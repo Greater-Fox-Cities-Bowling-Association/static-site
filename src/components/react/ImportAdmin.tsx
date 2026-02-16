@@ -24,6 +24,10 @@ export default function ImportAdmin() {
   const [githubToken, setGithubToken] = useState<string>("");
   const [githubUser, setGithubUser] = useState<string>("");
 
+  // Dev mode: toggle between local files and GitHub API
+  const [useGitHubAPI, setUseGitHubAPI] = useState<boolean>(false);
+  const isDev = import.meta.env.DEV;
+
   const githubRepo = `${import.meta.env.PUBLIC_GITHUB_OWNER || import.meta.env.GITHUB_OWNER}/${import.meta.env.PUBLIC_GITHUB_REPO || import.meta.env.GITHUB_REPO}`;
 
   // Get GitHub token from Auth0 custom claims
@@ -213,6 +217,36 @@ export default function ImportAdmin() {
             </div>
           </div>
 
+          {isDev && (
+            <div className="bg-amber-50 border-2 border-amber-200 rounded-lg shadow-sm p-4 mb-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="text-2xl">🔧</div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">
+                      Development Mode
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      {useGitHubAPI
+                        ? "Using GitHub API (testing production behavior)"
+                        : "Using local files (faster development)"}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setUseGitHubAPI(!useGitHubAPI)}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                    useGitHubAPI
+                      ? "bg-blue-600 text-white hover:bg-blue-700"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  }`}
+                >
+                  {useGitHubAPI ? "Switch to Local Files" : "Test GitHub API"}
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">
               Select Mode
@@ -266,6 +300,7 @@ export default function ImportAdmin() {
               token={githubToken}
               onEdit={handleEditPage}
               onCreateNew={handleCreateNewPage}
+              useGitHubAPI={useGitHubAPI}
             />
           )}
 
@@ -275,6 +310,7 @@ export default function ImportAdmin() {
               token={githubToken}
               onSave={handlePageSaved}
               onCancel={handleCancelEdit}
+              useGitHubAPI={useGitHubAPI}
             />
           )}
         </div>
@@ -283,7 +319,7 @@ export default function ImportAdmin() {
   );
 }
 
-function mapCsvData(data: any[], collectionType: string) {
+function mapCsvData(data: any[], _collectionType: string) {
   return data;
 }
 

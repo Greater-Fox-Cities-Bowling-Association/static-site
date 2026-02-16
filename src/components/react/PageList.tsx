@@ -7,6 +7,7 @@ interface PageListProps {
   token: string;
   onEdit: (slug: string) => void;
   onCreateNew: () => void;
+  useGitHubAPI?: boolean;
 }
 
 interface PageListItem {
@@ -21,6 +22,7 @@ export default function PageList({
   token,
   onEdit,
   onCreateNew,
+  useGitHubAPI = false,
 }: PageListProps) {
   const [pages, setPages] = useState<PageListItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,7 +36,12 @@ export default function PageList({
 
     try {
       console.log(token);
-      const result = await fetchPagesDirectory(token);
+      const result = await fetchPagesDirectory(
+        token,
+        undefined,
+        undefined,
+        useGitHubAPI,
+      );
 
       if (!result.success) {
         setError(result.error || "Failed to load pages");
@@ -95,7 +102,7 @@ export default function PageList({
 
   useEffect(() => {
     loadPages();
-  }, [token]);
+  }, [token, useGitHubAPI]);
 
   const handleDelete = async (slug: string) => {
     if (!deleteConfirm) {
@@ -108,7 +115,13 @@ export default function PageList({
     }
 
     try {
-      const result = await deletePageFile(slug, token);
+      const result = await deletePageFile(
+        slug,
+        token,
+        undefined,
+        undefined,
+        useGitHubAPI,
+      );
 
       if (result.success) {
         setPages(pages.filter((p) => p.slug !== slug));
