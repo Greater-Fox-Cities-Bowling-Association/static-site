@@ -1,11 +1,22 @@
 {
   "slug": "home",
   "title": "home",
-  "metaDescription": "test",
-  "status": "draft",
+  "metaDescription": "Greater Fox Cities Bowling Association",
+  "status": "published",
   "isLandingPage": true,
   "useLayout": true,
-  "sections": [],
-  "updatedAt": "2026-02-16T04:09:13.073Z",
+  "sections": [
+    {
+      "id": "hero-1",
+      "type": "hero",
+      "order": 1,
+      "title": "Greater Fox Cities Bowling Association",
+      "subtitle": "Welcome to our bowling community",
+      "backgroundImage": "",
+      "ctaText": "Learn More",
+      "ctaLink": "#"
+    }
+  ],
+  "updatedAt": "2026-02-16T04:25:52.623Z",
   "layoutId": "default"
 }

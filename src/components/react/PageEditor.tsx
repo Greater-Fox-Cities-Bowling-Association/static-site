@@ -209,7 +209,7 @@ export default function PageEditor({
           setPage((prev) => ({
             ...prev,
             useLayout: true,
-            layoutId: layouts[0].id,
+            layoutId: layouts?.[0]?.id ?? "",
           }));
         }
       } else {
@@ -333,9 +333,13 @@ export default function PageEditor({
     setSaving(true);
     try {
       console.log("Publishing page:", { slug: page.slug, title: page.title });
+      const publishedPage = {
+        ...page,
+        status: "published" as const,
+      };
       const result = await savePageFile(
         page.slug,
-        page,
+        publishedPage,
         token,
         undefined,
         undefined,
@@ -349,6 +353,7 @@ export default function PageEditor({
         if (page.slug) {
           deleteDraft(page.slug);
         }
+        setPage(publishedPage);
         setHasUnsavedChanges(false);
         alert("Page published successfully!");
         onSave();
