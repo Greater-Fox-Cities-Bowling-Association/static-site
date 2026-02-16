@@ -1,0 +1,20 @@
+{
+  "id": "dark",
+  "name": "Dark Theme",
+  "description": "A dark mode theme with deep backgrounds",
+  "isActive": true,
+  "colors": {
+    "primary": "#60a5fa",
+    "secondary": "#94a3b8",
+    "background": "#111827",
+    "text": "#f3f4f6",
+    "textSecondary": "#9ca3af",
+    "accent": "#3b82f6"
+  },
+  "fonts": {
+    "heading": "Outfit, sans-serif",
+    "body": "Inter, system-ui, sans-serif"
+  },
+  "createdAt": "2026-02-15T00:00:00Z",
+  "updatedAt": "2026-02-16T05:23:13.755Z"
+}

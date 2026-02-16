@@ -23,7 +23,7 @@ const { title, metaDescription, sections } = page.data;
 const sortedSections = [...sections].sort((a, b) => a.order - b.order);
 ---
 
-<PageLayout title={title} description={metaDescription}>
+<PageLayout title={title} description={metaDescription || "Greater Fox Cities Bowling Association"}>
   {sortedSections.map((section) => {
     switch (section.type) {
       case 'hero':

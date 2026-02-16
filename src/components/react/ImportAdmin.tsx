@@ -6,9 +6,18 @@ import PageList from "./PageList";
 import PageEditor from "./PageEditor";
 import LayoutList from "./LayoutList";
 import LayoutEditor from "./LayoutEditor";
+import ThemeList from "./ThemeList";
+import ThemeEditor from "./ThemeEditor";
 
 type Step = "select-type" | "upload" | "preview";
-type Mode = "csv" | "pages" | "page-editor" | "layouts" | "layout-editor";
+type Mode =
+  | "csv"
+  | "pages"
+  | "page-editor"
+  | "layouts"
+  | "layout-editor"
+  | "themes"
+  | "theme-editor";
 
 export default function ImportAdmin() {
   const { isLoading, error, isAuthenticated, user, logout, getIdTokenClaims } =
@@ -22,6 +31,9 @@ export default function ImportAdmin() {
   const [filename, setFilename] = useState("");
   const [editingSlug, setEditingSlug] = useState<string | undefined>(undefined);
   const [editingLayoutId, setEditingLayoutId] = useState<string | undefined>(
+    undefined,
+  );
+  const [editingThemeId, setEditingThemeId] = useState<string | undefined>(
     undefined,
   );
 
@@ -189,6 +201,26 @@ export default function ImportAdmin() {
     setEditingLayoutId(undefined);
   };
 
+  const handleEditTheme = (themeId: string) => {
+    setEditingThemeId(themeId);
+    setMode("theme-editor");
+  };
+
+  const handleCreateNewTheme = () => {
+    setEditingThemeId(undefined);
+    setMode("theme-editor");
+  };
+
+  const handleThemeSaved = () => {
+    setMode("themes");
+    setEditingThemeId(undefined);
+  };
+
+  const handleCancelThemeEdit = () => {
+    setMode("themes");
+    setEditingThemeId(undefined);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <header className="bg-white shadow-sm border-b border-gray-200">
@@ -319,6 +351,20 @@ export default function ImportAdmin() {
                   Create and manage page layouts
                 </p>
               </button>
+              <button
+                onClick={() => setMode("themes")}
+                className={`p-4 rounded-lg border-2 transition-all ${
+                  mode === "themes" || mode === "theme-editor"
+                    ? "border-blue-600 bg-blue-50"
+                    : "border-gray-200 hover:border-blue-300"
+                }`}
+              >
+                <div className="text-3xl mb-2">🎭</div>
+                <h3 className="font-semibold text-gray-900">Theme Manager</h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  Create and customize site themes
+                </p>
+              </button>
             </div>
           </div>
 
@@ -368,6 +414,25 @@ export default function ImportAdmin() {
               token={githubToken}
               onSave={handleLayoutSaved}
               onCancel={handleCancelLayoutEdit}
+              useGitHubAPI={useGitHubAPI}
+            />
+          )}
+
+          {mode === "themes" && (
+            <ThemeList
+              token={githubToken}
+              onEditTheme={handleEditTheme}
+              onCreateNewTheme={handleCreateNewTheme}
+              useGitHubAPI={useGitHubAPI}
+            />
+          )}
+
+          {mode === "theme-editor" && (
+            <ThemeEditor
+              themeId={editingThemeId}
+              token={githubToken}
+              onSave={handleThemeSaved}
+              onCancel={handleCancelThemeEdit}
               useGitHubAPI={useGitHubAPI}
             />
           )}

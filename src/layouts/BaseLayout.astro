@@ -1,10 +1,15 @@
 ---
+import { loadActiveTheme } from '../utils/themeLoader';
+
 interface Props {
   title: string;
   description?: string | undefined;
 }
 
 const { title, description = "Greater Fox Cities Bowling Association" } = Astro.props;
+
+// Load the active theme
+const activeTheme = await loadActiveTheme();
 ---
 
 <!doctype html>
@@ -16,7 +21,7 @@ const { title, description = "Greater Fox Cities Bowling Association" } = Astro.
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&family=Roboto:wght@400;500;600;700&family=Open+Sans:wght@400;500;600;700&family=Lato:wght@400;500;700&family=Montserrat:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&family=Raleway:wght@400;500;600;700&family=Nunito:wght@400;500;700&family=Playfair+Display:wght@600;700&family=Merriweather:wght@400;700&display=swap" rel="stylesheet" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
   </head>
@@ -25,7 +30,16 @@ const { title, description = "Greater Fox Cities Bowling Association" } = Astro.
   </body>
 </html>
 
-<style is:global>
+<style is:global define:vars={{
+  '--color-primary': activeTheme?.colors.primary || '#2563eb',
+  '--color-secondary': activeTheme?.colors.secondary || '#64748b',
+  '--color-background': activeTheme?.colors.background || '#ffffff',
+  '--color-text': activeTheme?.colors.text || '#1f2937',
+  '--color-text-secondary': activeTheme?.colors.textSecondary || '#6b7280',
+  '--color-accent': activeTheme?.colors.accent || '#3b82f6',
+  '--font-heading': activeTheme?.fonts.heading || 'Outfit, sans-serif',
+  '--font-body': activeTheme?.fonts.body || 'Inter, system-ui, sans-serif',
+}}>
   * {
     box-sizing: border-box;
   }
@@ -36,6 +50,40 @@ const { title, description = "Greater Fox Cities Bowling Association" } = Astro.
   
   body {
     margin: 0;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: var(--font-body);
+    background-color: var(--color-background);
+    color: var(--color-text);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    color: var(--color-text);
+  }
+
+  a {
+    color: var(--color-primary);
+  }
+
+  a:hover {
+    color: var(--color-accent);
+  }
+
+  button,
+  [role="button"] {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+  }
+
+  button:hover,
+  [role="button"]:hover {
+    background-color: var(--color-secondary);
+    border-color: var(--color-secondary);
   }
 </style>
+
+<script>
+  // Initialize theme on client-side
+  import { initializeTheme } from '../utils/themeLoader';
+  
+  initializeTheme().catch(err => console.error('Failed to initialize theme:', err));
+</script>

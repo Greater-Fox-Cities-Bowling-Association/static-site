@@ -1,0 +1,20 @@
+{
+  "id": "default",
+  "name": "Default Theme",
+  "description": "The default blue and gray theme",
+  "isActive": false,
+  "colors": {
+    "primary": "#2563eb",
+    "secondary": "#64748b",
+    "background": "#ffffff",
+    "text": "#1f2937",
+    "textSecondary": "#6b7280",
+    "accent": "#3b82f6"
+  },
+  "fonts": {
+    "heading": "Outfit, sans-serif",
+    "body": "Inter, system-ui, sans-serif"
+  },
+  "createdAt": "2026-02-15T00:00:00Z",
+  "updatedAt": "2026-02-16T05:23:13.766Z"
+}

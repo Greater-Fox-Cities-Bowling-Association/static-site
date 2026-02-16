@@ -91,6 +91,7 @@ const DEFAULT_REPO = typeof import.meta !== 'undefined'
   : 'gfcba';
 const PAGES_PATH = 'src/content/pages';
 const LAYOUTS_PATH = 'src/content/layouts';
+const THEMES_PATH = 'src/content/themes';
 
 export async function commitToGitHub({
   token,
@@ -1020,6 +1021,451 @@ export async function deleteLayoutFile(
     }
 
     logAPIResponse('deleteLayoutFile', 'GITHUB_API', { path, deleted: true, sha: fileData.sha.substring(0, 7) });
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error occurred'
+    };
+  }
+}
+
+// =============================================================================
+// Theme Management API Functions
+// =============================================================================
+
+/**
+ * Fetch all themes from the repository
+ */
+export async function fetchThemesDirectory(
+  token: string,
+  owner: string = DEFAULT_OWNER,
+  repo: string = DEFAULT_REPO,
+  forceGitHubAPI: boolean = false
+): Promise<{ success: boolean; files?: GitHubFileResponse[]; error?: string }> {
+  try {
+    // DEV MODE: Return local themes (unless forced to use GitHub API)
+    if (import.meta.env.DEV && !forceGitHubAPI) {
+      logAPICall({
+        function: 'fetchThemesDirectory',
+        mode: 'LOCAL',
+        params: { owner, repo, path: THEMES_PATH }
+      });
+
+      try {
+        const themeModules = import.meta.glob('/src/content/themes/*.json', { eager: true });
+        const files: GitHubFileResponse[] = Object.entries(themeModules).map(([path]) => {
+          const filename = path.split('/').pop() || '';
+          return {
+            name: filename,
+            path: `${THEMES_PATH}/${filename}`,
+            sha: '',
+            size: 0,
+            url: '',
+            html_url: '',
+            git_url: '',
+            download_url: path,
+            type: 'file' as const,
+          };
+        });
+
+        logAPIResponse('fetchThemesDirectory', 'LOCAL', { 
+          count: files.length,
+          themes: files.map(f => f.name)
+        });
+        return { success: true, files };
+      } catch (error) {
+        logAPIResponse('fetchThemesDirectory', 'LOCAL', null, error);
+        return { success: true, files: [] }; // Return empty array if no themes found
+      }
+    }
+
+    // PRODUCTION MODE: Fetch from GitHub
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${THEMES_PATH}?ref=main`;
+    
+    logAPICall({
+      function: 'fetchThemesDirectory',
+      mode: 'GITHUB_API',
+      params: { owner, repo, path: THEMES_PATH, ref: 'main' },
+      url: apiUrl,
+      method: 'GET'
+    });
+
+    const response = await fetch(apiUrl, {
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        logAPIResponse('fetchThemesDirectory', 'GITHUB_API', null, 'Themes directory not found (404)');
+        return { success: true, files: [] }; // Return empty array if directory doesn't exist
+      }
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to fetch themes directory');
+    }
+
+    const files: GitHubFileResponse[] = await response.json();
+    const jsonFiles = files.filter(f => f.type === 'file' && f.name.endsWith('.json'));
+
+    logAPIResponse('fetchThemesDirectory', 'GITHUB_API', { 
+      count: jsonFiles.length,
+      themes: jsonFiles.map(f => f.name)
+    });
+    return { 
+      success: true, 
+      files: jsonFiles 
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error occurred'
+    };
+  }
+}
+
+/**
+ * Fetch a specific theme by ID
+ */
+export async function fetchThemeContent(
+  themeId: string,
+  token: string,
+  owner: string = DEFAULT_OWNER,
+  repo: string = DEFAULT_REPO,
+  forceGitHubAPI: boolean = false
+): Promise<any> {
+  try {
+    const filename = `${themeId}.json`;
+
+    // DEV MODE: Read from local filesystem (unless forced to use GitHub API)
+    if (import.meta.env.DEV && !forceGitHubAPI) {
+      logAPICall({
+        function: 'fetchThemeContent',
+        mode: 'LOCAL',
+        params: { themeId, filename }
+      });
+
+      try {
+        const themeModules = import.meta.glob('/src/content/themes/*.json', { eager: true });
+        const themePath = `/src/content/themes/${filename}`;
+        const module = themeModules[themePath] as any;
+        
+        if (!module) {
+          logAPIResponse('fetchThemeContent', 'LOCAL', null, `Theme not found: ${themePath}`);
+          throw new Error('Theme not found locally');
+        }
+        
+        const content = module.default;
+        logAPIResponse('fetchThemeContent', 'LOCAL', { 
+          themeId, 
+          name: content.name
+        });
+        return content;
+      } catch (error) {
+        logAPIResponse('fetchThemeContent', 'LOCAL', null, error);
+        throw new Error('Theme not found locally');
+      }
+    }
+
+    // PRODUCTION MODE: Fetch from GitHub
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${THEMES_PATH}/${filename}?ref=main`;
+    
+    logAPICall({
+      function: 'fetchThemeContent',
+      mode: 'GITHUB_API',
+      params: { themeId, filename, owner, repo, ref: 'main' },
+      url: apiUrl,
+      method: 'GET'
+    });
+
+    const response = await fetch(apiUrl, {
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        logAPIResponse('fetchThemeContent', 'GITHUB_API', null, 'Theme not found (404)');
+        throw new Error('Theme not found');
+      }
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to fetch theme content');
+    }
+
+    const data: GitHubFileResponse = await response.json();
+    
+    if (!data.content) {
+      throw new Error('No content in response');
+    }
+
+    const decodedContent = atob(data.content);
+    const jsonContent = JSON.parse(decodedContent);
+
+    logAPIResponse('fetchThemeContent', 'GITHUB_API', { 
+      themeId,
+      name: jsonContent.name,
+      sha: data.sha.substring(0, 7),
+      size: data.size
+    });
+    return jsonContent;
+  } catch (error) {
+    throw error instanceof Error ? error : new Error('Unknown error occurred');
+  }
+}
+
+/**
+ * Save a theme file
+ */
+export async function saveThemeFile(
+  theme: any,
+  token: string,
+  owner: string = DEFAULT_OWNER,
+  repo: string = DEFAULT_REPO,
+  forceGitHubAPI: boolean = false
+): Promise<{ success: boolean; error?: string }> {
+  const filename = `${theme.id}.json`;
+  const path = `${THEMES_PATH}/${filename}`;
+  
+  const contentWithTimestamp = {
+    ...theme,
+    updatedAt: new Date().toISOString()
+  };
+
+  // DEV MODE: Save to local filesystem via API endpoint
+  if (import.meta.env.DEV && !forceGitHubAPI) {
+    logAPICall({
+      function: 'saveThemeFile',
+      mode: 'LOCAL',
+      params: { themeId: theme.id, path, name: theme.name },
+      url: '/api/save-page',
+      method: 'POST'
+    });
+
+    try {
+      const response = await fetch('/api/save-page', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path, content: contentWithTimestamp })
+      });
+
+      let result;
+      try {
+        result = await response.json();
+      } catch (jsonError) {
+        const text = await response.text();
+        logAPIResponse('saveThemeFile', 'LOCAL', null, `Server error: ${response.status}. Response: ${text}`);
+        return { 
+          success: false, 
+          error: `Server error: ${response.status}. Check dev server console for details.` 
+        };
+      }
+      
+      if (!response.ok) {
+        logAPIResponse('saveThemeFile', 'LOCAL', null, result.error || 'Server returned error');
+        return { success: false, error: result.error || 'Failed to save file locally' };
+      }
+
+      logAPIResponse('saveThemeFile', 'LOCAL', { path, success: true });
+      return { success: true };
+    } catch (error) {
+      logAPIResponse('saveThemeFile', 'LOCAL', null, error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to save file locally'
+      };
+    }
+  }
+
+  // PRODUCTION MODE: Commit to GitHub
+  const contentString = JSON.stringify(contentWithTimestamp, null, 2);
+  const message = `Update theme: ${theme.name || theme.id}`;
+
+  logAPICall({
+    function: 'saveThemeFile (via commitToGitHub)',
+    mode: 'GITHUB_API',
+    params: { themeId: theme.id, path, name: theme.name, message },
+    url: `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
+    method: 'PUT'
+  });
+
+  const result = await commitToGitHub({
+    token,
+    owner,
+    repo,
+    path,
+    content: contentString,
+    message,
+    branch: 'main'
+  });
+
+  if (result.success) {
+    logAPIResponse('saveThemeFile', 'GITHUB_API', { path, committed: true });
+  } else {
+    logAPIResponse('saveThemeFile', 'GITHUB_API', null, result.error);
+  }
+
+  return result;
+}
+
+/**
+ * Delete a theme file
+ */
+export async function deleteThemeFile(
+  themeId: string,
+  token: string,
+  owner: string = DEFAULT_OWNER,
+  repo: string = DEFAULT_REPO,
+  forceGitHubAPI: boolean = false
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const filename = `${themeId}.json`;
+    const path = `${THEMES_PATH}/${filename}`;
+
+    // DEV MODE: Delete from local filesystem via API endpoint
+    if (import.meta.env.DEV && !forceGitHubAPI) {
+      logAPICall({
+        function: 'deleteThemeFile',
+        mode: 'LOCAL',
+        params: { themeId, path },
+        url: '/api/delete-page',
+        method: 'POST'
+      });
+
+      const response = await fetch('/api/delete-page', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path })
+      });
+
+      let result;
+      try {
+        result = await response.json();
+      } catch (jsonError) {
+        const text = await response.text();
+        logAPIResponse('deleteThemeFile', 'LOCAL', null, `Server error: ${response.status}. Response: ${text}`);
+        return { 
+          success: false, 
+          error: `Server error: ${response.status}. Check dev server console for details.` 
+        };
+      }
+      
+      if (!response.ok) {
+        logAPIResponse('deleteThemeFile', 'LOCAL', null, result.error || 'Server returned error');
+        return { success: false, error: result.error || 'Failed to delete file locally' };
+      }
+
+      logAPIResponse('deleteThemeFile', 'LOCAL', { path, deleted: true });
+      return { success: true };
+    }
+
+    // PRODUCTION MODE: Delete from GitHub
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+    const apiUrlWithRef = `${apiUrl}?ref=main`;
+    
+    logAPICall({
+      function: 'deleteThemeFile',
+      mode: 'GITHUB_API',
+      params: { themeId, path, owner, repo, ref: 'main' },
+      url: apiUrl,
+      method: 'DELETE'
+    });
+
+    // First, get the file SHA (required for deletion)
+    const getResponse = await fetch(apiUrlWithRef, {
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+
+    if (!getResponse.ok) {
+      if (getResponse.status === 404) {
+        logAPIResponse('deleteThemeFile', 'GITHUB_API', null, 'Theme not found (404)');
+        return { success: false, error: 'Theme not found' };
+      }
+      const error = await getResponse.json();
+      throw new Error(error.message || 'Failed to get theme for deletion');
+    }
+
+    const fileData: GitHubFileResponse = await getResponse.json();
+
+    // Delete the file
+    const deleteResponse = await fetch(apiUrl, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message: `Delete theme: ${themeId}`,
+        sha: fileData.sha,
+        branch: 'main'
+      })
+    });
+
+    if (!deleteResponse.ok) {
+      const error = await deleteResponse.json();
+      throw new Error(error.message || 'Failed to delete theme');
+    }
+
+    logAPIResponse('deleteThemeFile', 'GITHUB_API', { path, deleted: true, sha: fileData.sha.substring(0, 7) });
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error occurred'
+    };
+  }
+}
+
+/**
+ * Activate a theme (set isActive to true and deactivate others)
+ */
+export async function activateTheme(
+  themeId: string,
+  token: string,
+  owner: string = DEFAULT_OWNER,
+  repo: string = DEFAULT_REPO,
+  forceGitHubAPI: boolean = false
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    // First, fetch all themes
+    const allThemesResult = await fetchThemesDirectory(token, owner, repo, forceGitHubAPI);
+    
+    if (!allThemesResult.success || !allThemesResult.files) {
+      return { success: false, error: 'Failed to fetch themes directory' };
+    }
+
+    // Fetch each theme and update their isActive status
+    const themeFiles = allThemesResult.files.filter(f => f.name.endsWith('.json'));
+    const themeIdToActivate = themeId;
+
+    for (const file of themeFiles) {
+      const currentThemeId = file.name.replace('.json', '');
+      const theme = await fetchThemeContent(currentThemeId, token, owner, repo, forceGitHubAPI);
+      
+      // Update isActive status
+      const updatedTheme = {
+        ...theme,
+        isActive: currentThemeId === themeIdToActivate
+      };
+
+      // Save the updated theme
+      const saveResult = await saveThemeFile(updatedTheme, token, owner, repo, forceGitHubAPI);
+      
+      if (!saveResult.success) {
+        return { success: false, error: `Failed to update theme ${currentThemeId}` };
+      }
+    }
+
+    logAPIResponse('activateTheme', forceGitHubAPI ? 'GITHUB_API' : 'LOCAL', { 
+      activatedTheme: themeIdToActivate
+    });
     return { success: true };
   } catch (error) {
     return {

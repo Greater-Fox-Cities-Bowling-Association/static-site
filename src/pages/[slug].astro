@@ -57,7 +57,7 @@ if (useLayout) {
 const sortedSections = [...sections].sort((a, b) => a.order - b.order);
 ---
 
-<BaseLayout title={title} description={metaDescription}>
+<BaseLayout title={title} description={metaDescription || "Greater Fox Cities Bowling Association"}>
   {selectedLayout ? (
     <PageLayout layout={selectedLayout}>
       {sortedSections.map((section) => {

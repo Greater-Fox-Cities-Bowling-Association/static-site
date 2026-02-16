@@ -97,6 +97,31 @@ const committeesCollection = defineCollection({
   }),
 });
 
+// Schema for themes
+const themesCollection = defineCollection({
+  type: 'data',
+  schema: z.object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string().optional(),
+    isActive: z.boolean().optional().default(false),
+    colors: z.object({
+      primary: z.string(),
+      secondary: z.string(),
+      background: z.string(),
+      text: z.string(),
+      textSecondary: z.string().optional(),
+      accent: z.string().optional(),
+    }),
+    fonts: z.object({
+      heading: z.string(),
+      body: z.string(),
+    }),
+    createdAt: z.string().optional(),
+    updatedAt: z.string().optional(),
+  }),
+});
+
 // Schema for layouts
 const layoutSchema = z.object({
   id: z.string(),
@@ -188,6 +213,7 @@ const pagesCollection = defineCollection({
 export const collections = {
   'pages': pagesCollection,
   'layouts': layoutsCollection,
+  'themes': themesCollection,
   'centers': centersCollection,
   'tournaments': tournamentsCollection,
   'honors': honorsCollection,

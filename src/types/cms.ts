@@ -83,6 +83,35 @@ export interface Layout {
 }
 
 // =============================================================================
+// Theme Type Definitions
+// =============================================================================
+
+export interface ThemeColors {
+  primary: string;
+  secondary: string;
+  background: string;
+  text: string;
+  textSecondary?: string;
+  accent?: string;
+}
+
+export interface ThemeFonts {
+  heading: string;
+  body: string;
+}
+
+export interface Theme {
+  id: string;
+  name: string;
+  description?: string;
+  isActive?: boolean;
+  colors: ThemeColors;
+  fonts: ThemeFonts;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+// =============================================================================
 // Page Content
 // =============================================================================
 
