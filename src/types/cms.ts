@@ -58,6 +58,31 @@ export interface CtaSection extends BaseSection {
 export type Section = HeroSection | TextSection | CardGridSection | CtaSection;
 
 // =============================================================================
+// Layout Type Definitions
+// =============================================================================
+
+export interface LayoutHeader {
+  showNavigation: boolean;
+  navigationStyle: 'default' | 'minimal' | 'full';
+  customNavigation?: boolean;
+}
+
+export interface LayoutFooter {
+  showFooter: boolean;
+  footerStyle?: 'default' | 'minimal' | 'full';
+  customFooter?: boolean;
+}
+
+export interface Layout {
+  id: string;
+  name: string;
+  description: string;
+  header: LayoutHeader;
+  footer: LayoutFooter;
+  updatedAt?: string;
+}
+
+// =============================================================================
 // Page Content
 // =============================================================================
 
@@ -67,6 +92,8 @@ export interface PageContent {
   metaDescription?: string;
   status: PageStatus;
   isLandingPage?: boolean;
+  layoutId?: string; // Optional layout ID - if not set and default exists, use default
+  useLayout?: boolean; // If false, render without any layout wrapper
   sections: Section[];
   createdAt?: string;
   updatedAt?: string;

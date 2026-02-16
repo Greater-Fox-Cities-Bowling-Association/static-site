@@ -1,6 +1,17 @@
 import { useState, useEffect } from "react";
-import type { PageContent, Section, SectionType } from "../../types/cms";
-import { fetchPageContent, savePageFile } from "../../utils/githubApi";
+import type {
+  PageContent,
+  Section,
+  SectionType,
+  Layout,
+} from "../../types/cms";
+import {
+  fetchPageContent,
+  savePageFile,
+  fetchPagesDirectory,
+  fetchLayoutsDirectory,
+  fetchLayoutContent,
+} from "../../utils/githubApi";
 import {
   loadDraft,
   saveDraft as saveDraftToStore,
@@ -39,6 +50,7 @@ function createEmptyPage(): PageContent {
     title: "",
     metaDescription: "",
     status: "draft",
+    useLayout: true,
     sections: [],
   };
 }
@@ -85,10 +97,14 @@ export default function PageEditor({
   const [existingLandingPage, setExistingLandingPage] = useState<string | null>(
     null,
   );
+  const [availableLayouts, setAvailableLayouts] = useState<Layout[]>([]);
 
   useEffect(() => {
     // Check for existing landing page
     checkForLandingPage();
+
+    // Load available layouts
+    loadAvailableLayouts();
 
     if (slug) {
       // Try to load draft first
@@ -143,6 +159,66 @@ export default function PageEditor({
       }
     } catch (error) {
       console.error("Error checking for landing page:", error);
+    }
+  };
+
+  const loadAvailableLayouts = async () => {
+    try {
+      // Fetch layouts from GitHub
+      const result = await fetchLayoutsDirectory(
+        token,
+        undefined,
+        undefined,
+        useGitHubAPI,
+      );
+
+      if (result.success && result.files && result.files.length > 0) {
+        // Load the content for each layout
+        const layouts: Layout[] = await Promise.all(
+          result.files.map(async (file) => {
+            const layoutId = file.name.replace(".json", "");
+            try {
+              const contentResult = await fetchLayoutContent(
+                layoutId,
+                token,
+                undefined,
+                undefined,
+                useGitHubAPI,
+              );
+              if (contentResult.success && contentResult.content) {
+                return contentResult.content;
+              }
+            } catch (error) {
+              console.error(`Failed to load layout ${layoutId}:`, error);
+            }
+            // Return a default layout if fetch fails
+            return {
+              id: layoutId,
+              name: layoutId,
+              description: "",
+              header: { showNavigation: true, navigationStyle: "default" },
+              footer: { showFooter: true, footerStyle: "default" },
+            };
+          }),
+        );
+
+        setAvailableLayouts(layouts);
+
+        // Auto-default new pages to the first available layout
+        if (!slug && layouts.length > 0) {
+          setPage((prev) => ({
+            ...prev,
+            useLayout: true,
+            layoutId: layouts[0].id,
+          }));
+        }
+      } else {
+        // If no layouts found, provide empty array
+        setAvailableLayouts([]);
+      }
+    } catch (error) {
+      console.error("Error loading layouts:", error);
+      setAvailableLayouts([]);
     }
   };
 
@@ -470,6 +546,56 @@ export default function PageEditor({
             )}
             <p className="mt-1 text-xs text-gray-500">
               The landing page will be displayed at the root URL (/)
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Page Layout
+            </label>
+            <div className="space-y-2">
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="layout"
+                  checked={page.useLayout === false}
+                  onChange={() => updatePage({ useLayout: false })}
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                />
+                <span className="text-sm text-gray-700">No Layout</span>
+              </label>
+
+              {availableLayouts.map((layout) => (
+                <label key={layout.id} className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="layout"
+                    checked={
+                      page.useLayout !== false && page.layoutId === layout.id
+                    }
+                    onChange={() =>
+                      updatePage({
+                        useLayout: true,
+                        layoutId: layout.id,
+                      })
+                    }
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                  />
+                  <div>
+                    <div className="text-sm font-medium text-gray-700">
+                      {layout.name}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {layout.description}
+                    </div>
+                  </div>
+                </label>
+              ))}
+            </div>
+            <p className="mt-2 text-xs text-gray-500">
+              {availableLayouts.length === 1
+                ? "Only one layout is available, and will be used by default."
+                : "Select a layout for this page, or choose 'No Layout' to render without a layout wrapper."}
             </p>
           </div>
         </div>

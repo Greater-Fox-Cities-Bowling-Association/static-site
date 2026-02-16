@@ -90,6 +90,7 @@ const DEFAULT_REPO = typeof import.meta !== 'undefined'
   ? (import.meta.env.PUBLIC_GITHUB_REPO || import.meta.env.GITHUB_REPO || 'gfcba')
   : 'gfcba';
 const PAGES_PATH = 'src/content/pages';
+const LAYOUTS_PATH = 'src/content/layouts';
 
 export async function commitToGitHub({
   token,
@@ -621,4 +622,409 @@ export async function savePageFile(
   }
 
   return result;
+}
+
+// =============================================================================
+// Layout Management Functions
+// =============================================================================
+
+/**
+ * Fetch all layouts from the layouts directory
+ */
+export async function fetchLayoutsDirectory(
+  token: string,
+  owner: string = DEFAULT_OWNER,
+  repo: string = DEFAULT_REPO,
+  forceGitHubAPI: boolean = false
+): Promise<{ success: boolean; files?: GitHubFileResponse[]; error?: string }> {
+  try {
+    // DEV MODE: Return local layouts (unless forced to use GitHub API)
+    if (import.meta.env.DEV && !forceGitHubAPI) {
+      logAPICall({
+        function: 'fetchLayoutsDirectory',
+        mode: 'LOCAL',
+        params: { owner, repo, path: LAYOUTS_PATH }
+      });
+
+      try {
+        const layoutModules = import.meta.glob('/src/content/layouts/*.json', { eager: true });
+        const files: GitHubFileResponse[] = Object.entries(layoutModules).map(([path]) => {
+          const filename = path.split('/').pop() || '';
+          return {
+            name: filename,
+            path: `${LAYOUTS_PATH}/${filename}`,
+            sha: '',
+            size: 0,
+            url: '',
+            html_url: '',
+            git_url: '',
+            download_url: path,
+            type: 'file' as const,
+          };
+        });
+
+        logAPIResponse('fetchLayoutsDirectory', 'LOCAL', { 
+          count: files.length,
+          layouts: files.map(f => f.name)
+        });
+        return { success: true, files };
+      } catch (error) {
+        logAPIResponse('fetchLayoutsDirectory', 'LOCAL', null, error);
+        return { success: true, files: [] }; // Return empty array if no layouts found
+      }
+    }
+
+    // PRODUCTION MODE: Fetch from GitHub
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${LAYOUTS_PATH}?ref=main`;
+    
+    logAPICall({
+      function: 'fetchLayoutsDirectory',
+      mode: 'GITHUB_API',
+      params: { owner, repo, path: LAYOUTS_PATH, ref: 'main' },
+      url: apiUrl,
+      method: 'GET'
+    });
+
+    const response = await fetch(apiUrl, {
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        logAPIResponse('fetchLayoutsDirectory', 'GITHUB_API', null, 'Layouts directory not found (404)');
+        return { success: true, files: [] }; // Return empty array if directory doesn't exist
+      }
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to fetch layouts directory');
+    }
+
+    const files: GitHubFileResponse[] = await response.json();
+    const jsonFiles = files.filter(f => f.type === 'file' && f.name.endsWith('.json'));
+
+    logAPIResponse('fetchLayoutsDirectory', 'GITHUB_API', { 
+      count: jsonFiles.length,
+      layouts: jsonFiles.map(f => f.name)
+    });
+    return { 
+      success: true, 
+      files: jsonFiles 
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error occurred'
+    };
+  }
+}
+
+/**
+ * Fetch a specific layout by ID
+ */
+export async function fetchLayoutContent(
+  layoutId: string,
+  token: string,
+  owner: string = DEFAULT_OWNER,
+  repo: string = DEFAULT_REPO,
+  forceGitHubAPI: boolean = false
+): Promise<{ success: boolean; content?: any; sha?: string; error?: string }> {
+  try {
+    const filename = `${layoutId}.json`;
+
+    // DEV MODE: Read from local filesystem (unless forced to use GitHub API)
+    if (import.meta.env.DEV && !forceGitHubAPI) {
+      logAPICall({
+        function: 'fetchLayoutContent',
+        mode: 'LOCAL',
+        params: { layoutId, filename }
+      });
+
+      try {
+        const layoutModules = import.meta.glob('/src/content/layouts/*.json', { eager: true });
+        const layoutPath = `/src/content/layouts/${filename}`;
+        const module = layoutModules[layoutPath] as any;
+        
+        if (!module) {
+          logAPIResponse('fetchLayoutContent', 'LOCAL', null, `Layout not found: ${layoutPath}`);
+          return { success: false, error: 'Layout not found locally' };
+        }
+        
+        const content = module.default;
+        logAPIResponse('fetchLayoutContent', 'LOCAL', { 
+          layoutId, 
+          name: content.name
+        });
+        return {
+          success: true,
+          content,
+          sha: ''
+        };
+      } catch (error) {
+        logAPIResponse('fetchLayoutContent', 'LOCAL', null, error);
+        return { success: false, error: 'Layout not found locally' };
+      }
+    }
+
+    // PRODUCTION MODE: Fetch from GitHub
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${LAYOUTS_PATH}/${filename}?ref=main`;
+    
+    logAPICall({
+      function: 'fetchLayoutContent',
+      mode: 'GITHUB_API',
+      params: { layoutId, filename, owner, repo, ref: 'main' },
+      url: apiUrl,
+      method: 'GET'
+    });
+
+    const response = await fetch(apiUrl, {
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        logAPIResponse('fetchLayoutContent', 'GITHUB_API', null, 'Layout not found (404)');
+        return { success: false, error: 'Layout not found' };
+      }
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to fetch layout content');
+    }
+
+    const data: GitHubFileResponse = await response.json();
+    
+    if (!data.content) {
+      throw new Error('No content in response');
+    }
+
+    const decodedContent = atob(data.content);
+    const jsonContent = JSON.parse(decodedContent);
+
+    logAPIResponse('fetchLayoutContent', 'GITHUB_API', { 
+      layoutId,
+      name: jsonContent.name,
+      sha: data.sha.substring(0, 7),
+      size: data.size
+    });
+    return { 
+      success: true, 
+      content: jsonContent,
+      sha: data.sha 
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error occurred'
+    };
+  }
+}
+
+/**
+ * Save a layout file
+ */
+export async function saveLayoutFile(
+  layoutId: string,
+  content: any,
+  token: string,
+  owner: string = DEFAULT_OWNER,
+  repo: string = DEFAULT_REPO,
+  forceGitHubAPI: boolean = false
+): Promise<{ success: boolean; error?: string }> {
+  const filename = `${layoutId}.json`;
+  const path = `${LAYOUTS_PATH}/${filename}`;
+  
+  const contentWithTimestamp = {
+    ...content,
+    updatedAt: new Date().toISOString()
+  };
+
+  // DEV MODE: Save to local filesystem via API endpoint
+  if (import.meta.env.DEV && !forceGitHubAPI) {
+    logAPICall({
+      function: 'saveLayoutFile',
+      mode: 'LOCAL',
+      params: { layoutId, path, name: content.name },
+      url: '/api/save-page',
+      method: 'POST'
+    });
+
+    try {
+      const response = await fetch('/api/save-page', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path, content: contentWithTimestamp })
+      });
+
+      let result;
+      try {
+        result = await response.json();
+      } catch (jsonError) {
+        const text = await response.text();
+        logAPIResponse('saveLayoutFile', 'LOCAL', null, `Server error: ${response.status}. Response: ${text}`);
+        return { 
+          success: false, 
+          error: `Server error: ${response.status}. Check dev server console for details.` 
+        };
+      }
+      
+      if (!response.ok) {
+        logAPIResponse('saveLayoutFile', 'LOCAL', null, result.error || 'Server returned error');
+        return { success: false, error: result.error || 'Failed to save file locally' };
+      }
+
+      logAPIResponse('saveLayoutFile', 'LOCAL', { path, success: true });
+      return { success: true };
+    } catch (error) {
+      logAPIResponse('saveLayoutFile', 'LOCAL', null, error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to save file locally'
+      };
+    }
+  }
+
+  // PRODUCTION MODE: Commit to GitHub
+  const contentString = JSON.stringify(contentWithTimestamp, null, 2);
+  const message = `Update layout: ${content.name || layoutId}`;
+
+  logAPICall({
+    function: 'saveLayoutFile (via commitToGitHub)',
+    mode: 'GITHUB_API',
+    params: { layoutId, path, name: content.name, message },
+    url: `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
+    method: 'PUT'
+  });
+
+  const result = await commitToGitHub({
+    token,
+    owner,
+    repo,
+    path,
+    content: contentString,
+    message,
+    branch: 'main'
+  });
+
+  if (result.success) {
+    logAPIResponse('saveLayoutFile', 'GITHUB_API', { path, committed: true });
+  } else {
+    logAPIResponse('saveLayoutFile', 'GITHUB_API', null, result.error);
+  }
+
+  return result;
+}
+
+/**
+ * Delete a layout file
+ */
+export async function deleteLayoutFile(
+  layoutId: string,
+  token: string,
+  owner: string = DEFAULT_OWNER,
+  repo: string = DEFAULT_REPO,
+  forceGitHubAPI: boolean = false
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const filename = `${layoutId}.json`;
+    const path = `${LAYOUTS_PATH}/${filename}`;
+
+    // DEV MODE: Delete from local filesystem via API endpoint
+    if (import.meta.env.DEV && !forceGitHubAPI) {
+      logAPICall({
+        function: 'deleteLayoutFile',
+        mode: 'LOCAL',
+        params: { layoutId, path },
+        url: '/api/delete-page',
+        method: 'POST'
+      });
+
+      const response = await fetch('/api/delete-page', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path })
+      });
+
+      let result;
+      try {
+        result = await response.json();
+      } catch (jsonError) {
+        const text = await response.text();
+        logAPIResponse('deleteLayoutFile', 'LOCAL', null, `Server error: ${response.status}. Response: ${text}`);
+        return { 
+          success: false, 
+          error: `Server error: ${response.status}. Check dev server console for details.` 
+        };
+      }
+      
+      if (!response.ok) {
+        logAPIResponse('deleteLayoutFile', 'LOCAL', null, result.error || 'Server returned error');
+        return { success: false, error: result.error || 'Failed to delete file locally' };
+      }
+
+      logAPIResponse('deleteLayoutFile', 'LOCAL', { path, deleted: true });
+      return { success: true };
+    }
+
+    // PRODUCTION MODE: Delete from GitHub
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+    const apiUrlWithRef = `${apiUrl}?ref=main`;
+    
+    logAPICall({
+      function: 'deleteLayoutFile',
+      mode: 'GITHUB_API',
+      params: { layoutId, path, owner, repo, ref: 'main' },
+      url: apiUrl,
+      method: 'DELETE'
+    });
+
+    // First, get the file SHA (required for deletion)
+    const getResponse = await fetch(apiUrlWithRef, {
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+
+    if (!getResponse.ok) {
+      if (getResponse.status === 404) {
+        logAPIResponse('deleteLayoutFile', 'GITHUB_API', null, 'Layout not found (404)');
+        return { success: false, error: 'Layout not found' };
+      }
+      const error = await getResponse.json();
+      throw new Error(error.message || 'Failed to get layout for deletion');
+    }
+
+    const fileData: GitHubFileResponse = await getResponse.json();
+
+    // Delete the file
+    const deleteResponse = await fetch(apiUrl, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message: `Delete layout: ${layoutId}`,
+        sha: fileData.sha,
+        branch: 'main'
+      })
+    });
+
+    if (!deleteResponse.ok) {
+      const error = await deleteResponse.json();
+      throw new Error(error.message || 'Failed to delete layout');
+    }
+
+    logAPIResponse('deleteLayoutFile', 'GITHUB_API', { path, deleted: true, sha: fileData.sha.substring(0, 7) });
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error occurred'
+    };
+  }
 }

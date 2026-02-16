@@ -1,10 +1,12 @@
 ---
 import { getCollection, getEntry } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import PageLayout from '../components/astro/PageLayout.astro';
 import HeroSection from '../components/astro/sections/HeroSection.astro';
 import TextSection from '../components/astro/sections/TextSection.astro';
 import CardGridSection from '../components/astro/sections/CardGridSection.astro';
 import CtaSection from '../components/astro/sections/CtaSection.astro';
+import type { Layout } from '../types/cms';
 
 // Generate static paths for all published pages
 export async function getStaticPaths() {
@@ -31,25 +33,64 @@ if (!page) {
   return Astro.redirect('/404');
 }
 
-const { title, metaDescription, sections } = page.data;
+const { title, metaDescription, sections, layoutId, useLayout = true } = page.data;
+
+// Get layout if useLayout is true
+let selectedLayout: Layout | null = null;
+if (useLayout) {
+  // If a specific layout is specified, use it
+  if (layoutId) {
+    const layoutEntry = await getEntry('layouts', layoutId);
+    if (layoutEntry?.data) {
+      selectedLayout = layoutEntry.data as Layout;
+    }
+  } else {
+    // Otherwise, try to use the default layout
+    const defaultLayout = await getEntry('layouts', 'default');
+    if (defaultLayout?.data) {
+      selectedLayout = defaultLayout.data as Layout;
+    }
+  }
+}
 
 // Sort sections by order
 const sortedSections = [...sections].sort((a, b) => a.order - b.order);
 ---
 
 <BaseLayout title={title} description={metaDescription}>
-  {sortedSections.map((section) => {
-    switch (section.type) {
-      case 'hero':
-        return <HeroSection section={section} />;
-      case 'text':
-        return <TextSection section={section} />;
-      case 'cardGrid':
-        return <CardGridSection section={section} />;
-      case 'cta':
-        return <CtaSection section={section} />;
-      default:
-        return null;
-    }
-  })}
+  {selectedLayout ? (
+    <PageLayout layout={selectedLayout}>
+      {sortedSections.map((section) => {
+        switch (section.type) {
+          case 'hero':
+            return <HeroSection section={section} />;
+          case 'text':
+            return <TextSection section={section} />;
+          case 'cardGrid':
+            return <CardGridSection section={section} />;
+          case 'cta':
+            return <CtaSection section={section} />;
+          default:
+            return null;
+        }
+      })}
+    </PageLayout>
+  ) : (
+    <>
+      {sortedSections.map((section) => {
+        switch (section.type) {
+          case 'hero':
+            return <HeroSection section={section} />;
+          case 'text':
+            return <TextSection section={section} />;
+          case 'cardGrid':
+            return <CardGridSection section={section} />;
+          case 'cta':
+            return <CtaSection section={section} />;
+          default:
+            return null;
+        }
+      })}
+    </>
+  )}
 </BaseLayout>

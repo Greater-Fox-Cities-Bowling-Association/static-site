@@ -4,6 +4,8 @@
   "metaDescription": "test",
   "status": "draft",
   "isLandingPage": true,
+  "useLayout": true,
   "sections": [],
-  "updatedAt": "2026-02-10T05:47:35.051Z"
+  "updatedAt": "2026-02-16T04:09:13.073Z",
+  "layoutId": "default"
 }

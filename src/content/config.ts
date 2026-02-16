@@ -97,6 +97,28 @@ const committeesCollection = defineCollection({
   }),
 });
 
+// Schema for layouts
+const layoutSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string(),
+  header: z.object({
+    showNavigation: z.boolean(),
+    navigationStyle: z.enum(['default', 'minimal', 'full']),
+    customNavigation: z.boolean().optional(),
+  }),
+  footer: z.object({
+    showFooter: z.boolean(),
+    footerStyle: z.enum(['default', 'minimal', 'full']).optional(),
+    customFooter: z.boolean().optional(),
+  }),
+});
+
+const layoutsCollection = defineCollection({
+  type: 'data',
+  schema: layoutSchema,
+});
+
 // Pages collection - CMS-managed pages
 const cardSchema = z.object({
   title: z.string(),
@@ -155,6 +177,8 @@ const pagesCollection = defineCollection({
     metaDescription: z.string().optional(),
     status: z.enum(['draft', 'published']),
     isLandingPage: z.boolean().optional(),
+    layoutId: z.string().optional(),
+    useLayout: z.boolean().optional().default(true),
     sections: z.array(sectionSchema),
     createdAt: z.string().optional(),
     updatedAt: z.string().optional(),
@@ -163,6 +187,7 @@ const pagesCollection = defineCollection({
 
 export const collections = {
   'pages': pagesCollection,
+  'layouts': layoutsCollection,
   'centers': centersCollection,
   'tournaments': tournamentsCollection,
   'honors': honorsCollection,

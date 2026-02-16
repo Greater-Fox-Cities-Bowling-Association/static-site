@@ -4,9 +4,11 @@ import Papa from "papaparse";
 import Auth0Login from "./Auth0Login";
 import PageList from "./PageList";
 import PageEditor from "./PageEditor";
+import LayoutList from "./LayoutList";
+import LayoutEditor from "./LayoutEditor";
 
 type Step = "select-type" | "upload" | "preview";
-type Mode = "csv" | "pages" | "page-editor";
+type Mode = "csv" | "pages" | "page-editor" | "layouts" | "layout-editor";
 
 export default function ImportAdmin() {
   const { isLoading, error, isAuthenticated, user, logout, getIdTokenClaims } =
@@ -19,6 +21,9 @@ export default function ImportAdmin() {
   const [mappedData, setMappedData] = useState<any>(null);
   const [filename, setFilename] = useState("");
   const [editingSlug, setEditingSlug] = useState<string | undefined>(undefined);
+  const [editingLayoutId, setEditingLayoutId] = useState<string | undefined>(
+    undefined,
+  );
 
   // GitHub authentication state
   const [githubToken, setGithubToken] = useState<string>("");
@@ -164,6 +169,26 @@ export default function ImportAdmin() {
     setEditingSlug(undefined);
   };
 
+  const handleEditLayout = (layoutId: string) => {
+    setEditingLayoutId(layoutId);
+    setMode("layout-editor");
+  };
+
+  const handleCreateNewLayout = () => {
+    setEditingLayoutId(undefined);
+    setMode("layout-editor");
+  };
+
+  const handleLayoutSaved = () => {
+    setMode("layouts");
+    setEditingLayoutId(undefined);
+  };
+
+  const handleCancelLayoutEdit = () => {
+    setMode("layouts");
+    setEditingLayoutId(undefined);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <header className="bg-white shadow-sm border-b border-gray-200">
@@ -251,7 +276,7 @@ export default function ImportAdmin() {
             <h2 className="text-lg font-semibold text-gray-900 mb-4">
               Select Mode
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <button
                 onClick={() => setMode("csv")}
                 className={`p-4 rounded-lg border-2 transition-all ${
@@ -278,6 +303,20 @@ export default function ImportAdmin() {
                 <h3 className="font-semibold text-gray-900">Page Manager</h3>
                 <p className="text-sm text-gray-600 mt-1">
                   Create and edit dynamic pages
+                </p>
+              </button>
+              <button
+                onClick={() => setMode("layouts")}
+                className={`p-4 rounded-lg border-2 transition-all ${
+                  mode === "layouts" || mode === "layout-editor"
+                    ? "border-blue-600 bg-blue-50"
+                    : "border-gray-200 hover:border-blue-300"
+                }`}
+              >
+                <div className="text-3xl mb-2">🎨</div>
+                <h3 className="font-semibold text-gray-900">Layout Manager</h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  Create and manage page layouts
                 </p>
               </button>
             </div>
@@ -310,6 +349,25 @@ export default function ImportAdmin() {
               token={githubToken}
               onSave={handlePageSaved}
               onCancel={handleCancelEdit}
+              useGitHubAPI={useGitHubAPI}
+            />
+          )}
+
+          {mode === "layouts" && (
+            <LayoutList
+              token={githubToken}
+              onEdit={handleEditLayout}
+              onCreateNew={handleCreateNewLayout}
+              useGitHubAPI={useGitHubAPI}
+            />
+          )}
+
+          {mode === "layout-editor" && (
+            <LayoutEditor
+              layoutId={editingLayoutId}
+              token={githubToken}
+              onSave={handleLayoutSaved}
+              onCancel={handleCancelLayoutEdit}
               useGitHubAPI={useGitHubAPI}
             />
           )}

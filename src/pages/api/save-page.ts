@@ -1,7 +1,6 @@
 import type { APIRoute } from 'astro';
 import { writeFileSync, mkdirSync } from 'fs';
 import { dirname, resolve } from 'path';
-import { fileURLToPath } from 'url';
 
 export const prerender = false;
 

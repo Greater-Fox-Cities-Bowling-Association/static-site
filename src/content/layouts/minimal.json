@@ -1,0 +1,12 @@
+{
+  "id": "minimal",
+  "name": "Minimal Layout",
+  "description": "Minimal layout with header navigation only, no footer",
+  "header": {
+    "showNavigation": true,
+    "navigationStyle": "minimal"
+  },
+  "footer": {
+    "showFooter": false
+  }
+}
