@@ -4,7 +4,7 @@ import { dirname, resolve } from 'path';
 
 export const prerender = false;
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async (context) => {
   // Only allow in development
   if (import.meta.env.PROD) {
     return new Response(JSON.stringify({ error: 'Not available in production' }), {
@@ -14,30 +14,41 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   try {
-    // Clone the request to avoid body already consumed error
-    const clonedRequest = request.clone();
+    console.log('🔍 POST /api/save-page called');
     
-    // Read the body as text first to debug
-    const bodyText = await clonedRequest.text();
-    console.log('📥 Received body (length):', bodyText.length);
-    console.log('📥 Received body (first 500 chars):', bodyText.substring(0, 500));
+    // Use Astro's request object
+    const request = context.request;
+    console.log('📋 Request method:', request.method);
     
-    if (!bodyText || bodyText.length === 0) {
-      console.error('❌ Empty request body');
-      return new Response(JSON.stringify({ error: 'Empty request body' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
-      });
+    // Parse JSON body using Astro's built-in method
+    let data;
+    try {
+      data = await request.json();
+      console.log('✅ Parsed JSON:', data);
+    } catch (e) {
+      console.error('❌ Failed to parse JSON:', e);
+      // Fallback: try to read the raw body
+      console.log('📥 Trying arrayBuffer fallback...');
+      const buffer = await request.arrayBuffer();
+      const bodyText = new TextDecoder().decode(buffer);
+      console.log('📏 Buffer length:', buffer.byteLength);
+      console.log('📝 Body text length:', bodyText.length);
+      console.log('📝 Body text:', bodyText);
+      
+      if (!bodyText) {
+        return new Response(JSON.stringify({ error: 'Empty request body' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      data = JSON.parse(bodyText);
     }
-
-    // Now parse it
-    const data = JSON.parse(bodyText);
-    console.log('📥 Parsed data keys:', Object.keys(data));
     
     const { path, content } = data;
     
     if (!path || !content) {
       console.error('❌ Missing path or content');
+      console.error('Path:', path, 'Content:', content);
       return new Response(JSON.stringify({ error: 'Missing path or content' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' }

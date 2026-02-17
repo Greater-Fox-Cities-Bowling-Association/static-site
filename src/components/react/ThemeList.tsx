@@ -111,6 +111,10 @@ export default function ThemeList({
     try {
       await activateTheme(themeId, token, owner, repo, useGitHubAPI);
       await loadThemes();
+      // Reload the page after successful activation to apply the new theme
+      if (typeof window !== "undefined") {
+        window.location.reload();
+      }
     } catch (err) {
       console.error("Error activating theme:", err);
       alert(err instanceof Error ? err.message : "Failed to activate theme");

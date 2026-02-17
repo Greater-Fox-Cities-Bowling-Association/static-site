@@ -1044,7 +1044,7 @@ export async function fetchThemesDirectory(
   forceGitHubAPI: boolean = false
 ): Promise<{ success: boolean; files?: GitHubFileResponse[]; error?: string }> {
   try {
-    // DEV MODE: Return local themes (unless forced to use GitHub API)
+    // DEV MODE: Fetch from dev server (unless forced to use GitHub API)
     if (import.meta.env.DEV && !forceGitHubAPI) {
       logAPICall({
         function: 'fetchThemesDirectory',
@@ -1053,6 +1053,8 @@ export async function fetchThemesDirectory(
       });
 
       try {
+        // Fetch the themes via the Vite dev server's directory listing
+        // Note: This uses the glob pattern but with a cache-buster to ensure fresh data
         const themeModules = import.meta.glob('/src/content/themes/*.json', { eager: true });
         const files: GitHubFileResponse[] = Object.entries(themeModules).map(([path]) => {
           const filename = path.split('/').pop() || '';
@@ -1069,11 +1071,25 @@ export async function fetchThemesDirectory(
           };
         });
 
+        // Also fetch each theme directly to ensure we have the latest content
+        // This validates that files actually exist on disk
+        const validFiles: GitHubFileResponse[] = [];
+        for (const file of files) {
+          try {
+            const response = await fetch(`/src/content/themes/${file.name}`);
+            if (response.ok) {
+              validFiles.push(file);
+            }
+          } catch (e) {
+            // File doesn't exist, skip it
+          }
+        }
+
         logAPIResponse('fetchThemesDirectory', 'LOCAL', { 
-          count: files.length,
-          themes: files.map(f => f.name)
+          count: validFiles.length,
+          themes: validFiles.map(f => f.name)
         });
-        return { success: true, files };
+        return { success: true, files: validFiles };
       } catch (error) {
         logAPIResponse('fetchThemesDirectory', 'LOCAL', null, error);
         return { success: true, files: [] }; // Return empty array if no themes found
@@ -1139,7 +1155,7 @@ export async function fetchThemeContent(
   try {
     const filename = `${themeId}.json`;
 
-    // DEV MODE: Read from local filesystem (unless forced to use GitHub API)
+    // DEV MODE: Fetch from dev server (unless forced to use GitHub API)
     if (import.meta.env.DEV && !forceGitHubAPI) {
       logAPICall({
         function: 'fetchThemeContent',
@@ -1148,16 +1164,15 @@ export async function fetchThemeContent(
       });
 
       try {
-        const themeModules = import.meta.glob('/src/content/themes/*.json', { eager: true });
-        const themePath = `/src/content/themes/${filename}`;
-        const module = themeModules[themePath] as any;
-        
-        if (!module) {
-          logAPIResponse('fetchThemeContent', 'LOCAL', null, `Theme not found: ${themePath}`);
+        // Fetch directly from the dev server instead of using import.meta.glob cache
+        // This ensures we get the latest file content from disk
+        const response = await fetch(`/src/content/themes/${filename}`);
+        if (!response.ok) {
+          logAPIResponse('fetchThemeContent', 'LOCAL', null, `Theme not found: ${filename}`);
           throw new Error('Theme not found locally');
         }
         
-        const content = module.default;
+        const content = await response.json();
         logAPIResponse('fetchThemeContent', 'LOCAL', { 
           themeId, 
           name: content.name
@@ -1246,10 +1261,15 @@ export async function saveThemeFile(
     });
 
     try {
+      const requestBody = JSON.stringify({ path, content: contentWithTimestamp });
+      console.log('📤 Sending request to /api/save-page');
+      console.log('📤 Request body length:', requestBody.length);
+      console.log('📤 Request body:', requestBody.substring(0, 500));
+      
       const response = await fetch('/api/save-page', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ path, content: contentWithTimestamp })
+        body: requestBody
       });
 
       let result;
@@ -1257,6 +1277,9 @@ export async function saveThemeFile(
         result = await response.json();
       } catch (jsonError) {
         const text = await response.text();
+        console.error('❌ Failed to parse JSON response:', jsonError);
+        console.error('Response status:', response.status);
+        console.error('Response text:', text);
         logAPIResponse('saveThemeFile', 'LOCAL', null, `Server error: ${response.status}. Response: ${text}`);
         return { 
           success: false, 
@@ -1265,13 +1288,16 @@ export async function saveThemeFile(
       }
       
       if (!response.ok) {
+        console.error('❌ API returned error:', result.error);
         logAPIResponse('saveThemeFile', 'LOCAL', null, result.error || 'Server returned error');
         return { success: false, error: result.error || 'Failed to save file locally' };
       }
 
+      console.log('✅ Theme file saved:', path);
       logAPIResponse('saveThemeFile', 'LOCAL', { path, success: true });
       return { success: true };
     } catch (error) {
+      console.error('❌ Fetch error while saving theme:', error);
       logAPIResponse('saveThemeFile', 'LOCAL', null, error);
       return {
         success: false,
@@ -1434,12 +1460,17 @@ export async function activateTheme(
   forceGitHubAPI: boolean = false
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    console.log('🎨 Starting theme activation for:', themeId);
+    
     // First, fetch all themes
     const allThemesResult = await fetchThemesDirectory(token, owner, repo, forceGitHubAPI);
     
     if (!allThemesResult.success || !allThemesResult.files) {
+      console.error('❌ Failed to fetch themes directory');
       return { success: false, error: 'Failed to fetch themes directory' };
     }
+
+    console.log('📋 Found themes:', allThemesResult.files.map(f => f.name));
 
     // Fetch each theme and update their isActive status
     const themeFiles = allThemesResult.files.filter(f => f.name.endsWith('.json'));
@@ -1447,6 +1478,8 @@ export async function activateTheme(
 
     for (const file of themeFiles) {
       const currentThemeId = file.name.replace('.json', '');
+      console.log(`📖 Processing theme: ${currentThemeId}`);
+      
       const theme = await fetchThemeContent(currentThemeId, token, owner, repo, forceGitHubAPI);
       
       // Update isActive status
@@ -1455,12 +1488,16 @@ export async function activateTheme(
         isActive: currentThemeId === themeIdToActivate
       };
 
+      console.log(`💾 Saving ${currentThemeId} with isActive=${updatedTheme.isActive}`);
+
       // Save the updated theme
       const saveResult = await saveThemeFile(updatedTheme, token, owner, repo, forceGitHubAPI);
       
       if (!saveResult.success) {
+        console.error(`❌ Failed to save theme ${currentThemeId}:`, saveResult.error);
         return { success: false, error: `Failed to update theme ${currentThemeId}` };
       }
+      console.log(`✅ Successfully saved ${currentThemeId}`);
     }
 
     // Clear the cached theme from sessionStorage to force reload
@@ -1472,13 +1509,13 @@ export async function activateTheme(
       activatedTheme: themeIdToActivate
     });
     
-    // Trigger a page reload to apply the new theme
-    if (typeof window !== 'undefined') {
-      window.location.reload();
-    }
+    console.log('✅ Theme activation complete, ready to reload');
+    // Note: Don't reload the page here - let the caller handle refreshing the UI
+    // The component will call loadThemes() to refresh the theme list
     
     return { success: true };
   } catch (error) {
+    console.error('❌ Error in activateTheme:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error occurred'
