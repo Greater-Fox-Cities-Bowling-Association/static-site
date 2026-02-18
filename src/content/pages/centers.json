@@ -1,11 +1,127 @@
 {
   "slug": "centers",
-  "title": "Centers",
+  "title": "Bowling Centers",
   "metaDescription": "Bowling centers in the Greater Fox Cities area.",
   "status": "published",
   "useLayout": true,
   "layoutId": "default",
-  "sections": [],
+  "sections": [
+    {
+      "id": "centers-list-1",
+      "type": "contentList",
+      "order": 1,
+      "heading": "Our Bowling Centers",
+      "collection": "centers",
+      "displayMode": "cards",
+      "columns": 3
+    }
+  ],
+  "data": [
+    {
+      "name": "Bowlero Sabre Lanes",
+      "address": "1330 Midway Rd",
+      "city": "Menasha",
+      "state": "WI",
+      "zip": "54952",
+      "phone": "",
+      "email": "",
+      "website": "https://www.bowlero.com/location/sabre-lanes",
+      "lanes": 32,
+      "features": [
+        "Automatic scoring",
+        "Cosmic bowling",
+        "Arcade",
+        "Food and beverages",
+        "League bowling"
+      ]
+    },
+    {
+      "name": "Bowlero Super Bowl",
+      "address": "2222 E Northland Ave",
+      "city": "Appleton",
+      "state": "WI",
+      "zip": "54911",
+      "phone": "",
+      "email": "",
+      "website": "https://www.bowlero.com/location/super-bowl-family-entertainment-center",
+      "lanes": 40,
+      "features": [
+        "Automatic scoring",
+        "Cosmic bowling",
+        "Arcade",
+        "Food and beverages",
+        "Family entertainment center",
+        "League bowling"
+      ]
+    },
+    {
+      "name": "Electric City Lanes",
+      "address": "136 W Wisconsin Ave",
+      "city": "Kaukauna",
+      "state": "WI",
+      "zip": "54130",
+      "phone": "",
+      "email": "",
+      "website": "https://www.electriccitylanes.com/",
+      "lanes": 24,
+      "features": [
+        "Automatic scoring",
+        "League bowling",
+        "Food and beverages",
+        "Pro shop"
+      ]
+    },
+    {
+      "name": "Officials Bowl & Spirits",
+      "address": "408 N 8th St",
+      "city": "Hilbert",
+      "state": "WI",
+      "zip": "54129",
+      "phone": "",
+      "email": "",
+      "website": "https://www.facebook.com/officialsden/",
+      "lanes": 8,
+      "features": [
+        "League bowling",
+        "Bar and spirits",
+        "Small town atmosphere"
+      ]
+    },
+    {
+      "name": "Rolling Thunder Lanes",
+      "address": "934 Byrd Ave",
+      "city": "Neenah",
+      "state": "WI",
+      "zip": "54956",
+      "phone": "",
+      "email": "",
+      "website": "https://rollingthunderlanes.com/",
+      "lanes": 20,
+      "features": [
+        "Automatic scoring",
+        "League bowling",
+        "Tournament host",
+        "Food and beverages",
+        "Pro shop"
+      ]
+    },
+    {
+      "name": "Split Happens",
+      "address": "106 S. Main St",
+      "city": "Brillion",
+      "state": "WI",
+      "zip": "54110",
+      "phone": "",
+      "email": "",
+      "website": "https://www.facebook.com/profile.php?id=100046971175071",
+      "lanes": 8,
+      "features": [
+        "League bowling",
+        "Small town bowling",
+        "Food and beverages"
+      ]
+    }
+  ],
   "createdAt": "2026-02-15T00:00:00.000Z",
-  "updatedAt": "2026-02-15T00:00:00.000Z"
+  "updatedAt": "2026-02-17T00:00:00.000Z"
 }

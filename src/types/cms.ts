@@ -6,7 +6,12 @@
 
 export type PageStatus = 'draft' | 'published';
 
-export type SectionType = 'hero' | 'text' | 'cardGrid' | 'cta';
+export type SectionType = 'hero' | 'text' | 'cardGrid' | 'cta' | 'contentList';
+
+// Collection names are dynamic - any collection defined in config.ts can be used
+export type ContentCollectionType = string;
+
+export type ContentListDisplayMode = 'cards' | 'table' | 'list';
 
 // =============================================================================
 // Navigation Type Definitions
@@ -75,7 +80,18 @@ export interface CtaSection extends BaseSection {
   style: 'primary' | 'secondary';
 }
 
-export type Section = HeroSection | TextSection | CardGridSection | CtaSection;
+export interface ContentListSection extends BaseSection {
+  type: 'contentList';
+  heading?: string;
+  collection: string; // Name of any collection defined in config.ts (e.g., 'centers', 'honors', etc.)
+  displayMode: ContentListDisplayMode;
+  itemIds?: string[]; // Optional: specific items to show. If empty, show all
+  limit?: number; // Optional: max items to display
+  columns?: 2 | 3 | 4; // For card display mode
+  showFilters?: boolean; // Allow users to filter/search the list
+}
+
+export type Section = HeroSection | TextSection | CardGridSection | CtaSection | ContentListSection;
 
 // =============================================================================
 // Layout Type Definitions

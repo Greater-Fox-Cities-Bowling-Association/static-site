@@ -209,11 +209,23 @@ const ctaSectionSchema = baseSectionSchema.extend({
   style: z.enum(['primary', 'secondary']),
 });
 
+const contentListSectionSchema = baseSectionSchema.extend({
+  type: z.literal('contentList'),
+  heading: z.string().optional(),
+  collection: z.string(), // Any collection name defined in config.ts (e.g., 'centers', 'honors', etc.)
+  displayMode: z.enum(['cards', 'table', 'list']),
+  itemIds: z.array(z.string()).optional(),
+  limit: z.number().optional(),
+  columns: z.union([z.literal(2), z.literal(3), z.literal(4)]).optional(),
+  showFilters: z.boolean().optional(),
+});
+
 const sectionSchema = z.discriminatedUnion('type', [
   heroSectionSchema,
   textSectionSchema,
   cardGridSectionSchema,
   ctaSectionSchema,
+  contentListSectionSchema,
 ]);
 
 const pagesCollection = defineCollection({

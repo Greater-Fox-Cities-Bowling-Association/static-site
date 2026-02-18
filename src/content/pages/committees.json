@@ -6,6 +6,117 @@
   "useLayout": true,
   "layoutId": "default",
   "sections": [],
+  "data": [
+    {
+      "name": "Board of Directors",
+      "role": "Governance",
+      "description": "The Board of Directors provides strategic oversight and governance for the Greater Fox Cities Bowling Association.",
+      "members": [
+        {
+          "name": "Andrew Belonger",
+          "position": "President",
+          "email": "gfcba920@gmail.com",
+          "phone": ""
+        },
+        {
+          "name": "Annette Zelinski",
+          "position": "Vice President",
+          "email": "gfcba920@gmail.com",
+          "phone": ""
+        },
+        {
+          "name": "Becky Landgraf",
+          "position": "Sergeant at Arms",
+          "email": "gfcba920@gmail.com",
+          "phone": ""
+        },
+        {
+          "name": "Beth Kosiorek",
+          "position": "Association Manager",
+          "email": "bethkusbc@gmail.com",
+          "phone": ""
+        },
+        {
+          "name": "Keith Koch",
+          "position": "Historian",
+          "email": "gfcba920@gmail.com",
+          "phone": ""
+        },
+        {
+          "name": "Terry Anderson",
+          "position": "Historian",
+          "email": "gfcba920@gmail.com",
+          "phone": ""
+        },
+        {
+          "name": "Ryan Duescher",
+          "position": "Board Member",
+          "email": "gfcba920@gmail.com",
+          "phone": ""
+        },
+        {
+          "name": "Carlene Enama",
+          "position": "Board Member",
+          "email": "gfcba920@gmail.com",
+          "phone": ""
+        },
+        {
+          "name": "Rhonda Hansen",
+          "position": "Board Member",
+          "email": "gfcba920@gmail.com",
+          "phone": ""
+        },
+        {
+          "name": "Jim Kading",
+          "position": "Board Member",
+          "email": "gfcba920@gmail.com",
+          "phone": ""
+        },
+        {
+          "name": "Matt Mattson",
+          "position": "Board Member",
+          "email": "gfcba920@gmail.com",
+          "phone": ""
+        },
+        {
+          "name": "Glenn Monte",
+          "position": "Board Member",
+          "email": "gfcba920@gmail.com",
+          "phone": ""
+        },
+        {
+          "name": "Michele Minkebige",
+          "position": "Board Member",
+          "email": "gfcba920@gmail.com",
+          "phone": ""
+        },
+        {
+          "name": "Caroline Pirkola",
+          "position": "Board Member",
+          "email": "gfcba920@gmail.com",
+          "phone": ""
+        },
+        {
+          "name": "Holland Rittmann",
+          "position": "Board Member",
+          "email": "gfcba920@gmail.com",
+          "phone": ""
+        },
+        {
+          "name": "Megan Salentine",
+          "position": "Board Member",
+          "email": "gfcba920@gmail.com",
+          "phone": ""
+        },
+        {
+          "name": "Amy Young",
+          "position": "Board Member",
+          "email": "gfcba920@gmail.com",
+          "phone": ""
+        }
+      ]
+    }
+  ],
   "createdAt": "2026-02-15T00:00:00.000Z",
   "updatedAt": "2026-02-15T00:00:00.000Z"
 }

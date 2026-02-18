@@ -6,6 +6,157 @@
   "useLayout": true,
   "layoutId": "default",
   "sections": [],
+  "data": [
+    {
+      "name": "Open Association Tournament",
+      "date": "January 10-11 / 17-18, 2026",
+      "location": "Rolling Thunder Lanes, Neenah",
+      "description": "Annual Open Association Tournament featuring singles, doubles, and team events.",
+      "entryFee": "See entry form",
+      "prizeFund": "TBD",
+      "rules": "See entry form and rules",
+      "contact": {
+        "name": "Beth Kosiorek",
+        "phone": "",
+        "email": "bethkusbc@gmail.com"
+      },
+      "status": "completed",
+      "links": [
+        {
+          "text": "Online Registration",
+          "url": "https://webapps.bowl.com/USBC.Registration/registration?tags=GrFoxCities86887"
+        },
+        {
+          "text": "Entry Form and Rules",
+          "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2026-Open-Tournament-Entry-Form.pdf"
+        },
+        {
+          "text": "Final Standings",
+          "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2026-Open-Final-Standings.pdf"
+        },
+        {
+          "text": "Prize List",
+          "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2026-Open-Final-Prize-List.pdf"
+        }
+      ]
+    },
+    {
+      "name": "Match Play (Masters)",
+      "date": "January 3, 2026",
+      "location": "Super Bowl, Appleton",
+      "description": "Masters division match play tournament with qualifying round followed by head-to-head competition.",
+      "entryFee": "See entry form",
+      "prizeFund": "TBD",
+      "rules": "See entry form and rules",
+      "contact": {
+        "name": "Beth Kosiorek",
+        "phone": "",
+        "email": "bethkusbc@gmail.com"
+      },
+      "status": "completed",
+      "links": [
+        {
+          "text": "Entry Form and Rules",
+          "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2026-Match-Play-Masters-Entry-Form.pdf"
+        },
+        {
+          "text": "Qualifying Results",
+          "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2026-Masters-Qualifying-Results.pdf"
+        },
+        {
+          "text": "Match Play Bracket Results",
+          "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2026-Masters-Bracket-Results.pdf"
+        }
+      ]
+    },
+    {
+      "name": "Match Play (Seniors)",
+      "date": "January 4, 2026",
+      "location": "Super Bowl, Appleton",
+      "description": "Seniors division match play tournament with qualifying round followed by head-to-head competition.",
+      "entryFee": "See entry form",
+      "prizeFund": "TBD",
+      "rules": "See entry form and rules",
+      "contact": {
+        "name": "Beth Kosiorek",
+        "phone": "",
+        "email": "bethkusbc@gmail.com"
+      },
+      "status": "completed",
+      "links": [
+        {
+          "text": "Entry Form and Rules",
+          "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2026-Match-Play-Seniors-Entry-Form.pdf"
+        },
+        {
+          "text": "Qualifying Results",
+          "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2026-Senior-Qualifying-Results.pdf"
+        },
+        {
+          "text": "Match Play Bracket Results",
+          "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2026-Senior-Bracket-Results.pdf"
+        }
+      ]
+    },
+    {
+      "name": "Women's Association Tournament",
+      "date": "January 10-11 / 17-18, 2026",
+      "location": "Rolling Thunder Lanes, Neenah",
+      "description": "Annual Women's Association Tournament featuring singles, doubles, and team events.",
+      "entryFee": "See entry form",
+      "prizeFund": "TBD",
+      "rules": "See entry form and rules",
+      "contact": {
+        "name": "Beth Kosiorek",
+        "phone": "",
+        "email": "bethkusbc@gmail.com"
+      },
+      "status": "completed",
+      "links": [
+        {
+          "text": "Online Registration",
+          "url": "https://webapps.bowl.com/USBC.Registration/registration?tags=GrFoxCities86887"
+        },
+        {
+          "text": "Entry Form and Rules",
+          "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2026-Womens-Tournament-Entry-Form.pdf"
+        },
+        {
+          "text": "Final Standings",
+          "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2026-Womens-Final-Standings.pdf"
+        },
+        {
+          "text": "Prize List",
+          "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2026-Womens-Final-Prize-List.pdf"
+        }
+      ]
+    },
+    {
+      "name": "Youth Association Tournament",
+      "date": "November 1-2 / 8-9 / 15-16, 2025",
+      "location": "Electric City Lanes, Kaukauna",
+      "description": "Annual Youth Association Tournament for young bowlers.",
+      "entryFee": "See entry form",
+      "prizeFund": "TBD",
+      "rules": "See entry form and rules",
+      "contact": {
+        "name": "Beth Kosiorek",
+        "phone": "",
+        "email": "bethkusbc@gmail.com"
+      },
+      "status": "completed",
+      "links": [
+        {
+          "text": "Entry Form and Rules",
+          "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2025-Youth-Tournament-Entry-Form.pdf"
+        },
+        {
+          "text": "Results",
+          "url": "#"
+        }
+      ]
+    }
+  ],
   "createdAt": "2026-02-15T00:00:00.000Z",
   "updatedAt": "2026-02-15T00:00:00.000Z"
 }

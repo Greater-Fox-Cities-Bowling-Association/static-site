@@ -23,6 +23,7 @@ export default function SectionWrapper({
     text: "Text Block",
     cardGrid: "Card Grid",
     cta: "Call to Action",
+    contentList: "Content List",
   };
 
   return (

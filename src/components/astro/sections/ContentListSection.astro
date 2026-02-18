@@ -1,0 +1,300 @@
+---
+import { getCollection } from "astro:content";
+import type { ContentListSection } from "../../../types/cms";
+
+interface Props {
+  section: ContentListSection;
+}
+
+const { section } = Astro.props;
+const {
+  heading,
+  collection,
+  displayMode,
+  itemIds,
+  limit,
+  columns = 3,
+} = section;
+
+// Fetch all items from the specified collection
+const allItems: any[] = await getCollection(collection as any);
+
+// Filter to specific items if itemIds is provided
+let items =
+  itemIds && itemIds.length > 0
+    ? allItems.filter((item) => itemIds.includes(item.id))
+    : allItems;
+
+// Apply limit if specified
+if (limit && limit > 0) {
+  items = items.slice(0, limit);
+}
+
+// Helper to get display data based on collection type
+function getItemDisplayData(item: any) {
+  const data = item.data;
+
+  // Specific mappings for known collection types
+  switch (collection) {
+    case "centers":
+      return {
+        title: data.name,
+        subtitle: `${data.city}, ${data.state}`,
+        description: data.lanes ? `${data.lanes} lanes` : "",
+        details: [data.address, data.phone, data.website].filter(Boolean),
+        link: data.website,
+      };
+
+    case "honors":
+      return {
+        title: data.title,
+        subtitle: data.year ? `${data.year}` : "",
+        description: data.description || "",
+        details: data.recipients
+          ? [`${data.recipients.length} recipients`]
+          : [],
+        link: `/honors/${item.id}`,
+      };
+
+    case "news":
+      return {
+        title: data.title,
+        subtitle: data.date,
+        description: data.excerpt,
+        details: [data.author].filter(Boolean),
+        link: `/news/${item.id}`,
+      };
+
+    case "tournaments":
+      return {
+        title: data.name,
+        subtitle: data.date,
+        description: data.description,
+        details: [data.location, data.status].filter(Boolean),
+        link: `/tournaments/${item.id}`,
+      };
+
+    case "committees":
+      return {
+        title: data.name,
+        subtitle: data.role || "",
+        description: data.description || "",
+        details: data.members ? [`${data.members.length} members`] : [],
+        link: `/committees/${item.id}`,
+      };
+
+    default:
+      // Generic fallback for any custom collection
+      // Try to intelligently extract common fields
+      const title = data.title || data.name || item.id;
+      const subtitle = data.subtitle || data.date || data.year || "";
+      const description =
+        data.description || data.excerpt || data.content || "";
+
+      // Extract any useful details from remaining fields
+      const details = [];
+      if (data.location) details.push(data.location);
+      if (data.date && !subtitle) details.push(data.date);
+      if (data.author) details.push(data.author);
+      if (data.category) details.push(data.category);
+
+      return {
+        title,
+        subtitle,
+        description,
+        details: details.filter(Boolean),
+        link: `/${collection}/${item.id}`,
+      };
+  }
+}
+
+const displayItems = items.map((item) => ({
+  id: item.id,
+  ...getItemDisplayData(item),
+  rawData: item.data,
+}));
+
+const gridColsClass = {
+  2: "md:grid-cols-2",
+  3: "md:grid-cols-3",
+  4: "md:grid-cols-4",
+}[columns];
+---
+
+<section class="py-16 bg-background">
+  <div class="container mx-auto px-4">
+    {
+      heading && (
+        <h2 class="text-3xl md:text-4xl font-bold mb-12 text-center text-text">
+          {heading}
+        </h2>
+      )
+    }
+
+    {
+      displayMode === "cards" && (
+        <div class={`grid grid-cols-1 ${gridColsClass} gap-8`}>
+          {displayItems.map((item) => (
+            <div class="bg-background rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow border border-text/10">
+              <div class="p-6">
+                <h3 class="text-xl font-bold mb-2 text-text">{item.title}</h3>
+                {item.subtitle && (
+                  <p class="text-sm text-primary font-semibold mb-3">
+                    {item.subtitle}
+                  </p>
+                )}
+                {item.description && (
+                  <p class="text-text-secondary mb-4">{item.description}</p>
+                )}
+                {item.details.length > 0 && (
+                  <div class="text-sm text-text-secondary space-y-1 mb-4">
+                    {item.details.map((detail) => (
+                      <p>{detail}</p>
+                    ))}
+                  </div>
+                )}
+                {item.link && (
+                  <a
+                    href={item.link}
+                    class="text-primary hover:text-accent font-semibold inline-flex items-center"
+                    target={item.link.startsWith("http") ? "_blank" : undefined}
+                    rel={
+                      item.link.startsWith("http")
+                        ? "noopener noreferrer"
+                        : undefined
+                    }
+                  >
+                    Learn More →
+                  </a>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )
+    }
+
+    {
+      displayMode === "table" && (
+        <div class="overflow-x-auto">
+          <table class="min-w-full bg-background border border-text/10 rounded-lg overflow-hidden">
+            <thead class="bg-primary/10">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-text uppercase tracking-wider">
+                  Name
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-text uppercase tracking-wider">
+                  Details
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-text uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-text/10">
+              {displayItems.map((item) => (
+                <tr class="hover:bg-primary/5 transition-colors">
+                  <td class="px-6 py-4">
+                    <div class="text-sm font-medium text-text">
+                      {item.title}
+                    </div>
+                    {item.subtitle && (
+                      <div class="text-sm text-text-secondary">
+                        {item.subtitle}
+                      </div>
+                    )}
+                  </td>
+                  <td class="px-6 py-4">
+                    {item.description && (
+                      <div class="text-sm text-text-secondary">
+                        {item.description}
+                      </div>
+                    )}
+                    {item.details.length > 0 && (
+                      <div class="text-xs text-text-secondary space-y-1 mt-1">
+                        {item.details.map((detail) => (
+                          <div>{detail}</div>
+                        ))}
+                      </div>
+                    )}
+                  </td>
+                  <td class="px-6 py-4">
+                    {item.link && (
+                      <a
+                        href={item.link}
+                        class="text-primary hover:text-accent font-semibold text-sm"
+                        target={
+                          item.link.startsWith("http") ? "_blank" : undefined
+                        }
+                        rel={
+                          item.link.startsWith("http")
+                            ? "noopener noreferrer"
+                            : undefined
+                        }
+                      >
+                        View →
+                      </a>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )
+    }
+
+    {
+      displayMode === "list" && (
+        <div class="max-w-4xl mx-auto space-y-6">
+          {displayItems.map((item) => (
+            <div class="bg-background rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow border border-text/10">
+              <div class="flex justify-between items-start">
+                <div class="flex-1">
+                  <h3 class="text-xl font-bold text-text mb-2">{item.title}</h3>
+                  {item.subtitle && (
+                    <p class="text-sm text-primary font-semibold mb-2">
+                      {item.subtitle}
+                    </p>
+                  )}
+                  {item.description && (
+                    <p class="text-text-secondary mb-3">{item.description}</p>
+                  )}
+                  {item.details.length > 0 && (
+                    <div class="text-sm text-text-secondary space-y-1">
+                      {item.details.map((detail) => (
+                        <p>{detail}</p>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                {item.link && (
+                  <a
+                    href={item.link}
+                    class="ml-4 text-primary hover:text-accent font-semibold text-sm whitespace-nowrap"
+                    target={item.link.startsWith("http") ? "_blank" : undefined}
+                    rel={
+                      item.link.startsWith("http")
+                        ? "noopener noreferrer"
+                        : undefined
+                    }
+                  >
+                    View →
+                  </a>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )
+    }
+
+    {
+      displayItems.length === 0 && (
+        <div class="text-center py-12">
+          <p class="text-text-secondary">No items to display.</p>
+        </div>
+      )
+    }
+  </div>
+</section>

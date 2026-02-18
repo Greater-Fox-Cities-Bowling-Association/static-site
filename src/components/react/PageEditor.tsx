@@ -23,6 +23,7 @@ import HeroEditor from "./sections/HeroEditor";
 import TextEditor from "./sections/TextEditor";
 import CardGridEditor from "./sections/CardGridEditor";
 import CtaEditor from "./sections/CtaEditor";
+import ContentListEditor from "./sections/ContentListEditor";
 
 interface PageEditorProps {
   slug: string | undefined; // undefined = creating new page
@@ -78,6 +79,14 @@ function createSection(type: SectionType, order: number): Section {
         buttonText: "",
         buttonLink: "",
         style: "primary",
+      };
+    case "contentList":
+      return {
+        ...baseSection,
+        type: "contentList",
+        collection: "centers",
+        displayMode: "cards",
+        columns: 3,
       };
   }
 }
@@ -760,6 +769,16 @@ export default function PageEditor({
                   Prominent button with heading
                 </div>
               </button>
+
+              <button
+                onClick={() => addSection("contentList")}
+                className="px-4 py-2 bg-background border border-text/20 rounded hover:bg-primary/5 text-left"
+              >
+                <div className="font-medium">Content List</div>
+                <div className="text-xs text-text-secondary">
+                  Display items from content collections
+                </div>
+              </button>
             </div>
           </div>
         )}
@@ -799,6 +818,14 @@ export default function PageEditor({
             case "cta":
               return (
                 <CtaEditor key={section.id} {...props} section={section} />
+              );
+            case "contentList":
+              return (
+                <ContentListEditor
+                  key={section.id}
+                  {...props}
+                  section={section}
+                />
               );
             default:
               return null;
