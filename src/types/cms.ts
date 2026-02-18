@@ -9,6 +9,26 @@ export type PageStatus = 'draft' | 'published';
 export type SectionType = 'hero' | 'text' | 'cardGrid' | 'cta';
 
 // =============================================================================
+// Navigation Type Definitions
+// =============================================================================
+
+export interface NavigationItem {
+  label: string;
+  href: string;
+  children?: NavigationItem[];
+  order: number;
+  id: string;
+}
+
+export interface NavigationConfig {
+  id: string;
+  name: string;
+  description?: string;
+  items: NavigationItem[];
+  updatedAt?: string;
+}
+
+// =============================================================================
 // Section Type Definitions
 // =============================================================================
 

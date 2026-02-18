@@ -1,0 +1,100 @@
+{
+  "id": "default",
+  "name": "Default Navigation",
+  "description": "Main navigation menu for the Greater Fox Cities BA website",
+  "items": [
+    {
+      "id": "home",
+      "label": "Home",
+      "href": "/",
+      "order": 1
+    },
+    {
+      "id": "news",
+      "label": "News",
+      "href": "/news",
+      "order": 2
+    },
+    {
+      "id": "tournaments",
+      "label": "Tournaments",
+      "href": "/tournaments",
+      "order": 3
+    },
+    {
+      "id": "honors",
+      "label": "Honors",
+      "href": "/honors",
+      "order": 4,
+      "children": [
+        {
+          "id": "hall-of-fame",
+          "label": "Hall of Fame",
+          "href": "/honors/hall-of-fame",
+          "order": 1
+        },
+        {
+          "id": "300-games",
+          "label": "300 Games",
+          "href": "/honors/300-games",
+          "order": 2
+        },
+        {
+          "id": "high-average",
+          "label": "High Average",
+          "href": "/honors/high-average",
+          "order": 3
+        },
+        {
+          "id": "high-series",
+          "label": "High Series",
+          "href": "/honors/high-series",
+          "order": 4
+        },
+        {
+          "id": "all-association",
+          "label": "All-Association Teams",
+          "href": "/honors/all-association-teams",
+          "order": 5
+        },
+        {
+          "id": "bowler-of-year",
+          "label": "Bowler of the Year",
+          "href": "/honors/bowler-of-the-year",
+          "order": 6
+        }
+      ]
+    },
+    {
+      "id": "awards",
+      "label": "Awards",
+      "href": "/awards",
+      "order": 5
+    },
+    {
+      "id": "scholarships",
+      "label": "Scholarships",
+      "href": "/scholarships",
+      "order": 6
+    },
+    {
+      "id": "centers",
+      "label": "Centers",
+      "href": "/centers",
+      "order": 7
+    },
+    {
+      "id": "committees",
+      "label": "Committees",
+      "href": "/committees",
+      "order": 8
+    },
+    {
+      "id": "contact",
+      "label": "Contact",
+      "href": "/contact",
+      "order": 9
+    }
+  ],
+  "updatedAt": "2026-02-17T00:00:00.000Z"
+}

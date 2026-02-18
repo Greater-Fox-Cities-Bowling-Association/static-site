@@ -144,6 +144,28 @@ const layoutsCollection = defineCollection({
   schema: layoutSchema,
 });
 
+// Navigation collection - for managing navigation menus
+const navigationItemSchema: z.ZodType<any> = z.lazy(() =>
+  z.object({
+    id: z.string(),
+    label: z.string(),
+    href: z.string(),
+    order: z.number(),
+    children: z.array(navigationItemSchema).optional(),
+  })
+);
+
+const navigationCollection = defineCollection({
+  type: 'data',
+  schema: z.object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string().optional(),
+    items: z.array(navigationItemSchema),
+    updatedAt: z.string().optional(),
+  }),
+});
+
 // Pages collection - CMS-managed pages
 const cardSchema = z.object({
   title: z.string(),
@@ -214,6 +236,7 @@ export const collections = {
   'pages': pagesCollection,
   'layouts': layoutsCollection,
   'themes': themesCollection,
+  'navigation': navigationCollection,
   'centers': centersCollection,
   'tournaments': tournamentsCollection,
   'honors': honorsCollection,

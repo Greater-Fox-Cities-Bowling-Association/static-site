@@ -8,6 +8,8 @@ import LayoutList from "./LayoutList";
 import LayoutEditor from "./LayoutEditor";
 import ThemeList from "./ThemeList";
 import ThemeEditor from "./ThemeEditor";
+import NavigationList from "./NavigationList";
+import NavigationEditor from "./NavigationEditor";
 
 type Step = "select-type" | "upload" | "preview";
 type Mode =
@@ -17,7 +19,9 @@ type Mode =
   | "layouts"
   | "layout-editor"
   | "themes"
-  | "theme-editor";
+  | "theme-editor"
+  | "navigation"
+  | "navigation-editor";
 
 export default function ImportAdmin() {
   const { isLoading, error, isAuthenticated, user, logout, getIdTokenClaims } =
@@ -36,6 +40,9 @@ export default function ImportAdmin() {
   const [editingThemeId, setEditingThemeId] = useState<string | undefined>(
     undefined,
   );
+  const [editingNavigationId, setEditingNavigationId] = useState<
+    string | undefined
+  >(undefined);
 
   // GitHub authentication state
   const [githubToken, setGithubToken] = useState<string>("");
@@ -221,6 +228,21 @@ export default function ImportAdmin() {
     setEditingThemeId(undefined);
   };
 
+  const handleEditNavigation = (navigationId: string) => {
+    setEditingNavigationId(navigationId);
+    setMode("navigation-editor");
+  };
+
+  const handleNavigationSaved = () => {
+    setMode("navigation");
+    setEditingNavigationId(undefined);
+  };
+
+  const handleCancelNavigationEdit = () => {
+    setMode("navigation");
+    setEditingNavigationId(undefined);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <header className="bg-background shadow-sm border-b border-text/10">
@@ -365,6 +387,20 @@ export default function ImportAdmin() {
                   Create and customize site themes
                 </p>
               </button>
+              <button
+                onClick={() => setMode("navigation")}
+                className={`p-4 rounded-lg border-2 transition-all ${
+                  mode === "navigation" || mode === "navigation-editor"
+                    ? "border-blue-600 bg-blue-50"
+                    : "border-gray-200 hover:border-blue-300"
+                }`}
+              >
+                <div className="text-3xl mb-2">🧭</div>
+                <h3 className="font-semibold text-gray-900">Navigation</h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  Configure navigation menus & dropdowns
+                </p>
+              </button>
             </div>
           </div>
 
@@ -433,6 +469,24 @@ export default function ImportAdmin() {
               token={githubToken}
               onSave={handleThemeSaved}
               onCancel={handleCancelThemeEdit}
+              useGitHubAPI={useGitHubAPI}
+            />
+          )}
+
+          {mode === "navigation" && (
+            <NavigationList
+              token={githubToken}
+              onEdit={handleEditNavigation}
+              useGitHubAPI={useGitHubAPI}
+            />
+          )}
+
+          {mode === "navigation-editor" && (
+            <NavigationEditor
+              navigationId={editingNavigationId}
+              token={githubToken}
+              onSave={handleNavigationSaved}
+              onCancel={handleCancelNavigationEdit}
               useGitHubAPI={useGitHubAPI}
             />
           )}
