@@ -8,7 +8,7 @@
     "secondary": "#64748b",
     "background": "#ffffff",
     "text": "#1f2937",
-    "textSecondary": "#6b7280",
+    "textSecondary": "#e2e8f0",
     "accent": "#3b82f6"
   },
   "fonts": {
@@ -16,5 +16,5 @@
     "body": "Inter, system-ui, sans-serif"
   },
   "createdAt": "2026-02-15T00:00:00Z",
-  "updatedAt": "2026-02-18T01:57:48.486Z"
+  "updatedAt": "2026-02-18T02:42:07.680Z"
 }

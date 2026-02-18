@@ -1,0 +1,20 @@
+{
+  "id": "thanksgiving",
+  "name": "Thanksgiving",
+  "description": "Warm autumn colors for Thanksgiving",
+  "isActive": false,
+  "colors": {
+    "primary": "#d97706",
+    "secondary": "#92400e",
+    "background": "#fef3c7",
+    "text": "#451a03",
+    "textSecondary": "#fde68a",
+    "accent": "#f59e0b"
+  },
+  "fonts": {
+    "heading": "Outfit, sans-serif",
+    "body": "Inter, system-ui, sans-serif"
+  },
+  "createdAt": "2026-02-17T00:00:00Z",
+  "updatedAt": "2026-02-18T02:42:07.771Z"
+}

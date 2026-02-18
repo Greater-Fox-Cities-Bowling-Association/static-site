@@ -1,0 +1,20 @@
+{
+  "id": "christmas",
+  "name": "Christmas",
+  "description": "Festive red and green theme for Christmas",
+  "isActive": false,
+  "colors": {
+    "primary": "#ff4141",
+    "secondary": "#29a255",
+    "background": "#fef2f2",
+    "text": "#1f2937",
+    "textSecondary": "#d1fae5",
+    "accent": "#008055"
+  },
+  "fonts": {
+    "heading": "Outfit, sans-serif",
+    "body": "Inter, system-ui, sans-serif"
+  },
+  "createdAt": "2026-02-17T00:00:00Z",
+  "updatedAt": "2026-02-18T02:42:07.606Z"
+}

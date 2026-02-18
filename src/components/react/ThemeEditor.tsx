@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import type { Theme } from "../../types/cms";
 import { fetchThemeContent, saveThemeFile } from "../../utils/githubApi";
 import { useTheme } from "../../utils/useTheme";
+import ColorPicker from "./ColorPicker";
 
 interface ThemeEditorProps {
   themeId: string | undefined; // undefined = creating new theme
@@ -306,145 +307,51 @@ export default function ThemeEditor({
           <h3 className="text-lg font-semibold text-text">Colors</h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-text-secondary mb-1">
-                Primary Color *
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="color"
-                  value={theme.colors.primary}
-                  onChange={(e) => updateColors({ primary: e.target.value })}
-                  className="h-10 w-14 rounded border border-text/20 cursor-pointer"
-                />
-                <input
-                  type="text"
-                  value={theme.colors.primary}
-                  onChange={(e) => updateColors({ primary: e.target.value })}
-                  className={`flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary ${
-                    validationErrors.primary
-                      ? "border-red-500"
-                      : "border-text/20"
-                  }`}
-                  placeholder="#2563eb"
-                />
-              </div>
-            </div>
+            <ColorPicker
+              label="Primary Color"
+              value={theme.colors.primary}
+              onChange={(color) => updateColors({ primary: color })}
+              required
+              {...(validationErrors.primary && {
+                error: validationErrors.primary,
+              })}
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-text-secondary mb-1">
-                Secondary Color
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="color"
-                  value={theme.colors.secondary}
-                  onChange={(e) => updateColors({ secondary: e.target.value })}
-                  className="h-10 w-14 rounded border border-text/20 cursor-pointer"
-                />
-                <input
-                  type="text"
-                  value={theme.colors.secondary}
-                  onChange={(e) => updateColors({ secondary: e.target.value })}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="#64748b"
-                />
-              </div>
-            </div>
+            <ColorPicker
+              label="Secondary Color"
+              value={theme.colors.secondary}
+              onChange={(color) => updateColors({ secondary: color })}
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Background Color *
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="color"
-                  value={theme.colors.background}
-                  onChange={(e) => updateColors({ background: e.target.value })}
-                  className="h-10 w-14 rounded border border-gray-300 cursor-pointer"
-                />
-                <input
-                  type="text"
-                  value={theme.colors.background}
-                  onChange={(e) => updateColors({ background: e.target.value })}
-                  className={`flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                    validationErrors.background
-                      ? "border-red-300"
-                      : "border-gray-300"
-                  }`}
-                  placeholder="#ffffff"
-                />
-              </div>
-            </div>
+            <ColorPicker
+              label="Background Color"
+              value={theme.colors.background}
+              onChange={(color) => updateColors({ background: color })}
+              required
+              {...(validationErrors.background && {
+                error: validationErrors.background,
+              })}
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Text Color *
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="color"
-                  value={theme.colors.text}
-                  onChange={(e) => updateColors({ text: e.target.value })}
-                  className="h-10 w-14 rounded border border-gray-300 cursor-pointer"
-                />
-                <input
-                  type="text"
-                  value={theme.colors.text}
-                  onChange={(e) => updateColors({ text: e.target.value })}
-                  className={`flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                    validationErrors.text ? "border-red-300" : "border-gray-300"
-                  }`}
-                  placeholder="#1f2937"
-                />
-              </div>
-            </div>
+            <ColorPicker
+              label="Text Color"
+              value={theme.colors.text}
+              onChange={(color) => updateColors({ text: color })}
+              required
+              {...(validationErrors.text && { error: validationErrors.text })}
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Secondary Text Color
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="color"
-                  value={theme.colors.textSecondary || "#6b7280"}
-                  onChange={(e) =>
-                    updateColors({ textSecondary: e.target.value })
-                  }
-                  className="h-10 w-14 rounded border border-gray-300 cursor-pointer"
-                />
-                <input
-                  type="text"
-                  value={theme.colors.textSecondary || ""}
-                  onChange={(e) =>
-                    updateColors({ textSecondary: e.target.value })
-                  }
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="#6b7280"
-                />
-              </div>
-            </div>
+            <ColorPicker
+              label="Secondary Text Color"
+              value={theme.colors.textSecondary || "#6b7280"}
+              onChange={(color) => updateColors({ textSecondary: color })}
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Accent Color
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="color"
-                  value={theme.colors.accent || "#3b82f6"}
-                  onChange={(e) => updateColors({ accent: e.target.value })}
-                  className="h-10 w-14 rounded border border-gray-300 cursor-pointer"
-                />
-                <input
-                  type="text"
-                  value={theme.colors.accent || ""}
-                  onChange={(e) => updateColors({ accent: e.target.value })}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="#3b82f6"
-                />
-              </div>
-            </div>
+            <ColorPicker
+              label="Accent Color"
+              value={theme.colors.accent || "#3b82f6"}
+              onChange={(color) => updateColors({ accent: color })}
+            />
           </div>
         </div>
 

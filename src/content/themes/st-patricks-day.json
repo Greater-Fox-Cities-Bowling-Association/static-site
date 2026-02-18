@@ -1,0 +1,20 @@
+{
+  "id": "st-patricks-day",
+  "name": "St. Patrick's Day",
+  "description": "Irish green and gold theme for St. Patrick's Day",
+  "isActive": true,
+  "colors": {
+    "primary": "#16a34a",
+    "secondary": "#f2d31b",
+    "background": "#caefd5",
+    "text": "#14532d",
+    "textSecondary": "#422006",
+    "accent": "#19c156"
+  },
+  "fonts": {
+    "heading": "Outfit, sans-serif",
+    "body": "Inter, system-ui, sans-serif"
+  },
+  "createdAt": "2026-02-17T00:00:00Z",
+  "updatedAt": "2026-02-18T02:44:13.296Z"
+}
