@@ -1,7 +1,6 @@
-
-import type { HeroSection } from '../../../types/cms';
-import type { SectionEditorProps } from '../../../types/cms';
-import SectionWrapper from './SectionWrapper';
+import type { HeroSection } from "../../../types/cms";
+import type { SectionEditorProps } from "../../../types/cms";
+import SectionWrapper from "./SectionWrapper";
 
 type HeroEditorProps = SectionEditorProps & {
   section: HeroSection;
@@ -16,7 +15,10 @@ export default function HeroEditor({
   canMoveUp,
   canMoveDown,
 }: HeroEditorProps) {
-  const updateField = <K extends keyof HeroSection>(field: K, value: HeroSection[K]) => {
+  const updateField = <K extends keyof HeroSection>(
+    field: K,
+    value: HeroSection[K],
+  ) => {
     onChange({ ...section, [field]: value });
   };
 
@@ -31,14 +33,14 @@ export default function HeroEditor({
     >
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Title <span className="text-red-500">*</span>
+          <label className="block text-sm font-medium text-text-secondary mb-1">
+            Title <span className="text-red-600">*</span>
           </label>
           <input
             type="text"
             value={section.title}
-            onChange={(e) => updateField('title', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onChange={(e) => updateField("title", e.target.value)}
+            className="w-full px-3 py-2 border border-text/20 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
             placeholder="Enter hero title"
           />
         </div>
@@ -48,8 +50,8 @@ export default function HeroEditor({
             Subtitle
           </label>
           <textarea
-            value={section.subtitle || ''}
-            onChange={(e) => updateField('subtitle', e.target.value)}
+            value={section.subtitle || ""}
+            onChange={(e) => updateField("subtitle", e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             rows={3}
             placeholder="Enter subtitle (optional)"
@@ -62,8 +64,8 @@ export default function HeroEditor({
           </label>
           <input
             type="text"
-            value={section.backgroundImage || ''}
-            onChange={(e) => updateField('backgroundImage', e.target.value)}
+            value={section.backgroundImage || ""}
+            onChange={(e) => updateField("backgroundImage", e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="https://example.com/image.jpg"
           />
@@ -76,8 +78,8 @@ export default function HeroEditor({
             </label>
             <input
               type="text"
-              value={section.ctaText || ''}
-              onChange={(e) => updateField('ctaText', e.target.value)}
+              value={section.ctaText || ""}
+              onChange={(e) => updateField("ctaText", e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Get Started"
             />
@@ -89,8 +91,8 @@ export default function HeroEditor({
             </label>
             <input
               type="text"
-              value={section.ctaLink || ''}
-              onChange={(e) => updateField('ctaLink', e.target.value)}
+              value={section.ctaLink || ""}
+              onChange={(e) => updateField("ctaLink", e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="/contact"
             />

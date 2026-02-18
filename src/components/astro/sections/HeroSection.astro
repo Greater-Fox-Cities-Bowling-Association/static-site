@@ -16,7 +16,7 @@ const { section } = Astro.props;
 const { title, subtitle, backgroundImage, ctaText, ctaLink } = section;
 ---
 
-<section class="relative min-h-[500px] flex items-center justify-center overflow-hidden">
+<section class="relative min-h-[500px] flex items-center justify-center overflow-hidden bg-gradient-to-br from-primary to-secondary">
   {backgroundImage && (
     <div class="absolute inset-0 z-0">
       <img 
@@ -29,12 +29,12 @@ const { title, subtitle, backgroundImage, ctaText, ctaLink } = section;
   )}
   
   <div class="container mx-auto px-4 relative z-10 text-center">
-    <h1 class="text-4xl md:text-6xl font-bold text-white mb-6">
+    <h1 class="text-4xl md:text-6xl font-bold text-background mb-6">
       {title}
     </h1>
     
     {subtitle && (
-      <p class="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto">
+      <p class="text-xl md:text-2xl text-background opacity-90 mb-8 max-w-3xl mx-auto">
         {subtitle}
       </p>
     )}
@@ -42,7 +42,7 @@ const { title, subtitle, backgroundImage, ctaText, ctaLink } = section;
     {ctaText && ctaLink && (
       <a 
         href={ctaLink} 
-        class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-4 rounded-lg transition-colors"
+        class="inline-block bg-accent hover:bg-primary text-background font-semibold px-8 py-4 rounded-lg transition-colors"
       >
         {ctaText}
       </a>

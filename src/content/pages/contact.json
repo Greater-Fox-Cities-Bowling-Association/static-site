@@ -1,0 +1,28 @@
+{
+  "slug": "contact",
+  "title": "Contact",
+  "metaDescription": "Get in touch with the association.",
+  "status": "published",
+  "useLayout": true,
+  "layoutId": "default",
+  "sections": [
+    {
+      "id": "contact-hero",
+      "order": 1,
+      "type": "hero",
+      "title": "Contact Us",
+      "subtitle": "We are here to help with questions, memberships, and events.",
+      "ctaText": "Email Us",
+      "ctaLink": "mailto:info@example.org"
+    },
+    {
+      "id": "contact-details",
+      "order": 2,
+      "type": "text",
+      "heading": "Contact Details",
+      "content": "This is a test contact"
+    }
+  ],
+  "createdAt": "2026-02-15T00:00:00.000Z",
+  "updatedAt": "2026-02-15T00:00:00.000Z"
+}

@@ -17,15 +17,15 @@ const { cards } = Astro.props;
   {cards.map((card) => (
     <a
       href={card.link}
-      class="group bg-white rounded-lg shadow-md hover:shadow-xl transition-all p-6 border border-gray-200 hover:border-primary-500"
+      class="group bg-background rounded-lg shadow-md hover:shadow-xl transition-all p-6 border border-text/10 hover:border-primary"
     >
-      <h3 class="font-display font-bold text-xl mb-2 text-gray-900 group-hover:text-primary-700 transition-colors">
+      <h3 class="font-display font-bold text-xl mb-2 text-text group-hover:text-primary transition-colors">
         {card.title}
       </h3>
-      <p class="text-gray-600 text-sm">
+      <p class="text-text-secondary text-sm">
         {card.description}
       </p>
-      <div class="mt-4 text-primary-600 text-sm font-semibold flex items-center">
+      <div class="mt-4 text-primary text-sm font-semibold flex items-center">
         Learn more
         <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />

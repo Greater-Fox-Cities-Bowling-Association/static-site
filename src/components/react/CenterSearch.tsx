@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo } from "react";
 
 interface Center {
   name: string;
@@ -17,17 +17,17 @@ interface Props {
 }
 
 export default function CenterSearch({ centers }: Props) {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
 
   const filteredCenters = useMemo(() => {
     if (!searchTerm) return centers;
-    
+
     const term = searchTerm.toLowerCase();
     return centers.filter(
       (center) =>
         center.name.toLowerCase().includes(term) ||
         center.city.toLowerCase().includes(term) ||
-        center.features?.some((f) => f.toLowerCase().includes(term))
+        center.features?.some((f) => f.toLowerCase().includes(term)),
     );
   }, [centers, searchTerm]);
 
@@ -39,19 +39,19 @@ export default function CenterSearch({ centers }: Props) {
           placeholder="Search by name, city, or features..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+          className="w-full px-4 py-3 border border-text/20 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
         />
         {searchTerm && (
           <button
-            onClick={() => setSearchTerm('')}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            onClick={() => setSearchTerm("")}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text"
           >
             ✕
           </button>
         )}
       </div>
 
-      <div className="text-sm text-gray-600">
+      <div className="text-sm text-text-secondary">
         Showing {filteredCenters.length} of {centers.length} centers
       </div>
 
@@ -59,12 +59,12 @@ export default function CenterSearch({ centers }: Props) {
         {filteredCenters.map((center, index) => (
           <div
             key={index}
-            className="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg transition-shadow"
+            className="bg-background rounded-lg shadow-md p-6 border border-text/10 hover:shadow-lg transition-shadow"
           >
-            <h3 className="font-display font-bold text-xl mb-3 text-gray-900">
+            <h3 className="font-display font-bold text-xl mb-3 text-text">
               {center.name}
             </h3>
-            <div className="space-y-2 text-gray-700">
+            <div className="space-y-2 text-text-secondary">
               <p>{center.address}</p>
               <p>
                 {center.city}, {center.state} {center.zip}
@@ -75,22 +75,22 @@ export default function CenterSearch({ centers }: Props) {
                   href={center.website}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-primary-600 hover:text-primary-700 inline-block mt-2"
+                  className="text-primary hover:text-primary inline-block mt-2"
                 >
                   Visit Website →
                 </a>
               )}
               {center.lanes && (
-                <p className="text-sm text-gray-600 mt-3">
+                <p className="text-sm text-text-secondary mt-3">
                   <strong>Lanes:</strong> {center.lanes}
                 </p>
               )}
               {center.features && center.features.length > 0 && (
                 <div className="mt-3">
-                  <p className="text-sm font-semibold text-gray-700 mb-1">
+                  <p className="text-sm font-semibold text-text-secondary mb-1">
                     Features:
                   </p>
-                  <ul className="text-sm text-gray-600 space-y-1">
+                  <ul className="text-sm text-text-secondary space-y-1">
                     {center.features.map((feature, i) => (
                       <li key={i}>• {feature}</li>
                     ))}
@@ -103,7 +103,7 @@ export default function CenterSearch({ centers }: Props) {
       </div>
 
       {filteredCenters.length === 0 && (
-        <div className="text-center py-12 text-gray-500">
+        <div className="text-center py-12 text-text-secondary">
           No centers found matching your search.
         </div>
       )}

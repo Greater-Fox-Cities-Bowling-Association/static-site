@@ -1,0 +1,50 @@
+---
+import type { Layout } from '../../types/cms';
+import Navigation from './Navigation.astro';
+import Footer from './Footer.astro';
+
+interface Props {
+  layout?: Layout;
+}
+
+const { layout } = Astro.props;
+---
+
+<div class="page-layout">
+  {layout?.header.showNavigation && (
+    <header class="page-layout__header">
+      <Navigation />
+    </header>
+  )}
+  
+  <main class="page-layout__main">
+    <slot />
+  </main>
+  
+  {layout?.footer.showFooter && (
+    <footer class="page-layout__footer">
+      <Footer />
+    </footer>
+  )}
+</div>
+
+<style>
+  .page-layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .page-layout__header {
+    flex-shrink: 0;
+  }
+
+  .page-layout__main {
+    flex: 1;
+  }
+
+  .page-layout__footer {
+    flex-shrink: 0;
+    margin-top: auto;
+  }
+</style>

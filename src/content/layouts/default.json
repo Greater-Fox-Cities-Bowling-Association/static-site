@@ -1,0 +1,13 @@
+{
+  "id": "default",
+  "name": "Default Layout",
+  "description": "Standard layout with header navigation and footer",
+  "header": {
+    "showNavigation": true,
+    "navigationStyle": "default"
+  },
+  "footer": {
+    "showFooter": true,
+    "footerStyle": "default"
+  }
+}

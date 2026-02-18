@@ -58,6 +58,60 @@ export interface CtaSection extends BaseSection {
 export type Section = HeroSection | TextSection | CardGridSection | CtaSection;
 
 // =============================================================================
+// Layout Type Definitions
+// =============================================================================
+
+export interface LayoutHeader {
+  showNavigation: boolean;
+  navigationStyle: 'default' | 'minimal' | 'full';
+  customNavigation?: boolean;
+}
+
+export interface LayoutFooter {
+  showFooter: boolean;
+  footerStyle?: 'default' | 'minimal' | 'full';
+  customFooter?: boolean;
+}
+
+export interface Layout {
+  id: string;
+  name: string;
+  description: string;
+  header: LayoutHeader;
+  footer: LayoutFooter;
+  updatedAt?: string;
+}
+
+// =============================================================================
+// Theme Type Definitions
+// =============================================================================
+
+export interface ThemeColors {
+  primary: string;
+  secondary: string;
+  background: string;
+  text: string;
+  textSecondary?: string;
+  accent?: string;
+}
+
+export interface ThemeFonts {
+  heading: string;
+  body: string;
+}
+
+export interface Theme {
+  id: string;
+  name: string;
+  description?: string;
+  isActive?: boolean;
+  colors: ThemeColors;
+  fonts: ThemeFonts;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+// =============================================================================
 // Page Content
 // =============================================================================
 
@@ -66,6 +120,9 @@ export interface PageContent {
   title: string;
   metaDescription?: string;
   status: PageStatus;
+  isLandingPage?: boolean;
+  layoutId?: string; // Optional layout ID - if not set and default exists, use default
+  useLayout?: boolean; // If false, render without any layout wrapper
   sections: Section[];
   createdAt?: string;
   updatedAt?: string;

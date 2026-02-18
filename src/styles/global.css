@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Theme CSS Variables - These are fallbacks only, overridden by server-side rendering */
+  :root {
+    /* Defaults are set by server in BaseLayout.astro */
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    font-family: var(--font-body);
+    background-color: var(--color-background);
+    color: var(--color-text);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    color: var(--color-text);
+  }
+
+  a {
+    color: var(--color-primary);
+    text-decoration: none;
+  }
+
+  a:hover {
+    color: var(--color-accent);
+  }
+}
+
+@layer components {
+  button,
+  [role="button"] {
+    @apply bg-primary text-background border border-primary cursor-pointer transition-all duration-200;
+  }
+
+  button:hover,
+  [role="button"]:hover {
+    @apply bg-secondary border-secondary;
+  }
+}

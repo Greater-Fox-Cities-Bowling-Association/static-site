@@ -1,0 +1,20 @@
+{
+  "id": "bowling-green",
+  "name": "Bowling Green",
+  "description": "A vibrant green theme inspired by bowling lanes",
+  "isActive": false,
+  "colors": {
+    "primary": "#10b981",
+    "secondary": "#6b7280",
+    "background": "#f9fafb",
+    "text": "#111827",
+    "textSecondary": "#f1f5f9",
+    "accent": "#14b8a6"
+  },
+  "fonts": {
+    "heading": "Outfit, sans-serif",
+    "body": "Inter, system-ui, sans-serif"
+  },
+  "createdAt": "2026-02-15T00:00:00Z",
+  "updatedAt": "2026-02-18T02:42:07.592Z"
+}
