@@ -145,18 +145,18 @@ export default function PageList({
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-gray-600">Loading pages...</div>
+        <div className="text-text-secondary">Loading pages...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+      <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-6">
         <p className="text-red-700">Error: {error}</p>
         <button
           onClick={loadPages}
-          className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          className="mt-2 px-4 py-2 bg-red-600 text-background rounded hover:bg-red-700"
         >
           Retry
         </button>
@@ -167,10 +167,10 @@ export default function PageList({
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Pages</h2>
+        <h2 className="text-2xl font-bold text-text">Pages</h2>
         <button
           onClick={onCreateNew}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+          className="px-4 py-2 bg-primary text-background rounded-lg hover:bg-accent font-medium"
         >
           + Create New Page
         </button>
@@ -183,17 +183,17 @@ export default function PageList({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search pages..."
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 border border-text/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
       )}
 
       {filteredPages.length === 0 && pages.length === 0 && (
-        <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-          <p className="text-gray-600 text-lg mb-4">No pages yet</p>
+        <div className="text-center py-12 bg-background rounded-lg border-2 border-dashed border-text/20">
+          <p className="text-text-secondary text-lg mb-4">No pages yet</p>
           <button
             onClick={onCreateNew}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+            className="px-6 py-3 bg-primary text-background rounded-lg hover:bg-accent font-medium"
           >
             Create Your First Page
           </button>
@@ -201,36 +201,36 @@ export default function PageList({
       )}
 
       {filteredPages.length === 0 && pages.length > 0 && (
-        <div className="text-center py-8 text-gray-600">
+        <div className="text-center py-8 text-text-secondary">
           No pages match your search
         </div>
       )}
 
       {filteredPages.length > 0 && (
-        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+        <div className="bg-background border border-text/10 rounded-lg overflow-hidden">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="bg-background border-b border-text/10">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                   Title
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                   Slug
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-text/10">
               {filteredPages.map((page) => (
-                <tr key={page.slug} className="hover:bg-gray-50">
+                <tr key={page.slug} className="hover:bg-primary/5">
                   <td className="px-6 py-4">
                     <div className="flex items-center">
-                      <span className="font-medium text-gray-900">
+                      <span className="font-medium text-text">
                         {page.title}
                       </span>
                       {page.hasDraft && (
@@ -240,7 +240,7 @@ export default function PageList({
                       )}
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-500 font-mono">
+                  <td className="px-6 py-4 text-sm text-text-secondary font-mono">
                     {page.slug}
                   </td>
                   <td className="px-6 py-4">
@@ -257,7 +257,7 @@ export default function PageList({
                   <td className="px-6 py-4 text-right text-sm">
                     <button
                       onClick={() => onEdit(page.slug)}
-                      className="text-blue-600 hover:text-blue-800 mr-4"
+                      className="text-primary hover:text-primary mr-4"
                     >
                       Edit
                     </button>
@@ -266,7 +266,7 @@ export default function PageList({
                       className={`${
                         deleteConfirm === page.slug
                           ? "text-red-700 font-bold"
-                          : "text-red-600 hover:text-red-800"
+                          : "text-red-600 hover:text-red-700"
                       }`}
                     >
                       {deleteConfirm === page.slug
@@ -276,7 +276,7 @@ export default function PageList({
                     {deleteConfirm === page.slug && (
                       <button
                         onClick={() => setDeleteConfirm(null)}
-                        className="ml-2 text-gray-600 hover:text-gray-800"
+                        className="ml-2 text-text-secondary hover:text-text"
                       >
                         Cancel
                       </button>

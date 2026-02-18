@@ -723,40 +723,40 @@ export default function PageEditor({
             <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={() => addSection("hero")}
-                className="px-4 py-2 bg-white border border-gray-300 rounded hover:bg-gray-50 text-left"
+                className="px-4 py-2 bg-background border border-text/20 rounded hover:bg-primary/5 text-left"
               >
                 <div className="font-medium">Hero</div>
-                <div className="text-xs text-gray-500">
+                <div className="text-xs text-text-secondary">
                   Large banner with title and CTA
                 </div>
               </button>
 
               <button
                 onClick={() => addSection("text")}
-                className="px-4 py-2 bg-white border border-gray-300 rounded hover:bg-gray-50 text-left"
+                className="px-4 py-2 bg-background border border-text/20 rounded hover:bg-primary/5 text-left"
               >
                 <div className="font-medium">Text Block</div>
-                <div className="text-xs text-gray-500">
+                <div className="text-xs text-text-secondary">
                   Paragraph content with optional heading
                 </div>
               </button>
 
               <button
                 onClick={() => addSection("cardGrid")}
-                className="px-4 py-2 bg-white border border-gray-300 rounded hover:bg-gray-50 text-left"
+                className="px-4 py-2 bg-background border border-text/20 rounded hover:bg-primary/5 text-left"
               >
                 <div className="font-medium">Card Grid</div>
-                <div className="text-xs text-gray-500">
+                <div className="text-xs text-text-secondary">
                   Multiple cards in a grid layout
                 </div>
               </button>
 
               <button
                 onClick={() => addSection("cta")}
-                className="px-4 py-2 bg-white border border-gray-300 rounded hover:bg-gray-50 text-left"
+                className="px-4 py-2 bg-background border border-text/20 rounded hover:bg-primary/5 text-left"
               >
                 <div className="font-medium">Call to Action</div>
-                <div className="text-xs text-gray-500">
+                <div className="text-xs text-text-secondary">
                   Prominent button with heading
                 </div>
               </button>
@@ -765,8 +765,8 @@ export default function PageEditor({
         )}
 
         {page.sections.length === 0 && (
-          <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-            <p className="text-gray-600">
+          <div className="text-center py-12 bg-background rounded-lg border-2 border-dashed border-text/20">
+            <p className="text-text-secondary">
               No sections yet. Click "Add Section" to create content.
             </p>
           </div>

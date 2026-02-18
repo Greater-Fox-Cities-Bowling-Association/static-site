@@ -1,7 +1,6 @@
-
-import type { TextSection } from '../../../types/cms';
-import type { SectionEditorProps } from '../../../types/cms';
-import SectionWrapper from './SectionWrapper';
+import type { TextSection } from "../../../types/cms";
+import type { SectionEditorProps } from "../../../types/cms";
+import SectionWrapper from "./SectionWrapper";
 
 type TextEditorProps = SectionEditorProps & {
   section: TextSection;
@@ -16,7 +15,10 @@ export default function TextEditor({
   canMoveUp,
   canMoveDown,
 }: TextEditorProps) {
-  const updateField = <K extends keyof TextSection>(field: K, value: TextSection[K]) => {
+  const updateField = <K extends keyof TextSection>(
+    field: K,
+    value: TextSection[K],
+  ) => {
     onChange({ ...section, [field]: value });
   };
 
@@ -31,26 +33,26 @@ export default function TextEditor({
     >
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-text-secondary mb-1">
             Heading
           </label>
           <input
             type="text"
-            value={section.heading || ''}
-            onChange={(e) => updateField('heading', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={section.heading || ""}
+            onChange={(e) => updateField("heading", e.target.value)}
+            className="w-full px-3 py-2 border border-text/20 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
             placeholder="Section heading (optional)"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Content <span className="text-red-500">*</span>
+          <label className="block text-sm font-medium text-text-secondary mb-1">
+            Content <span className="text-red-600">*</span>
           </label>
           <textarea
             value={section.content}
-            onChange={(e) => updateField('content', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+            onChange={(e) => updateField("content", e.target.value)}
+            className="w-full px-3 py-2 border border-text/20 rounded-md focus:outline-none focus:ring-2 focus:ring-primary font-mono text-sm"
             rows={10}
             placeholder="Enter text content (supports markdown)"
           />

@@ -12,11 +12,11 @@ const navItems = [
 ];
 ---
 
-<nav class="bg-white shadow-md sticky top-0 z-50">
+<nav class="bg-background shadow-md sticky top-0 z-50">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex justify-between items-center h-16">
       <div class="flex-shrink-0">
-        <a href="/" class="font-display font-bold text-xl text-primary-700">
+        <a href="/" class="font-display font-bold text-xl text-primary">
           GFCBA
         </a>
       </div>
@@ -26,7 +26,7 @@ const navItems = [
         {navItems.map((item) => (
           <a
             href={item.href}
-            class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-primary-700 hover:bg-primary-50 transition-colors"
+            class="px-3 py-2 rounded-md text-sm font-medium text-text-secondary hover:text-primary hover:bg-primary/10 transition-colors"
           >
             {item.label}
           </a>
@@ -38,7 +38,7 @@ const navItems = [
         <button
           type="button"
           id="mobile-menu-button"
-          class="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-primary-700 hover:bg-primary-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500"
+          class="inline-flex items-center justify-center p-2 rounded-md text-text-secondary hover:text-primary hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
           aria-controls="mobile-menu"
           aria-expanded="false"
         >
@@ -57,7 +57,7 @@ const navItems = [
       {navItems.map((item) => (
         <a
           href={item.href}
-          class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary-700 hover:bg-primary-50 transition-colors"
+          class="block px-3 py-2 rounded-md text-base font-medium text-text-secondary hover:text-primary hover:bg-primary/10 transition-colors"
         >
           {item.label}
         </a>

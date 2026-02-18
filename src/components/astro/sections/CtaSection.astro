@@ -9,14 +9,14 @@ const { section } = Astro.props;
 const { heading, buttonText, buttonLink, style } = section;
 
 const buttonStyles = {
-  primary: 'bg-blue-600 hover:bg-blue-700 text-white',
-  secondary: 'bg-gray-800 hover:bg-gray-900 text-white',
+  primary: 'bg-primary hover:bg-accent text-background',
+  secondary: 'bg-secondary hover:bg-primary text-text',
 };
 ---
 
-<section class="py-20 bg-gradient-to-br from-blue-600 to-blue-800">
+<section class="py-20 bg-gradient-to-br from-primary to-secondary">
   <div class="container mx-auto px-4 text-center">
-    <h2 class="text-3xl md:text-5xl font-bold text-white mb-8">
+    <h2 class="text-3xl md:text-5xl font-bold text-background mb-8">
       {heading}
     </h2>
     

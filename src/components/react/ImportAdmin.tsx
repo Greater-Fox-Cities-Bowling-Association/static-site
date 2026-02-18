@@ -94,13 +94,13 @@ export default function ImportAdmin() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
+        <div className="bg-background rounded-2xl shadow-xl p-8 max-w-md w-full">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
+            <h2 className="text-xl font-semibold text-text mb-2">
               Initializing Authentication...
             </h2>
-            <p className="text-gray-600">
+            <p className="text-text-secondary">
               Please wait while we set up your session
             </p>
           </div>
@@ -111,17 +111,17 @@ export default function ImportAdmin() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
+      <div className="min-h-screen bg-gradient-to-br from-red-500/10 to-red-100 flex items-center justify-center p-4">
+        <div className="bg-background rounded-2xl shadow-xl p-8 max-w-md w-full">
           <div className="text-center">
             <div className="text-5xl mb-4">❌</div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            <h2 className="text-xl font-semibold text-text mb-2">
               Authentication Error
             </h2>
-            <p className="text-gray-600 mb-4">{error.message}</p>
+            <p className="text-text-secondary mb-4">{error.message}</p>
             <button
               onClick={() => window.location.reload()}
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              className="bg-primary text-background px-6 py-2 rounded-lg hover:bg-accent transition-colors"
             >
               Try Again
             </button>
@@ -223,14 +223,14 @@ export default function ImportAdmin() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <header className="bg-white shadow-sm border-b border-gray-200">
+      <header className="bg-background shadow-sm border-b border-text/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="text-2xl font-bold text-text">
                 🏆 GFCBA Admin Panel
               </h1>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-sm text-text-secondary mt-1">
                 Logged in as {user?.email}
               </p>
             </div>
@@ -246,13 +246,13 @@ export default function ImportAdmin() {
 
       {!githubToken ? (
         <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">
-          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full mx-4">
+          <div className="bg-background rounded-2xl shadow-xl p-8 max-w-md w-full mx-4">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
+              <h2 className="text-xl font-semibold text-text mb-2">
                 Setting up GitHub access...
               </h2>
-              <p className="text-gray-600">
+              <p className="text-text-secondary">
                 Please wait while we configure your repository access
               </p>
             </div>
@@ -260,14 +260,14 @@ export default function ImportAdmin() {
         </div>
       ) : (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+          <div className="bg-background rounded-lg shadow-sm p-4 mb-6">
             <div className="flex items-center gap-3">
               <div className="text-2xl">✓</div>
               <div>
-                <p className="text-sm font-medium text-gray-900">
+                <p className="text-sm font-medium text-text">
                   Connected to GitHub as @{githubUser}
                 </p>
-                <p className="text-xs text-gray-600">
+                <p className="text-xs text-text-secondary">
                   Repository: {githubRepo}
                 </p>
               </div>
@@ -280,10 +280,10 @@ export default function ImportAdmin() {
                 <div className="flex items-center gap-3">
                   <div className="text-2xl">🔧</div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">
+                    <h3 className="font-semibold text-text">
                       Development Mode
                     </h3>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-text-secondary">
                       {useGitHubAPI
                         ? "Using GitHub API (testing production behavior)"
                         : "Using local files (faster development)"}
@@ -294,8 +294,8 @@ export default function ImportAdmin() {
                   onClick={() => setUseGitHubAPI(!useGitHubAPI)}
                   className={`px-4 py-2 rounded-lg font-medium transition-all ${
                     useGitHubAPI
-                      ? "bg-blue-600 text-white hover:bg-blue-700"
-                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                      ? "bg-primary text-background hover:bg-accent"
+                      : "bg-text/10 text-text hover:bg-text/20"
                   }`}
                 >
                   {useGitHubAPI ? "Switch to Local Files" : "Test GitHub API"}
@@ -304,8 +304,8 @@ export default function ImportAdmin() {
             </div>
           )}
 
-          <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          <div className="bg-background rounded-lg shadow-sm p-6 mb-6">
+            <h2 className="text-lg font-semibold text-text mb-4">
               Select Mode
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -313,8 +313,8 @@ export default function ImportAdmin() {
                 onClick={() => setMode("csv")}
                 className={`p-4 rounded-lg border-2 transition-all ${
                   mode === "csv"
-                    ? "border-blue-600 bg-blue-50"
-                    : "border-gray-200 hover:border-blue-300"
+                    ? "border-primary bg-primary/10"
+                    : "border-text/20 hover:border-primary/50"
                 }`}
               >
                 <div className="text-3xl mb-2">📊</div>
@@ -473,8 +473,8 @@ function CsvImportPanel({
 
   if (step === "select-type") {
     return (
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+      <div className="bg-background rounded-lg shadow-sm p-6">
+        <h2 className="text-lg font-semibold text-text mb-4">
           Select Collection Type
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -482,9 +482,9 @@ function CsvImportPanel({
             <button
               key={type}
               onClick={() => onTypeSelect(type)}
-              className="p-4 rounded-lg border-2 border-gray-200 hover:border-blue-300 transition-all"
+              className="p-4 rounded-lg border-2 border-text/20 hover:border-primary/50 transition-all"
             >
-              <h3 className="font-semibold text-gray-900 capitalize">{type}</h3>
+              <h3 className="font-semibold text-text capitalize">{type}</h3>
             </button>
           ))}
         </div>
@@ -494,21 +494,21 @@ function CsvImportPanel({
 
   if (step === "upload") {
     return (
-      <div className="bg-white rounded-lg shadow-sm p-6">
+      <div className="bg-background rounded-lg shadow-sm p-6">
         <button
           onClick={onBack}
-          className="mb-4 text-sm text-gray-600 hover:text-gray-900"
+          className="mb-4 text-sm text-text-secondary hover:text-text"
         >
           ← Back
         </button>
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+        <h2 className="text-lg font-semibold text-text mb-4">
           Upload CSV for {collectionType}
         </h2>
         <input
           type="file"
           accept=".csv"
           onChange={handleFileChange}
-          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+          className="block w-full text-sm text-text-secondary file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
         />
       </div>
     );
@@ -516,29 +516,29 @@ function CsvImportPanel({
 
   if (step === "preview") {
     return (
-      <div className="bg-white rounded-lg shadow-sm p-6">
+      <div className="bg-background rounded-lg shadow-sm p-6">
         <button
           onClick={onBack}
-          className="mb-4 text-sm text-gray-600 hover:text-gray-900"
+          className="mb-4 text-sm text-text-secondary hover:text-text"
         >
           ← Back
         </button>
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+        <h2 className="text-lg font-semibold text-text mb-4">
           Preview: {filename}
         </h2>
-        <pre className="bg-gray-100 p-4 rounded-lg overflow-auto max-h-96 text-sm">
+        <pre className="bg-background border border-text/10 p-4 rounded-lg overflow-auto max-h-96 text-sm">
           {JSON.stringify(mappedData, null, 2)}
         </pre>
         <div className="mt-4 flex gap-3">
           <button
             onClick={onBack}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+            className="px-4 py-2 text-sm font-medium text-text bg-text/10 hover:bg-text/20 rounded-lg transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={() => alert("Import functionality to be implemented")}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+            className="px-4 py-2 text-sm font-medium text-background bg-primary hover:bg-accent rounded-lg transition-colors"
           >
             Import Data
           </button>

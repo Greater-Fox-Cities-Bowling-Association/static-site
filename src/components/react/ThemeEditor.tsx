@@ -288,13 +288,13 @@ export default function ThemeEditor({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-text-secondary mb-1">
               Description
             </label>
             <textarea
               value={theme.description || ""}
               onChange={(e) => updateTheme({ description: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-text/20 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
               rows={2}
               placeholder="Describe your theme..."
             />
@@ -303,11 +303,11 @@ export default function ThemeEditor({
 
         {/* Colors */}
         <div className="space-y-4 border-t pt-6">
-          <h3 className="text-lg font-semibold text-gray-900">Colors</h3>
+          <h3 className="text-lg font-semibold text-text">Colors</h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-text-secondary mb-1">
                 Primary Color *
               </label>
               <div className="flex gap-2">
@@ -315,16 +315,16 @@ export default function ThemeEditor({
                   type="color"
                   value={theme.colors.primary}
                   onChange={(e) => updateColors({ primary: e.target.value })}
-                  className="h-10 w-14 rounded border border-gray-300 cursor-pointer"
+                  className="h-10 w-14 rounded border border-text/20 cursor-pointer"
                 />
                 <input
                   type="text"
                   value={theme.colors.primary}
                   onChange={(e) => updateColors({ primary: e.target.value })}
-                  className={`flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                  className={`flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary ${
                     validationErrors.primary
-                      ? "border-red-300"
-                      : "border-gray-300"
+                      ? "border-red-500"
+                      : "border-text/20"
                   }`}
                   placeholder="#2563eb"
                 />
@@ -332,7 +332,7 @@ export default function ThemeEditor({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-text-secondary mb-1">
                 Secondary Color
               </label>
               <div className="flex gap-2">
@@ -340,7 +340,7 @@ export default function ThemeEditor({
                   type="color"
                   value={theme.colors.secondary}
                   onChange={(e) => updateColors({ secondary: e.target.value })}
-                  className="h-10 w-14 rounded border border-gray-300 cursor-pointer"
+                  className="h-10 w-14 rounded border border-text/20 cursor-pointer"
                 />
                 <input
                   type="text"
@@ -450,20 +450,20 @@ export default function ThemeEditor({
 
         {/* Fonts */}
         <div className="space-y-4 border-t pt-6">
-          <h3 className="text-lg font-semibold text-gray-900">Typography</h3>
+          <h3 className="text-lg font-semibold text-text">Typography</h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-text-secondary mb-1">
                 Heading Font *
               </label>
               <select
                 value={theme.fonts.heading}
                 onChange={(e) => updateFonts({ heading: e.target.value })}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary ${
                   validationErrors.headingFont
-                    ? "border-red-300"
-                    : "border-gray-300"
+                    ? "border-red-500"
+                    : "border-text/20"
                 }`}
               >
                 {GOOGLE_FONTS.map((font) => (
@@ -480,16 +480,16 @@ export default function ThemeEditor({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-text-secondary mb-1">
                 Body Font *
               </label>
               <select
                 value={theme.fonts.body}
                 onChange={(e) => updateFonts({ body: e.target.value })}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary ${
                   validationErrors.bodyFont
-                    ? "border-red-300"
-                    : "border-gray-300"
+                    ? "border-red-500"
+                    : "border-text/20"
                 }`}
               >
                 {GOOGLE_FONTS.map((font) => (
@@ -509,7 +509,7 @@ export default function ThemeEditor({
 
         {/* Preview */}
         <div className="space-y-4 border-t pt-6">
-          <h3 className="text-lg font-semibold text-gray-900">Preview</h3>
+          <h3 className="text-lg font-semibold text-text">Preview</h3>
 
           <div
             className="rounded-lg border p-6 space-y-4"
@@ -551,10 +551,10 @@ export default function ThemeEditor({
       </div>
 
       {/* Action Buttons */}
-      <div className="flex items-center justify-between gap-4 bg-white border border-gray-200 rounded-lg p-4">
+      <div className="flex items-center justify-between gap-4 bg-background border border-text/10 rounded-lg p-4">
         <button
           onClick={onCancel}
-          className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+          className="px-6 py-2 border border-text/20 rounded-lg hover:bg-primary/5 transition-colors font-medium"
           disabled={saving}
         >
           Cancel
@@ -563,7 +563,7 @@ export default function ThemeEditor({
         <button
           onClick={handleSave}
           disabled={saving}
-          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-6 py-2 bg-primary text-background rounded-lg hover:bg-accent transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {saving ? "Saving..." : isCreating ? "Create Theme" : "Save Changes"}
         </button>

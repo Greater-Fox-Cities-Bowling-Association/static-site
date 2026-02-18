@@ -154,18 +154,18 @@ export default function LayoutList({
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-gray-600">Loading layouts...</div>
+        <div className="text-text-secondary">Loading layouts...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+      <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-6">
         <p className="text-red-700">Error: {error}</p>
         <button
           onClick={loadLayouts}
-          className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          className="mt-2 px-4 py-2 bg-red-600 text-background rounded hover:bg-red-700"
         >
           Retry
         </button>
@@ -176,10 +176,10 @@ export default function LayoutList({
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Layouts</h2>
+        <h2 className="text-2xl font-bold text-text">Layouts</h2>
         <button
           onClick={onCreateNew}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+          className="px-4 py-2 bg-primary text-background rounded-lg hover:bg-accent font-medium"
         >
           + Create New Layout
         </button>
@@ -192,17 +192,17 @@ export default function LayoutList({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search layouts..."
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 border border-text/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
       )}
 
       {filteredLayouts.length === 0 && layouts.length === 0 && (
-        <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-          <p className="text-gray-600 text-lg mb-4">No layouts yet</p>
+        <div className="text-center py-12 bg-background rounded-lg border-2 border-dashed border-text/20">
+          <p className="text-text-secondary text-lg mb-4">No layouts yet</p>
           <button
             onClick={onCreateNew}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+            className="px-6 py-3 bg-primary text-background rounded-lg hover:bg-accent font-medium"
           >
             Create Your First Layout
           </button>
@@ -240,7 +240,7 @@ export default function LayoutList({
                 <div className="flex gap-2">
                   <button
                     onClick={() => onEdit(layout.id)}
-                    className="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 font-medium text-sm transition-colors"
+                    className="px-4 py-2 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 font-medium text-sm transition-colors"
                   >
                     Edit
                   </button>
@@ -249,8 +249,8 @@ export default function LayoutList({
                     onClick={() => handleDelete(layout.id)}
                     className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
                       deleteConfirm === layout.id
-                        ? "bg-red-600 text-white hover:bg-red-700"
-                        : "bg-red-50 text-red-600 hover:bg-red-100"
+                        ? "bg-red-600 text-background hover:bg-red-700"
+                        : "bg-red-500/10 text-red-600 hover:bg-red-500/20"
                     }`}
                   >
                     {deleteConfirm === layout.id ? "Confirm Delete?" : "Delete"}
@@ -259,7 +259,7 @@ export default function LayoutList({
                   {deleteConfirm === layout.id && (
                     <button
                       onClick={() => setDeleteConfirm(null)}
-                      className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium text-sm transition-colors"
+                      className="px-4 py-2 bg-text/10 text-text rounded-lg hover:bg-text/20 font-medium text-sm transition-colors"
                     >
                       Cancel
                     </button>
@@ -272,8 +272,8 @@ export default function LayoutList({
       )}
 
       {filteredLayouts.length === 0 && layouts.length > 0 && (
-        <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-          <p className="text-gray-600">No layouts match your search</p>
+        <div className="text-center py-12 bg-background rounded-lg border-2 border-dashed border-text/20">
+          <p className="text-text-secondary">No layouts match your search</p>
         </div>
       )}
     </div>

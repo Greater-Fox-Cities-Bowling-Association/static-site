@@ -156,7 +156,7 @@ export default function LayoutEditor({
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-gray-600">Loading layout...</div>
+        <div className="text-text-secondary">Loading layout...</div>
       </div>
     );
   }
@@ -164,21 +164,21 @@ export default function LayoutEditor({
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-900">
+        <h2 className="text-2xl font-bold text-text">
           {layoutId ? "Edit Layout" : "Create New Layout"}
         </h2>
 
         <div className="flex gap-2">
           <button
             onClick={onCancel}
-            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+            className="px-4 py-2 border border-text/20 rounded-lg hover:bg-primary/5"
           >
             Cancel
           </button>
 
           <button
             onClick={handlePublish}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+            className="px-4 py-2 bg-primary text-background rounded-lg hover:bg-accent disabled:opacity-50"
             disabled={saving}
           >
             {saving ? "Saving..." : "Save Layout"}
@@ -193,20 +193,20 @@ export default function LayoutEditor({
       )}
 
       {/* Basic Information */}
-      <div className="mb-6 p-6 bg-white border border-gray-200 rounded-lg">
+      <div className="mb-6 p-6 bg-background border border-text/10 rounded-lg">
         <h3 className="text-lg font-semibold mb-4">Basic Information</h3>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Layout Name <span className="text-red-500">*</span>
+            <label className="block text-sm font-medium text-text-secondary mb-1">
+              Layout Name <span className="text-red-600">*</span>
             </label>
             <input
               type="text"
               value={layout.name}
               onChange={(e) => handleNameChange(e.target.value)}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors.name ? "border-red-500" : "border-gray-300"
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary ${
+                errors.name ? "border-red-500" : "border-text/20"
               }`}
               placeholder="e.g., Blog Layout, Landing Page Layout"
             />
@@ -219,8 +219,8 @@ export default function LayoutEditor({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Layout ID <span className="text-red-500">*</span>
+            <label className="block text-sm font-medium text-text-secondary mb-1">
+              Layout ID <span className="text-red-600">*</span>
             </label>
             <input
               type="text"
@@ -228,8 +228,8 @@ export default function LayoutEditor({
               onChange={(e) =>
                 updateLayout({ id: generateLayoutId(e.target.value) })
               }
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm ${
-                errors.id ? "border-red-500" : "border-gray-300"
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary font-mono text-sm ${
+                errors.id ? "border-red-500" : "border-text/20"
               }`}
               placeholder="layout-id"
               disabled={!!layoutId} // Can't change ID when editing
@@ -248,13 +248,13 @@ export default function LayoutEditor({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-text-secondary mb-1">
               Description
             </label>
             <textarea
               value={layout.description}
               onChange={(e) => updateLayout({ description: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-text/20 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
               rows={3}
               placeholder="Describe what this layout is for and when to use it"
             />
@@ -267,7 +267,7 @@ export default function LayoutEditor({
       </div>
 
       {/* Header Configuration */}
-      <div className="mb-6 p-6 bg-white border border-gray-200 rounded-lg">
+      <div className="mb-6 p-6 bg-background border border-text/10 rounded-lg">
         <h3 className="text-lg font-semibold mb-4">Header Configuration</h3>
 
         <div className="space-y-4">
@@ -305,7 +305,7 @@ export default function LayoutEditor({
                     onChange={(e) =>
                       updateHeader({ navigationStyle: e.target.value as any })
                     }
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                    className="w-4 h-4 text-primary border-text/20 rounded focus:ring-2 focus:ring-primary"
                   />
                   <span className="text-sm text-gray-700">Default (Full)</span>
                 </label>
@@ -361,7 +361,7 @@ export default function LayoutEditor({
       </div>
 
       {/* Footer Configuration */}
-      <div className="mb-6 p-6 bg-white border border-gray-200 rounded-lg">
+      <div className="mb-6 p-6 bg-background border border-text/10 rounded-lg">
         <h3 className="text-lg font-semibold mb-4">Footer Configuration</h3>
 
         <div className="space-y-4">
@@ -453,9 +453,9 @@ export default function LayoutEditor({
       </div>
 
       {/* Preview */}
-      <div className="mb-6 p-6 bg-white border border-gray-200 rounded-lg">
+      <div className="mb-6 p-6 bg-background border border-text/10 rounded-lg">
         <h3 className="text-lg font-semibold mb-4">Layout Preview</h3>
-        <div className="bg-gray-50 p-8 rounded-lg border-2 border-dashed border-gray-300">
+        <div className="bg-background border border-text/10 p-8 rounded-lg border-2 border-dashed border-text/20">
           <div className="space-y-6">
             <div>
               <div className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">
