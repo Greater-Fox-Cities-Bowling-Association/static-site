@@ -1522,3 +1522,172 @@ export async function activateTheme(
     };
   }
 }
+
+// =============================================================================
+// Collection Management Functions
+// =============================================================================
+
+/**
+ * Get all collections with metadata
+ */
+export async function getCollections(
+  token: string,
+  forceGitHubAPI: boolean = false
+): Promise<any[]> {
+  logAPICall({
+    function: 'getCollections',
+    mode: forceGitHubAPI ? 'GITHUB_API' : 'LOCAL',
+    params: { forceGitHubAPI },
+  });
+
+  try {
+    // In Astro, we read from the content config
+    if (!forceGitHubAPI && typeof import.meta !== 'undefined' && import.meta.env.DEV) {
+      // Dev mode - read from local filesystem
+      const collections = await import('../content/config.ts');
+      const collectionInfo = [];
+
+      for (const [name, _collection] of Object.entries(collections.collections)) {
+        try {
+          // Try to get items from each collection
+          const items = await import.meta.glob('../content/**/*.json');
+          const collectionPath = `../content/${name}/`;
+          const collectionFiles = Object.keys(items).filter(path => path.includes(collectionPath));
+          
+          collectionInfo.push({
+            name,
+            itemCount: collectionFiles.length,
+            fields: [], // TODO: Extract from schema
+            description: `${name} collection`,
+          });
+        } catch (err) {
+          console.warn(`Could not load items for collection ${name}:`, err);
+          collectionInfo.push({
+            name,
+            itemCount: 0,
+            fields: [],
+            description: `${name} collection`,
+          });
+        }
+      }
+
+      logAPIResponse('getCollections', 'LOCAL', collectionInfo);
+      return collectionInfo;
+    }
+
+    // Production or forced GitHub API mode
+    // We need to list directories in src/content/
+    const response = await fetch(
+      `https://api.github.com/repos/${DEFAULT_OWNER}/${DEFAULT_REPO}/contents/src/content`,
+      {
+        headers: {
+          Authorization: `token ${token}`,
+          Accept: 'application/vnd.github.v3+json',
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`GitHub API error: ${response.statusText}`);
+    }
+
+    const contents = await response.json() as GitHubFileResponse[];
+    const collections = contents.filter((item) => item.type === 'dir' && item.name !== 'config.ts');
+
+    const collectionInfo = await Promise.all(
+      collections.map(async (coll) => {
+        // Get files in each collection
+        const collResponse = await fetch(coll.url, {
+          headers: {
+            Authorization: `token ${token}`,
+            Accept: 'application/vnd.github.v3+json',
+          },
+        });
+        
+        const collFiles = await collResponse.json() as GitHubFileResponse[];
+        const jsonFiles = collFiles.filter(f => f.name.endsWith('.json'));
+
+        return {
+          name: coll.name,
+          itemCount: jsonFiles.length,
+          fields: [],
+          description: `${coll.name} collection`,
+        };
+      })
+    );
+
+    logAPIResponse('getCollections', 'GITHUB_API', collectionInfo);
+    return collectionInfo;
+  } catch (error) {
+    logAPIResponse('getCollections', forceGitHubAPI ? 'GITHUB_API' : 'LOCAL', null, error);
+    throw error;
+  }
+}
+
+/**
+ * Get a specific collection schema
+ */
+export async function getCollection(
+  collectionName: string,
+  token: string,
+  forceGitHubAPI: boolean = false
+): Promise<any> {
+  logAPICall({
+    function: 'getCollection',
+    mode: forceGitHubAPI ? 'GITHUB_API' : 'LOCAL',
+    params: { collectionName, forceGitHubAPI },
+  });
+
+  try {
+    // Read the config.ts file and parse the collection schema
+    // This is a simplified approach - real implementation would parse the actual schema
+    const schema = {
+      name: collectionName,
+      description: `${collectionName} collection`,
+      fields: [
+        { name: 'title', type: 'string', required: true, description: 'Title' },
+        { name: 'description', type: 'string', required: false, description: 'Description' },
+      ],
+    };
+
+    logAPIResponse('getCollection', forceGitHubAPI ? 'GITHUB_API' : 'LOCAL', schema);
+    return schema;
+  } catch (error) {
+    logAPIResponse('getCollection', forceGitHubAPI ? 'GITHUB_API' : 'LOCAL', null, error);
+    throw error;
+  }
+}
+
+/**
+ * Save a collection schema
+ */
+export async function saveCollection(
+  schema: any,
+  token: string,
+  forceGitHubAPI: boolean = false
+): Promise<void> {
+  logAPICall({
+    function: 'saveCollection',
+    mode: forceGitHubAPI ? 'GITHUB_API' : 'LOCAL',
+    params: { schema, forceGitHubAPI },
+  });
+
+  try {
+    // This would update the config.ts file with the new collection schema
+    // For now, we'll just log it as this requires parsing and modifying TypeScript code
+    console.warn('Collection schema saving not yet implemented');
+    console.log('Would save schema:', schema);
+
+    // TODO: Implement actual schema saving
+    // This would involve:
+    // 1. Reading src/content/config.ts
+    // 2. Parsing the TypeScript AST
+    // 3. Adding/updating the collection definition
+    // 4. Writing back the modified file via GitHub API
+
+    logAPIResponse('saveCollection', forceGitHubAPI ? 'GITHUB_API' : 'LOCAL', { saved: true });
+  } catch (error) {
+    logAPIResponse('saveCollection', forceGitHubAPI ? 'GITHUB_API' : 'LOCAL', null, error);
+    throw error;
+  }
+}

@@ -10,6 +10,8 @@ import ThemeList from "./ThemeList";
 import ThemeEditor from "./ThemeEditor";
 import NavigationList from "./NavigationList";
 import NavigationEditor from "./NavigationEditor";
+import CollectionList from "./CollectionList";
+import CollectionEditor from "./CollectionEditor";
 
 type Step = "select-type" | "upload" | "preview";
 type Mode =
@@ -21,7 +23,9 @@ type Mode =
   | "themes"
   | "theme-editor"
   | "navigation"
-  | "navigation-editor";
+  | "navigation-editor"
+  | "collections"
+  | "collection-editor";
 
 export default function ImportAdmin() {
   const { isLoading, error, isAuthenticated, user, logout, getIdTokenClaims } =
@@ -41,6 +45,9 @@ export default function ImportAdmin() {
     undefined,
   );
   const [editingNavigationId, setEditingNavigationId] = useState<
+    string | undefined
+  >(undefined);
+  const [editingCollectionName, setEditingCollectionName] = useState<
     string | undefined
   >(undefined);
 
@@ -243,6 +250,26 @@ export default function ImportAdmin() {
     setEditingNavigationId(undefined);
   };
 
+  const handleEditCollection = (collectionName: string) => {
+    setEditingCollectionName(collectionName);
+    setMode("collection-editor");
+  };
+
+  const handleCreateNewCollection = () => {
+    setEditingCollectionName(undefined);
+    setMode("collection-editor");
+  };
+
+  const handleCollectionSaved = () => {
+    setMode("collections");
+    setEditingCollectionName(undefined);
+  };
+
+  const handleCancelCollectionEdit = () => {
+    setMode("collections");
+    setEditingCollectionName(undefined);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <header className="bg-background shadow-sm border-b border-text/10">
@@ -401,6 +428,20 @@ export default function ImportAdmin() {
                   Configure navigation menus & dropdowns
                 </p>
               </button>
+              <button
+                onClick={() => setMode("collections")}
+                className={`p-4 rounded-lg border-2 transition-all ${
+                  mode === "collections" || mode === "collection-editor"
+                    ? "border-blue-600 bg-blue-50"
+                    : "border-gray-200 hover:border-blue-300"
+                }`}
+              >
+                <div className="text-3xl mb-2">📦</div>
+                <h3 className="font-semibold text-gray-900">Collections</h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  Create and manage custom content collections
+                </p>
+              </button>
             </div>
           </div>
 
@@ -481,12 +522,33 @@ export default function ImportAdmin() {
             />
           )}
 
-          {mode === "navigation-editor" && (
+          {mode === "navigation-editor" && editingNavigationId && (
             <NavigationEditor
               navigationId={editingNavigationId}
               token={githubToken}
               onSave={handleNavigationSaved}
               onCancel={handleCancelNavigationEdit}
+              useGitHubAPI={useGitHubAPI}
+            />
+          )}
+
+          {mode === "collections" && (
+            <CollectionList
+              token={githubToken}
+              onEdit={handleEditCollection}
+              onCreateNew={handleCreateNewCollection}
+              useGitHubAPI={useGitHubAPI}
+            />
+          )}
+
+          {mode === "collection-editor" && (
+            <CollectionEditor
+              {...(editingCollectionName
+                ? { collectionName: editingCollectionName }
+                : {})}
+              token={githubToken}
+              onSave={handleCollectionSaved}
+              onCancel={handleCancelCollectionEdit}
               useGitHubAPI={useGitHubAPI}
             />
           )}
