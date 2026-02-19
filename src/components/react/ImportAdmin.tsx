@@ -1,6 +1,5 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { useState, useEffect } from "react";
-import Papa from "papaparse";
 import Auth0Login from "./Auth0Login";
 import PageList from "./PageList";
 import PageEditor from "./PageEditor";
@@ -8,35 +7,24 @@ import LayoutList from "./LayoutList";
 import LayoutEditor from "./LayoutEditor";
 import ThemeList from "./ThemeList";
 import ThemeEditor from "./ThemeEditor";
-import NavigationList from "./NavigationList";
-import NavigationEditor from "./NavigationEditor";
-import CollectionList from "./CollectionList";
-import CollectionEditor from "./CollectionEditor";
+import ComponentSchemaEditor from "./ComponentSchemaEditor";
+import ComponentSchemaList from "./ComponentSchemaList";
 
-type Step = "select-type" | "upload" | "preview";
 type Mode =
-  | "csv"
-  | "pages"
-  | "page-editor"
-  | "layouts"
-  | "layout-editor"
   | "themes"
   | "theme-editor"
-  | "navigation"
-  | "navigation-editor"
-  | "collections"
-  | "collection-editor";
+  | "layouts"
+  | "layout-editor"
+  | "pages"
+  | "page-editor"
+  | "components"
+  | "component-editor";
 
 export default function ImportAdmin() {
   const { isLoading, error, isAuthenticated, user, logout, getIdTokenClaims } =
     useAuth0();
 
-  const [step, setStep] = useState<Step>("select-type");
-  const [mode, setMode] = useState<Mode>("csv");
-  const [collectionType, setCollectionType] = useState<string>("");
-  const [, setRawData] = useState<any[]>([]);
-  const [mappedData, setMappedData] = useState<any>(null);
-  const [filename, setFilename] = useState("");
+  const [mode, setMode] = useState<Mode>("pages");
   const [editingSlug, setEditingSlug] = useState<string | undefined>(undefined);
   const [editingLayoutId, setEditingLayoutId] = useState<string | undefined>(
     undefined,
@@ -44,10 +32,7 @@ export default function ImportAdmin() {
   const [editingThemeId, setEditingThemeId] = useState<string | undefined>(
     undefined,
   );
-  const [editingNavigationId, setEditingNavigationId] = useState<
-    string | undefined
-  >(undefined);
-  const [editingCollectionName, setEditingCollectionName] = useState<
+  const [editingComponentName, setEditingComponentName] = useState<
     string | undefined
   >(undefined);
 
@@ -149,20 +134,6 @@ export default function ImportAdmin() {
     return <Auth0Login onAuthenticated={() => {}} />;
   }
 
-  const handleTypeSelect = (type: string) => {
-    setCollectionType(type);
-    setStep("upload");
-  };
-
-  const handleDataParsed = (data: any[], fname: string) => {
-    setRawData(data);
-    setFilename(fname);
-
-    const mapped = mapCsvData(data, collectionType);
-    setMappedData(mapped);
-    setStep("preview");
-  };
-
   const handleLogout = () => {
     localStorage.removeItem("github_token");
     localStorage.removeItem("github_user");
@@ -235,39 +206,24 @@ export default function ImportAdmin() {
     setEditingThemeId(undefined);
   };
 
-  const handleEditNavigation = (navigationId: string) => {
-    setEditingNavigationId(navigationId);
-    setMode("navigation-editor");
+  const handleEditComponent = (componentName: string) => {
+    setEditingComponentName(componentName);
+    setMode("component-editor");
   };
 
-  const handleNavigationSaved = () => {
-    setMode("navigation");
-    setEditingNavigationId(undefined);
+  const handleCreateNewComponent = () => {
+    setEditingComponentName(undefined);
+    setMode("component-editor");
   };
 
-  const handleCancelNavigationEdit = () => {
-    setMode("navigation");
-    setEditingNavigationId(undefined);
+  const handleComponentSaved = () => {
+    setMode("components");
+    setEditingComponentName(undefined);
   };
 
-  const handleEditCollection = (collectionName: string) => {
-    setEditingCollectionName(collectionName);
-    setMode("collection-editor");
-  };
-
-  const handleCreateNewCollection = () => {
-    setEditingCollectionName(undefined);
-    setMode("collection-editor");
-  };
-
-  const handleCollectionSaved = () => {
-    setMode("collections");
-    setEditingCollectionName(undefined);
-  };
-
-  const handleCancelCollectionEdit = () => {
-    setMode("collections");
-    setEditingCollectionName(undefined);
+  const handleCancelComponentEdit = () => {
+    setMode("components");
+    setEditingComponentName(undefined);
   };
 
   return (
@@ -355,107 +311,69 @@ export default function ImportAdmin() {
 
           <div className="bg-background rounded-lg shadow-sm p-6 mb-6">
             <h2 className="text-lg font-semibold text-text mb-4">
-              Select Mode
+              Admin Panel
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <button
-                onClick={() => setMode("csv")}
-                className={`p-4 rounded-lg border-2 transition-all ${
-                  mode === "csv"
+                onClick={() => setMode("themes")}
+                className={`p-6 rounded-lg border-2 transition-all ${
+                  mode === "themes" || mode === "theme-editor"
                     ? "border-primary bg-primary/10"
                     : "border-text/20 hover:border-primary/50"
                 }`}
               >
-                <div className="text-3xl mb-2">📊</div>
-                <h3 className="font-semibold text-gray-900">CSV Import</h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  Import data from CSV files
-                </p>
-              </button>
-              <button
-                onClick={() => setMode("pages")}
-                className={`p-4 rounded-lg border-2 transition-all ${
-                  mode === "pages" || mode === "page-editor"
-                    ? "border-blue-600 bg-blue-50"
-                    : "border-gray-200 hover:border-blue-300"
-                }`}
-              >
-                <div className="text-3xl mb-2">📄</div>
-                <h3 className="font-semibold text-gray-900">Page Manager</h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  Create and edit dynamic pages
+                <div className="text-4xl mb-3">🎨</div>
+                <h3 className="font-semibold text-text mb-1">Theme Manager</h3>
+                <p className="text-sm text-text-secondary">
+                  Customize colors, fonts, and visual styles
                 </p>
               </button>
               <button
                 onClick={() => setMode("layouts")}
-                className={`p-4 rounded-lg border-2 transition-all ${
+                className={`p-6 rounded-lg border-2 transition-all ${
                   mode === "layouts" || mode === "layout-editor"
-                    ? "border-blue-600 bg-blue-50"
-                    : "border-gray-200 hover:border-blue-300"
+                    ? "border-primary bg-primary/10"
+                    : "border-text/20 hover:border-primary/50"
                 }`}
               >
-                <div className="text-3xl mb-2">🎨</div>
-                <h3 className="font-semibold text-gray-900">Layout Manager</h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  Create and manage page layouts
+                <div className="text-4xl mb-3">📐</div>
+                <h3 className="font-semibold text-text mb-1">Layout Manager</h3>
+                <p className="text-sm text-text-secondary">
+                  Configure layouts, navigation & footer
                 </p>
               </button>
               <button
-                onClick={() => setMode("themes")}
-                className={`p-4 rounded-lg border-2 transition-all ${
-                  mode === "themes" || mode === "theme-editor"
-                    ? "border-blue-600 bg-blue-50"
-                    : "border-gray-200 hover:border-blue-300"
+                onClick={() => setMode("pages")}
+                className={`p-6 rounded-lg border-2 transition-all ${
+                  mode === "pages" || mode === "page-editor"
+                    ? "border-primary bg-primary/10"
+                    : "border-text/20 hover:border-primary/50"
                 }`}
               >
-                <div className="text-3xl mb-2">🎭</div>
-                <h3 className="font-semibold text-gray-900">Theme Manager</h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  Create and customize site themes
+                <div className="text-4xl mb-3">📄</div>
+                <h3 className="font-semibold text-text mb-1">Page Manager</h3>
+                <p className="text-sm text-text-secondary">
+                  Build pages with sections and content
                 </p>
               </button>
               <button
-                onClick={() => setMode("navigation")}
-                className={`p-4 rounded-lg border-2 transition-all ${
-                  mode === "navigation" || mode === "navigation-editor"
-                    ? "border-blue-600 bg-blue-50"
-                    : "border-gray-200 hover:border-blue-300"
+                onClick={() => setMode("components")}
+                className={`p-6 rounded-lg border-2 transition-all ${
+                  mode === "components" || mode === "component-editor"
+                    ? "border-primary bg-primary/10"
+                    : "border-text/20 hover:border-primary/50"
                 }`}
               >
-                <div className="text-3xl mb-2">🧭</div>
-                <h3 className="font-semibold text-gray-900">Navigation</h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  Configure navigation menus & dropdowns
-                </p>
-              </button>
-              <button
-                onClick={() => setMode("collections")}
-                className={`p-4 rounded-lg border-2 transition-all ${
-                  mode === "collections" || mode === "collection-editor"
-                    ? "border-blue-600 bg-blue-50"
-                    : "border-gray-200 hover:border-blue-300"
-                }`}
-              >
-                <div className="text-3xl mb-2">📦</div>
-                <h3 className="font-semibold text-gray-900">Collections</h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  Create and manage custom content collections
+                <div className="text-4xl mb-3">🧩</div>
+                <h3 className="font-semibold text-text mb-1">
+                  Component Schema
+                </h3>
+                <p className="text-sm text-text-secondary">
+                  Define reusable component schemas
                 </p>
               </button>
             </div>
           </div>
-
-          {mode === "csv" && (
-            <CsvImportPanel
-              step={step}
-              collectionType={collectionType}
-              mappedData={mappedData}
-              filename={filename}
-              onTypeSelect={handleTypeSelect}
-              onDataParsed={handleDataParsed}
-              onBack={() => setStep("select-type")}
-            />
-          )}
 
           {mode === "pages" && (
             <PageList
@@ -514,41 +432,21 @@ export default function ImportAdmin() {
             />
           )}
 
-          {mode === "navigation" && (
-            <NavigationList
+          {mode === "components" && (
+            <ComponentSchemaList
               token={githubToken}
-              onEdit={handleEditNavigation}
+              onEdit={handleEditComponent}
+              onCreateNew={handleCreateNewComponent}
               useGitHubAPI={useGitHubAPI}
             />
           )}
 
-          {mode === "navigation-editor" && editingNavigationId && (
-            <NavigationEditor
-              navigationId={editingNavigationId}
+          {mode === "component-editor" && (
+            <ComponentSchemaEditor
+              componentName={editingComponentName ?? "new-component"}
               token={githubToken}
-              onSave={handleNavigationSaved}
-              onCancel={handleCancelNavigationEdit}
-              useGitHubAPI={useGitHubAPI}
-            />
-          )}
-
-          {mode === "collections" && (
-            <CollectionList
-              token={githubToken}
-              onEdit={handleEditCollection}
-              onCreateNew={handleCreateNewCollection}
-              useGitHubAPI={useGitHubAPI}
-            />
-          )}
-
-          {mode === "collection-editor" && (
-            <CollectionEditor
-              {...(editingCollectionName
-                ? { collectionName: editingCollectionName }
-                : {})}
-              token={githubToken}
-              onSave={handleCollectionSaved}
-              onCancel={handleCancelCollectionEdit}
+              onSave={handleComponentSaved}
+              onCancel={handleCancelComponentEdit}
               useGitHubAPI={useGitHubAPI}
             />
           )}
@@ -556,112 +454,4 @@ export default function ImportAdmin() {
       )}
     </div>
   );
-}
-
-function mapCsvData(data: any[], _collectionType: string) {
-  return data;
-}
-
-function CsvImportPanel({
-  step,
-  collectionType,
-  mappedData,
-  filename,
-  onTypeSelect,
-  onDataParsed,
-  onBack,
-}: any) {
-  const [, setFile] = useState<File | null>(null);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
-      setFile(selectedFile);
-      Papa.parse(selectedFile, {
-        header: true,
-        skipEmptyLines: true,
-        complete: (results) => {
-          onDataParsed(results.data, selectedFile.name);
-        },
-      });
-    }
-  };
-
-  if (step === "select-type") {
-    return (
-      <div className="bg-background rounded-lg shadow-sm p-6">
-        <h2 className="text-lg font-semibold text-text mb-4">
-          Select Collection Type
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {["honors", "tournaments", "centers", "news"].map((type) => (
-            <button
-              key={type}
-              onClick={() => onTypeSelect(type)}
-              className="p-4 rounded-lg border-2 border-text/20 hover:border-primary/50 transition-all"
-            >
-              <h3 className="font-semibold text-text capitalize">{type}</h3>
-            </button>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (step === "upload") {
-    return (
-      <div className="bg-background rounded-lg shadow-sm p-6">
-        <button
-          onClick={onBack}
-          className="mb-4 text-sm text-text-secondary hover:text-text"
-        >
-          ← Back
-        </button>
-        <h2 className="text-lg font-semibold text-text mb-4">
-          Upload CSV for {collectionType}
-        </h2>
-        <input
-          type="file"
-          accept=".csv"
-          onChange={handleFileChange}
-          className="block w-full text-sm text-text-secondary file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
-        />
-      </div>
-    );
-  }
-
-  if (step === "preview") {
-    return (
-      <div className="bg-background rounded-lg shadow-sm p-6">
-        <button
-          onClick={onBack}
-          className="mb-4 text-sm text-text-secondary hover:text-text"
-        >
-          ← Back
-        </button>
-        <h2 className="text-lg font-semibold text-text mb-4">
-          Preview: {filename}
-        </h2>
-        <pre className="bg-background border border-text/10 p-4 rounded-lg overflow-auto max-h-96 text-sm">
-          {JSON.stringify(mappedData, null, 2)}
-        </pre>
-        <div className="mt-4 flex gap-3">
-          <button
-            onClick={onBack}
-            className="px-4 py-2 text-sm font-medium text-text bg-text/10 hover:bg-text/20 rounded-lg transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={() => alert("Import functionality to be implemented")}
-            className="px-4 py-2 text-sm font-medium text-background bg-primary hover:bg-accent rounded-lg transition-colors"
-          >
-            Import Data
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  return null;
 }

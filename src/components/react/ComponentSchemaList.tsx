@@ -1,54 +1,54 @@
 import { useState, useEffect } from "react";
 import { getCollections } from "../../utils/githubApi";
 
-interface CollectionListProps {
+interface ComponentSchemaListProps {
   token: string;
-  onEdit: (collectionName: string) => void;
+  onEdit: (componentName: string) => void;
   onCreateNew: () => void;
   useGitHubAPI: boolean;
 }
 
-interface CollectionInfo {
+interface ComponentSchemaInfo {
   name: string;
   itemCount: number;
   fields: string[];
   description?: string;
 }
 
-export default function CollectionList({
+export default function ComponentSchemaList({
   token,
   onEdit,
   onCreateNew,
   useGitHubAPI,
-}: CollectionListProps) {
-  const [collections, setCollections] = useState<CollectionInfo[]>([]);
+}: ComponentSchemaListProps) {
+  const [schemas, setSchemas] = useState<ComponentSchemaInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    loadCollections();
+    loadSchemas();
   }, [token, useGitHubAPI]);
 
-  const loadCollections = async () => {
+  const loadSchemas = async () => {
     setLoading(true);
     setError(null);
     try {
       const data = await getCollections(token, useGitHubAPI);
-      setCollections(data);
+      setSchemas(data);
     } catch (err) {
-      console.error("Error loading collections:", err);
+      console.error("Error loading component schemas:", err);
       setError(
-        err instanceof Error ? err.message : "Failed to load collections",
+        err instanceof Error ? err.message : "Failed to load component schemas",
       );
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (collectionName: string) => {
+  const handleDelete = async (componentName: string) => {
     if (
       !confirm(
-        `Are you sure you want to delete the "${collectionName}" collection? This cannot be undone.`,
+        `Are you sure you want to delete the "${componentName}" component schema? This cannot be undone.`,
       )
     ) {
       return;
@@ -58,8 +58,8 @@ export default function CollectionList({
       // TODO: Implement delete functionality
       alert("Delete functionality coming soon!");
     } catch (err) {
-      console.error("Error deleting collection:", err);
-      alert("Failed to delete collection");
+      console.error("Error deleting component schema:", err);
+      alert("Failed to delete component schema");
     }
   };
 
@@ -68,7 +68,9 @@ export default function CollectionList({
       <div className="bg-white rounded-lg shadow-sm p-8">
         <div className="flex items-center justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <span className="ml-3 text-gray-600">Loading collections...</span>
+          <span className="ml-3 text-gray-600">
+            Loading component schemas...
+          </span>
         </div>
       </div>
     );
@@ -80,7 +82,7 @@ export default function CollectionList({
         <div className="text-center">
           <p className="text-red-600 mb-4">Error: {error}</p>
           <button
-            onClick={loadCollections}
+            onClick={loadSchemas}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
             Retry
@@ -94,9 +96,12 @@ export default function CollectionList({
     <div className="bg-white rounded-lg shadow-sm p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-xl font-semibold text-gray-900">Collections</h2>
+          <h2 className="text-xl font-semibold text-gray-900">
+            Component Schemas
+          </h2>
           <p className="text-sm text-gray-600 mt-1">
-            Manage your content collections and schemas
+            Define reusable component schemas assembled from primitive
+            components
           </p>
         </div>
         <button
@@ -104,58 +109,59 @@ export default function CollectionList({
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
         >
           <span className="text-xl">+</span>
-          Create Collection
+          Create Schema
         </button>
       </div>
 
-      {collections.length === 0 ? (
+      {schemas.length === 0 ? (
         <div className="text-center py-12">
-          <div className="text-6xl mb-4">📦</div>
+          <div className="text-6xl mb-4">🧩</div>
           <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            No Collections Yet
+            No Component Schemas Yet
           </h3>
           <p className="text-gray-600 mb-4">
-            Create your first collection to start organizing content
+            Create your first component schema to define reusable content
+            structures
           </p>
           <button
             onClick={onCreateNew}
             className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            Create Your First Collection
+            Create Your First Schema
           </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {collections.map((collection) => (
+          {schemas.map((schema) => (
             <div
-              key={collection.name}
+              key={schema.name}
               className="border-2 border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-all"
             >
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <h3 className="font-semibold text-gray-900 capitalize">
-                    {collection.name}
+                    {schema.name}
                   </h3>
                   <p className="text-sm text-gray-500 mt-1">
-                    {collection.itemCount}{" "}
-                    {collection.itemCount === 1 ? "item" : "items"}
+                    {schema.itemCount}{" "}
+                    {schema.itemCount === 1 ? "item" : "items"}
                   </p>
                 </div>
-                <div className="text-2xl">📦</div>
+                <div className="text-2xl">🧩</div>
               </div>
 
-              {collection.description && (
+              {schema.description && (
                 <p className="text-sm text-gray-600 mb-3">
-                  {collection.description}
+                  {schema.description}
                 </p>
               )}
 
               <div className="mb-4">
                 <p className="text-xs font-semibold text-gray-500 mb-1">
-                  FIELDS
+                  SCHEMA FIELDS
                 </p>
                 <div className="flex flex-wrap gap-1">
-                  {collection.fields.slice(0, 3).map((field) => (
+                  {schema.fields.slice(0, 3).map((field) => (
                     <span
                       key={field}
                       className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded"
@@ -163,9 +169,9 @@ export default function CollectionList({
                       {field}
                     </span>
                   ))}
-                  {collection.fields.length > 3 && (
+                  {schema.fields.length > 3 && (
                     <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
-                      +{collection.fields.length - 3} more
+                      +{schema.fields.length - 3} more
                     </span>
                   )}
                 </div>
@@ -173,13 +179,13 @@ export default function CollectionList({
 
               <div className="flex gap-2">
                 <button
-                  onClick={() => onEdit(collection.name)}
+                  onClick={() => onEdit(schema.name)}
                   className="flex-1 px-3 py-2 text-sm bg-blue-50 text-blue-700 rounded hover:bg-blue-100 transition-colors"
                 >
                   Edit Schema
                 </button>
                 <button
-                  onClick={() => handleDelete(collection.name)}
+                  onClick={() => handleDelete(schema.name)}
                   className="px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded transition-colors"
                 >
                   Delete
@@ -195,13 +201,14 @@ export default function CollectionList({
           <div className="text-xl">💡</div>
           <div>
             <h4 className="font-semibold text-blue-900 mb-1">
-              About Collections
+              About Component Schemas
             </h4>
             <p className="text-sm text-blue-800">
-              Collections are schemas that define the structure of your content.
-              Each collection can have custom fields and validation rules. Use
-              them to organize different types of content like honors,
-              tournaments, news, etc.
+              Component schemas define the structure of reusable content
+              components assembled from primitive types. Each schema can have
+              custom fields with validation rules. Use them to create different
+              content types like honors, tournaments, news, centers, etc. that
+              can be displayed in your pages.
             </p>
           </div>
         </div>

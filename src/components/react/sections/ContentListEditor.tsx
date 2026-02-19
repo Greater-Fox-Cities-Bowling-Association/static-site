@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Papa from "papaparse";
 import type {
   ContentListSection,
   ContentListDisplayMode,
@@ -20,6 +21,8 @@ export default function ContentListEditor({
   canMoveDown,
 }: ContentListEditorProps) {
   const [newItemId, setNewItemId] = useState("");
+  const [showCSVImport, setShowCSVImport] = useState(false);
+  const [csvParsing, setCsvParsing] = useState(false);
 
   const updateField = <K extends keyof ContentListSection>(
     field: K,
@@ -47,6 +50,70 @@ export default function ContentListEditor({
 
   const clearAllItems = () => {
     updateField("itemIds", undefined);
+  };
+
+  const handleCSVFile = (file: File) => {
+    if (!file.name.endsWith(".csv")) {
+      alert("Please upload a CSV file");
+      return;
+    }
+
+    setCsvParsing(true);
+
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: (results) => {
+        setCsvParsing(false);
+
+        if (results.errors.length > 0) {
+          alert(
+            `CSV parsing error: ${results.errors[0]?.message || "Unknown error"}`,
+          );
+          return;
+        }
+
+        // Extract item IDs from the first column or 'id' column
+        const data = results.data as Record<string, any>[];
+        const itemIds: string[] = [];
+
+        data.forEach((row) => {
+          // Look for 'id', 'slug', or the first column value
+          const id = row.id || row.slug || Object.values(row)[0];
+          if (id && typeof id === "string") {
+            itemIds.push(id.trim());
+          }
+        });
+
+        if (itemIds.length === 0) {
+          alert(
+            "No valid item IDs found in CSV. Make sure the CSV has an 'id' or 'slug' column.",
+          );
+          return;
+        }
+
+        // Add the imported IDs to the current list
+        const currentIds = section.itemIds || [];
+        const newIds = [
+          ...currentIds,
+          ...itemIds.filter((id) => !currentIds.includes(id)),
+        ];
+        updateField("itemIds", newIds);
+        setShowCSVImport(false);
+        alert(`Successfully imported ${itemIds.length} item IDs from CSV!`);
+      },
+      error: (error) => {
+        setCsvParsing(false);
+        alert(`Error reading file: ${error.message}`);
+      },
+    });
+  };
+
+  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleCSVFile(file);
+    }
   };
 
   return (
@@ -167,14 +234,22 @@ export default function ContentListEditor({
                 item IDs to only show those items.
               </p>
             </div>
-            {section.itemIds && section.itemIds.length > 0 && (
+            <div className="flex gap-2">
               <button
-                onClick={clearAllItems}
-                className="text-xs text-red-600 hover:text-red-700"
+                onClick={() => setShowCSVImport(true)}
+                className="text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
               >
-                Clear All
+                📥 Import from CSV
               </button>
-            )}
+              {section.itemIds && section.itemIds.length > 0 && (
+                <button
+                  onClick={clearAllItems}
+                  className="text-xs text-red-600 hover:text-red-700"
+                >
+                  Clear All
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="flex gap-2 mb-3">
@@ -241,6 +316,47 @@ export default function ContentListEditor({
           </p>
         </div>
       </div>
+
+      {/* CSV Import Modal */}
+      {showCSVImport && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-background rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold text-text mb-4">
+              Import Item IDs from CSV
+            </h3>
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm text-text-secondary mb-3">
+                  Upload a CSV file with item IDs. The first column or 'id'
+                  column will be used to extract item IDs.
+                </p>
+                <input
+                  type="file"
+                  accept=".csv"
+                  onChange={handleFileInput}
+                  disabled={csvParsing}
+                  className="w-full px-3 py-2 border border-text/20 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+              {csvParsing && (
+                <div className="flex items-center gap-2 text-primary">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                  <span className="text-sm">Parsing CSV...</span>
+                </div>
+              )}
+              <div className="flex gap-2 justify-end">
+                <button
+                  onClick={() => setShowCSVImport(false)}
+                  disabled={csvParsing}
+                  className="px-4 py-2 border border-text/20 rounded hover:bg-text/5"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </SectionWrapper>
   );
 }

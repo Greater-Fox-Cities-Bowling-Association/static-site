@@ -1,6 +1,15 @@
 import { useState, useEffect } from "react";
-import type { Layout, LayoutHeader, LayoutFooter } from "../../types/cms";
-import { fetchLayoutContent, saveLayoutFile } from "../../utils/githubApi";
+import type {
+  Layout,
+  LayoutHeader,
+  LayoutFooter,
+  NavigationConfig,
+} from "../../types/cms";
+import {
+  fetchLayoutContent,
+  saveLayoutFile,
+  fetchNavigationDirectory,
+} from "../../utils/githubApi";
 
 interface LayoutEditorProps {
   layoutId: string | undefined; // undefined = creating new layout
@@ -47,11 +56,13 @@ export default function LayoutEditor({
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [availableNavigation, setAvailableNavigation] = useState<string[]>([]);
 
   useEffect(() => {
     if (layoutId) {
       loadLayoutFromGitHub();
     }
+    loadAvailableNavigation();
   }, [layoutId]);
 
   const loadLayoutFromGitHub = async () => {
@@ -78,6 +89,29 @@ export default function LayoutEditor({
       );
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadAvailableNavigation = async () => {
+    try {
+      const result = await fetchNavigationDirectory(
+        token,
+        undefined,
+        undefined,
+        useGitHubAPI,
+      );
+
+      if (result.success && result.files) {
+        // Extract navigation IDs from filenames (e.g., "default.json" -> "default")
+        const navIds = result.files.map((file) =>
+          file.name.replace(/\.json$/, ""),
+        );
+        setAvailableNavigation(navIds);
+      }
+    } catch (error) {
+      console.error("Error loading navigation menus:", error);
+      // Set a default if loading fails
+      setAvailableNavigation(["default"]);
     }
   };
 
@@ -262,6 +296,56 @@ export default function LayoutEditor({
               Optional description to help you remember the purpose of this
               layout
             </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Navigation Configuration */}
+      <div className="mb-6 p-6 bg-background border border-text/10 rounded-lg">
+        <h3 className="text-lg font-semibold mb-4">Navigation Configuration</h3>
+
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-text-secondary mb-2">
+              Navigation Menu
+            </label>
+            <select
+              value={layout.navigationId || ""}
+              onChange={(e) =>
+                updateLayout({
+                  navigationId: e.target.value || undefined,
+                })
+              }
+              className="w-full px-3 py-2 border border-text/20 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="">None (Use default navigation)</option>
+              {availableNavigation.map((navId) => (
+                <option key={navId} value={navId}>
+                  {navId.charAt(0).toUpperCase() + navId.slice(1)}
+                </option>
+              ))}
+            </select>
+            <p className="mt-1 text-xs text-gray-500">
+              Select which navigation menu to use with this layout. Leave empty
+              to use the default navigation.
+            </p>
+          </div>
+
+          <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-start gap-2">
+              <div className="text-lg">ℹ️</div>
+              <div className="text-sm text-blue-800">
+                <p className="font-medium mb-1">
+                  Navigation & Layout Integration
+                </p>
+                <p>
+                  The navigation menu is part of the layout configuration. Each
+                  layout can specify which navigation menu to use in the header,
+                  allowing different page styles to have different navigation
+                  structures.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>

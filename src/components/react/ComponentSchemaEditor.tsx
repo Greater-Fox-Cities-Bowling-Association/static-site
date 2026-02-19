@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { getCollection, saveCollection } from "../../utils/githubApi";
 
-interface CollectionEditorProps {
-  collectionName?: string;
+interface ComponentSchemaEditorProps {
+  componentName?: string;
   token: string;
   onSave: () => void;
   onCancel: () => void;
@@ -16,7 +16,7 @@ interface Field {
   description?: string;
 }
 
-interface CollectionSchema {
+interface ComponentSchema {
   name: string;
   description?: string;
   fields: Field[];
@@ -31,41 +31,41 @@ const FIELD_TYPES = [
   { value: "date", label: "Date" },
 ] as const;
 
-export default function CollectionEditor({
-  collectionName,
+export default function ComponentSchemaEditor({
+  componentName,
   token,
   onSave,
   onCancel,
   useGitHubAPI,
-}: CollectionEditorProps) {
-  const [loading, setLoading] = useState(!!collectionName);
+}: ComponentSchemaEditorProps) {
+  const [loading, setLoading] = useState(!!componentName);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [schema, setSchema] = useState<CollectionSchema>({
+  const [schema, setSchema] = useState<ComponentSchema>({
     name: "",
     description: "",
     fields: [],
   });
 
   useEffect(() => {
-    if (collectionName) {
-      loadCollection();
+    if (componentName) {
+      loadSchema();
     }
-  }, [collectionName]);
+  }, [componentName]);
 
-  const loadCollection = async () => {
-    if (!collectionName) return;
+  const loadSchema = async () => {
+    if (!componentName) return;
 
     setLoading(true);
     setError(null);
     try {
-      const data = await getCollection(collectionName, token, useGitHubAPI);
+      const data = await getCollection(componentName, token, useGitHubAPI);
       setSchema(data);
     } catch (err) {
-      console.error("Error loading collection:", err);
+      console.error("Error loading component schema:", err);
       setError(
-        err instanceof Error ? err.message : "Failed to load collection",
+        err instanceof Error ? err.message : "Failed to load component schema",
       );
     } finally {
       setLoading(false);
@@ -98,7 +98,7 @@ export default function CollectionEditor({
   const handleSave = async () => {
     // Validation
     if (!schema.name.trim()) {
-      alert("Collection name is required");
+      alert("Component schema name is required");
       return;
     }
 
@@ -121,9 +121,9 @@ export default function CollectionEditor({
       await saveCollection(schema, token, useGitHubAPI);
       onSave();
     } catch (err) {
-      console.error("Error saving collection:", err);
+      console.error("Error saving component schema:", err);
       setError(
-        err instanceof Error ? err.message : "Failed to save collection",
+        err instanceof Error ? err.message : "Failed to save component schema",
       );
       setSaving(false);
     }
@@ -134,7 +134,9 @@ export default function CollectionEditor({
       <div className="bg-white rounded-lg shadow-sm p-8">
         <div className="flex items-center justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <span className="ml-3 text-gray-600">Loading collection...</span>
+          <span className="ml-3 text-gray-600">
+            Loading component schema...
+          </span>
         </div>
       </div>
     );
@@ -144,12 +146,12 @@ export default function CollectionEditor({
     <div className="bg-white rounded-lg shadow-sm p-6">
       <div className="mb-6">
         <h2 className="text-xl font-semibold text-gray-900">
-          {collectionName
-            ? `Edit Collection: ${collectionName}`
-            : "Create New Collection"}
+          {componentName
+            ? `Edit Component Schema: ${componentName}`
+            : "Create New Component Schema"}
         </h2>
         <p className="text-sm text-gray-600 mt-1">
-          Define the schema for your content collection
+          Define the schema for your component assembled from primitive types
         </p>
       </div>
 
@@ -163,13 +165,13 @@ export default function CollectionEditor({
         {/* Basic Info */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Collection Name *
+            Schema Name *
           </label>
           <input
             type="text"
             value={schema.name}
             onChange={(e) => setSchema({ ...schema, name: e.target.value })}
-            disabled={!!collectionName}
+            disabled={!!componentName}
             placeholder="e.g., honors, tournaments, centers"
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
           />
@@ -187,7 +189,7 @@ export default function CollectionEditor({
             onChange={(e) =>
               setSchema({ ...schema, description: e.target.value })
             }
-            placeholder="Brief description of this collection"
+            placeholder="Brief description of this component schema"
             rows={2}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
@@ -197,7 +199,7 @@ export default function CollectionEditor({
         <div>
           <div className="flex items-center justify-between mb-3">
             <label className="text-sm font-medium text-gray-700">
-              Fields *
+              Schema Fields (Primitive Components) *
             </label>
             <button
               onClick={handleAddField}
@@ -231,7 +233,7 @@ export default function CollectionEditor({
 
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1">
-                      Field Type *
+                      Primitive Type *
                     </label>
                     <select
                       value={field.type}
@@ -321,9 +323,9 @@ export default function CollectionEditor({
           >
             {saving
               ? "Saving..."
-              : collectionName
-                ? "Update Collection"
-                : "Create Collection"}
+              : componentName
+                ? "Update Schema"
+                : "Create Schema"}
           </button>
         </div>
       </div>
@@ -334,8 +336,9 @@ export default function CollectionEditor({
           <div>
             <h4 className="font-semibold text-amber-900 mb-1">Important</h4>
             <p className="text-sm text-amber-800">
-              Changing the collection schema may affect existing content. Make
-              sure to update your content items to match the new schema.
+              Changing the component schema may affect existing content items.
+              Make sure to update your content items to match the new schema
+              structure.
             </p>
           </div>
         </div>

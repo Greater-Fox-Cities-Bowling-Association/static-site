@@ -1524,6 +1524,104 @@ export async function activateTheme(
 }
 
 // =============================================================================
+// Navigation Management Functions
+// =============================================================================
+
+const NAVIGATION_PATH = 'src/content/navigation';
+
+/**
+ * Fetch all navigation menus from the repository
+ */
+export async function fetchNavigationDirectory(
+  token: string,
+  owner: string = DEFAULT_OWNER,
+  repo: string = DEFAULT_REPO,
+  forceGitHubAPI: boolean = false
+): Promise<{ success: boolean; files?: GitHubFileResponse[]; error?: string }> {
+  try {
+    // DEV MODE: Return local navigation menus (unless forced to use GitHub API)
+    if (import.meta.env.DEV && !forceGitHubAPI) {
+      logAPICall({
+        function: 'fetchNavigationDirectory',
+        mode: 'LOCAL',
+        params: { owner, repo, path: NAVIGATION_PATH }
+      });
+
+      try {
+        const navModules = import.meta.glob('/src/content/navigation/*.json', { eager: true });
+        const files: GitHubFileResponse[] = Object.entries(navModules).map(([path]) => {
+          const filename = path.split('/').pop() || '';
+          return {
+            name: filename,
+            path: `${NAVIGATION_PATH}/${filename}`,
+            sha: '',
+            size: 0,
+            url: '',
+            html_url: '',
+            git_url: '',
+            download_url: path,
+            type: 'file' as const,
+          };
+        });
+
+        logAPIResponse('fetchNavigationDirectory', 'LOCAL', { 
+          count: files.length,
+          navigation: files.map(f => f.name)
+        });
+        return { success: true, files };
+      } catch (error) {
+        logAPIResponse('fetchNavigationDirectory', 'LOCAL', null, error);
+        return { success: true, files: [] }; // Return empty array if no navigation found
+      }
+    }
+
+    // PRODUCTION MODE: Fetch from GitHub
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${NAVIGATION_PATH}?ref=main`;
+    
+    logAPICall({
+      function: 'fetchNavigationDirectory',
+      mode: 'GITHUB_API',
+      params: { owner, repo, path: NAVIGATION_PATH, ref: 'main' },
+      url: apiUrl,
+      method: 'GET'
+    });
+
+    const response = await fetch(apiUrl, {
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        logAPIResponse('fetchNavigationDirectory', 'GITHUB_API', null, 'Navigation directory not found (404)');
+        return { success: true, files: [] }; // Return empty array if directory doesn't exist
+      }
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to fetch navigation directory');
+    }
+
+    const files: GitHubFileResponse[] = await response.json();
+    const jsonFiles = files.filter(f => f.type === 'file' && f.name.endsWith('.json'));
+
+    logAPIResponse('fetchNavigationDirectory', 'GITHUB_API', { 
+      count: jsonFiles.length,
+      navigation: jsonFiles.map(f => f.name)
+    });
+    return { 
+      success: true, 
+      files: jsonFiles 
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error occurred'
+    };
+  }
+}
+
+// =============================================================================
 // Collection Management Functions
 // =============================================================================
 
