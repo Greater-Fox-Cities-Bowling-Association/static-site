@@ -8,7 +8,7 @@ import LayoutEditor from "./LayoutEditor";
 import ThemeList from "./ThemeList";
 import ThemeEditor from "./ThemeEditor";
 import ComponentList from "./ComponentList";
-import PrimitiveComponentEditor from "./PrimitiveComponentEditor";
+import CompositeComponentEditor from "./CompositeComponentEditor";
 
 type Mode =
   | "themes"
@@ -18,7 +18,6 @@ type Mode =
   | "pages"
   | "page-editor"
   | "components"
-  | "primitive-editor"
   | "composite-editor";
 
 export default function ImportAdmin() {
@@ -33,9 +32,6 @@ export default function ImportAdmin() {
   const [editingThemeId, setEditingThemeId] = useState<string | undefined>(
     undefined,
   );
-  const [editingPrimitiveId, setEditingPrimitiveId] = useState<
-    string | undefined
-  >(undefined);
   const [editingCompositeId, setEditingCompositeId] = useState<
     string | undefined
   >(undefined);
@@ -210,26 +206,6 @@ export default function ImportAdmin() {
     setEditingThemeId(undefined);
   };
 
-  const handleEditPrimitive = (componentId: string) => {
-    setEditingPrimitiveId(componentId);
-    setMode("primitive-editor");
-  };
-
-  const handleCreateNewPrimitive = () => {
-    setEditingPrimitiveId(undefined);
-    setMode("primitive-editor");
-  };
-
-  const handlePrimitiveSaved = () => {
-    setMode("components");
-    setEditingPrimitiveId(undefined);
-  };
-
-  const handleCancelPrimitiveEdit = () => {
-    setMode("components");
-    setEditingPrimitiveId(undefined);
-  };
-
   const handleEditComposite = (componentId: string) => {
     setEditingCompositeId(componentId);
     setMode("composite-editor");
@@ -383,9 +359,7 @@ export default function ImportAdmin() {
               <button
                 onClick={() => setMode("components")}
                 className={`p-6 rounded-lg border-2 transition-all ${
-                  mode === "components" ||
-                  mode === "primitive-editor" ||
-                  mode === "composite-editor"
+                  mode === "components" || mode === "composite-editor"
                     ? "border-primary bg-primary/10"
                     : "border-text/20 hover:border-primary/50"
                 }`}
@@ -467,28 +441,14 @@ export default function ImportAdmin() {
             />
           )}
 
-          {mode === "primitive-editor" && (
-            <PrimitiveComponentEditor
-              componentId={editingPrimitiveId}
+          {mode === "composite-editor" && (
+            <CompositeComponentEditor
+              componentId={editingCompositeId}
               token={githubToken}
-              onSave={handlePrimitiveSaved}
-              onCancel={handleCancelPrimitiveEdit}
+              onSave={handleCompositeSaved}
+              onCancel={handleCancelCompositeEdit}
               useGitHubAPI={useGitHubAPI}
             />
-          )}
-
-          {mode === "composite-editor" && (
-            <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-              <p className="text-gray-600 mb-4">
-                Composite Component Editor coming soon!
-              </p>
-              <button
-                onClick={handleCancelCompositeEdit}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              >
-                Back to Components
-              </button>
-            </div>
           )}
         </div>
       )}
