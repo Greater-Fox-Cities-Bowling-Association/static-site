@@ -41,6 +41,8 @@ export default function CompositeComponentEditor({
     description: "",
     type: "composite",
     icon: "",
+    minColumns: 4,
+    defaultColumns: 6,
     components: [],
     dataSchema: [],
   });
@@ -377,6 +379,122 @@ export default function CompositeComponentEditor({
             />
           </div>
 
+          {/* Grid Size */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Column Size
+              <span className="text-xs text-gray-500 ml-2">12-column grid</span>
+            </label>
+            <p className="text-xs text-gray-500 mb-3">
+              Set how wide this component is by default and the minimum it can
+              be squeezed to. Pages can override the actual placement.
+            </p>
+            <div className="space-y-4">
+              {(["minColumns", "defaultColumns"] as const).map((key) => {
+                const label =
+                  key === "minColumns" ? "Minimum width" : "Default width";
+                const hint =
+                  key === "minColumns"
+                    ? "Smallest this component can be — it won't look right below this"
+                    : "Suggested width when dropped onto a page";
+                return (
+                  <div key={key}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-gray-600">
+                        {label}
+                      </span>
+                      <span className="text-xs font-mono bg-gray-100 px-2 py-0.5 rounded">
+                        {component[key]}/12 cols
+                        <span className="text-gray-400 ml-1">
+                          (~{Math.round((component[key] / 12) * 100)}%)
+                        </span>
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-400 mb-2">{hint}</p>
+                    {/* Visual 12-column grid picker */}
+                    <div className="flex gap-1">
+                      {Array.from({ length: 12 }, (_, i) => i + 1).map(
+                        (col) => {
+                          const isActive = col <= component[key];
+                          const isExact = col === component[key];
+                          const isBelowMin =
+                            key === "defaultColumns" &&
+                            col < component.minColumns;
+                          return (
+                            <button
+                              key={col}
+                              type="button"
+                              disabled={isBelowMin}
+                              onClick={() => {
+                                const update: Partial<CompositeComponent> = {
+                                  [key]: col,
+                                };
+                                // If setting minColumns above defaultColumns, raise default too
+                                if (
+                                  key === "minColumns" &&
+                                  col > component.defaultColumns
+                                ) {
+                                  update.defaultColumns = col;
+                                }
+                                setComponent({ ...component, ...update });
+                              }}
+                              title={
+                                isBelowMin
+                                  ? `Can't go below min (${component.minColumns})`
+                                  : `${col} col${col !== 1 ? "s" : ""}`
+                              }
+                              className={`flex-1 h-6 rounded-sm text-xs font-bold transition-all border ${
+                                isBelowMin
+                                  ? "bg-gray-100 border-gray-200 text-gray-300 cursor-not-allowed"
+                                  : isExact
+                                    ? key === "minColumns"
+                                      ? "bg-orange-500 border-orange-600 text-white"
+                                      : "bg-blue-600 border-blue-700 text-white"
+                                    : isActive
+                                      ? key === "minColumns"
+                                        ? "bg-orange-200 border-orange-300 text-orange-800"
+                                        : "bg-blue-200 border-blue-300 text-blue-800"
+                                      : "bg-gray-100 border-gray-300 text-gray-500 hover:bg-gray-200"
+                              }`}
+                            >
+                              {isExact ? col : ""}
+                            </button>
+                          );
+                        },
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+              {/* Width comparison bar */}
+              <div>
+                <p className="text-xs text-gray-500 mb-1">
+                  Preview (relative to full page width):
+                </p>
+                <div className="relative h-5 bg-gray-100 rounded border border-gray-200 overflow-hidden">
+                  <div
+                    className="absolute top-0 left-0 h-full bg-orange-200 border-r-2 border-orange-400 transition-all"
+                    style={{ width: `${(component.minColumns / 12) * 100}%` }}
+                    title={`Min: ${component.minColumns} cols`}
+                  />
+                  <div
+                    className="absolute top-0 left-0 h-full bg-blue-300 opacity-60 border-r-2 border-blue-500 transition-all"
+                    style={{
+                      width: `${(component.defaultColumns / 12) * 100}%`,
+                    }}
+                    title={`Default: ${component.defaultColumns} cols`}
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center text-xs text-gray-500 pointer-events-none">
+                    <span className="bg-white/80 px-1 rounded">
+                      🟠 min ({component.minColumns}) &nbsp; 🔵 default (
+                      {component.defaultColumns})
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Data Schema */}
           <div>
             <div className="flex items-center justify-between mb-3">
@@ -659,6 +777,20 @@ export default function CompositeComponentEditor({
                   <div className="flex-1 mx-2 bg-white rounded px-3 py-0.5 text-xs text-gray-400 border border-gray-300">
                     {component.name || "Component Preview"}
                   </div>
+                  <span className="text-xs font-mono bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full whitespace-nowrap">
+                    {component.defaultColumns}/12
+                  </span>
+                </div>
+                {/* Column width ruler */}
+                <div className="flex bg-gray-50 border-b border-gray-200">
+                  {Array.from({ length: 12 }, (_, i) => (
+                    <div
+                      key={i}
+                      className={`flex-1 h-1.5 border-r border-gray-300 last:border-r-0 ${
+                        i < component.defaultColumns ? "bg-blue-200" : ""
+                      } ${i < component.minColumns ? "bg-orange-300" : ""}`}
+                    />
+                  ))}
                 </div>
 
                 {/* Rendered component */}

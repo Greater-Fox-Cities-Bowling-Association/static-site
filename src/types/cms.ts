@@ -54,6 +54,8 @@ export interface CompositeComponent {
   description: string;
   type: 'composite';
   icon?: string;
+  minColumns: number;     // Minimum columns (1-12) this component needs to render correctly
+  defaultColumns: number; // Suggested column span (1-12) when placed on a page
   components: CompositeComponentInstance[]; // Ordered list of primitive components
   dataSchema: ComponentField[]; // Schema for data that gets passed to the composite
 }

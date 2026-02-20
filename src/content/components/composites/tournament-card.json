@@ -4,6 +4,8 @@
   "description": "Displays tournament information with image, details, and register button",
   "type": "composite",
   "icon": "🏆",
+  "minColumns": 4,
+  "defaultColumns": 4,
   "components": [
     {
       "id": "card-section",

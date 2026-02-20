@@ -4,6 +4,8 @@
   "description": "Displays bowling center information with contact details",
   "type": "composite",
   "icon": "🎳",
+  "minColumns": 3,
+  "defaultColumns": 4,
   "components": [
     {
       "id": "card-section",
