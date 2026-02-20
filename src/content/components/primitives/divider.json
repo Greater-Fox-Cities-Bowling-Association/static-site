@@ -1,0 +1,34 @@
+{
+  "id": "divider",
+  "name": "Divider",
+  "description": "Horizontal line to separate content",
+  "type": "primitive",
+  "icon": "➖",
+  "fields": [
+    {
+      "name": "thickness",
+      "label": "Line Thickness",
+      "type": "enum",
+      "required": false,
+      "defaultValue": "thin",
+      "values": ["thin", "medium", "thick"],
+      "description": "Thickness of the divider line"
+    },
+    {
+      "name": "color",
+      "label": "Color",
+      "type": "string",
+      "required": false,
+      "description": "Line color (hex, rgb, or named color)"
+    },
+    {
+      "name": "margin",
+      "label": "Vertical Margin",
+      "type": "enum",
+      "required": false,
+      "defaultValue": "medium",
+      "values": ["small", "medium", "large"],
+      "description": "Space above and below the divider"
+    }
+  ]
+}

@@ -1789,3 +1789,251 @@ export async function saveCollection(
     throw error;
   }
 }
+
+// =============================================================================
+// Component Management Functions
+// =============================================================================
+
+const PRIMITIVES_PATH = 'src/content/components/primitives';
+const COMPOSITES_PATH = 'src/content/components/composites';
+
+/**
+ * Fetch all primitive components
+ */
+export async function fetchPrimitiveComponents(
+  token: string,
+  owner: string = DEFAULT_OWNER,
+  repo: string = DEFAULT_REPO,
+  forceGitHubAPI: boolean = false
+): Promise<any[]> {
+  logAPICall({
+    function: 'fetchPrimitiveComponents',
+    mode: forceGitHubAPI ? 'GITHUB_API' : 'LOCAL',
+    params: { owner, repo, path: PRIMITIVES_PATH },
+  });
+
+  try {
+    // DEV MODE: Load from local filesystem (unless forced to use GitHub API)
+    if (import.meta.env.DEV && !forceGitHubAPI) {
+      // Use fetch to load JSON files locally
+      const primitiveIds = [
+        'text', 'image', 'button', 'list', 'table', 
+        'section', 'checkbox', 'radiobutton', 'link', 
+        'spacer', 'divider'
+      ];
+      
+      const components = await Promise.all(
+        primitiveIds.map(async (id) => {
+          try {
+            const response = await fetch(`/src/content/components/primitives/${id}.json`);
+            if (response.ok) {
+              return await response.json();
+            }
+            return null;
+          } catch (err) {
+            console.warn(`Could not load primitive component: ${id}`);
+            return null;
+          }
+        })
+      );
+      
+      const validComponents = components.filter(c => c !== null);
+      logAPIResponse('fetchPrimitiveComponents', 'LOCAL', { count: validComponents.length });
+      return validComponents;
+    }
+
+    // PRODUCTION MODE: Fetch from GitHub
+    const url = `https://api.github.com/repos/${owner}/${repo}/contents/${PRIMITIVES_PATH}`;
+    logAPICall({
+      function: 'fetchPrimitiveComponents (via GitHub API)',
+      mode: 'GITHUB_API',
+      params: { owner, repo, path: PRIMITIVES_PATH },
+      url,
+      method: 'GET'
+    });
+
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`GitHub API error: ${response.status}`);
+    }
+
+    const files: GitHubFileResponse[] = await response.json();
+    const components = await Promise.all(
+      files
+        .filter(f => f.type === 'file' && f.name.endsWith('.json'))
+        .map(async (file) => {
+          const fileResponse = await fetch(file.download_url!, {
+            headers: {
+              'Authorization': `token ${token}`
+            }
+          });
+          return fileResponse.json();
+        })
+    );
+
+    logAPIResponse('fetchPrimitiveComponents', 'GITHUB_API', { count: components.length });
+    return components;
+  } catch (error) {
+    logAPIResponse('fetchPrimitiveComponents', forceGitHubAPI ? 'GITHUB_API' : 'LOCAL', null, error);
+    throw error;
+  }
+}
+
+/**
+ * Fetch all composite components
+ */
+export async function fetchCompositeComponents(
+  token: string,
+  owner: string = DEFAULT_OWNER,
+  repo: string = DEFAULT_REPO,
+  forceGitHubAPI: boolean = false
+): Promise<any[]> {
+  logAPICall({
+    function: 'fetchCompositeComponents',
+    mode: forceGitHubAPI ? 'GITHUB_API' : 'LOCAL',
+    params: { owner, repo, path: COMPOSITES_PATH },
+  });
+
+  try {
+    // DEV MODE: Load from local filesystem (unless forced to use GitHub API)
+    if (import.meta.env.DEV && !forceGitHubAPI) {
+      // Use fetch to load JSON files locally
+      const compositeIds = ['tournament-card', 'location-card'];
+      
+      const components = await Promise.all(
+        compositeIds.map(async (id) => {
+          try {
+            const response = await fetch(`/src/content/components/composites/${id}.json`);
+            if (response.ok) {
+              return await response.json();
+            }
+            return null;
+          } catch (err) {
+            console.warn(`Could not load composite component: ${id}`);
+            return null;
+          }
+        })
+      );
+      
+      const validComponents = components.filter(c => c !== null);
+      logAPIResponse('fetchCompositeComponents', 'LOCAL', { count: validComponents.length });
+      return validComponents;
+    }
+
+    // PRODUCTION MODE: Fetch from GitHub
+    const url = `https://api.github.com/repos/${owner}/${repo}/contents/${COMPOSITES_PATH}`;
+    logAPICall({
+      function: 'fetchCompositeComponents (via GitHub API)',
+      mode: 'GITHUB_API',
+      params: { owner, repo, path: COMPOSITES_PATH },
+      url,
+      method: 'GET'
+    });
+
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`GitHub API error: ${response.status}`);
+    }
+
+    const files: GitHubFileResponse[] = await response.json();
+    const components = await Promise.all(
+      files
+        .filter(f => f.type === 'file' && f.name.endsWith('.json'))
+        .map(async (file) => {
+          const fileResponse = await fetch(file.download_url!, {
+            headers: {
+              'Authorization': `token ${token}`
+            }
+          });
+          return fileResponse.json();
+        })
+    );
+
+    logAPIResponse('fetchCompositeComponents', 'GITHUB_API', { count: components.length });
+    return components;
+  } catch (error) {
+    logAPIResponse('fetchCompositeComponents', forceGitHubAPI ? 'GITHUB_API' : 'LOCAL', null, error);
+    throw error;
+  }
+}
+
+/**
+ * Save a component (primitive or composite)
+ */
+export async function saveComponent(
+  component: any,
+  token: string,
+  owner: string = DEFAULT_OWNER,
+  repo: string = DEFAULT_REPO,
+  forceGitHubAPI: boolean = false
+): Promise<{ success: boolean; error?: string }> {
+  const isComposite = component.type === 'composite';
+  const basePath = isComposite ? COMPOSITES_PATH : PRIMITIVES_PATH;
+  const filename = `${component.id}.json`;
+  const path = `${basePath}/${filename}`;
+  
+  logAPICall({
+    function: 'saveComponent',
+    mode: forceGitHubAPI ? 'GITHUB_API' : 'LOCAL',
+    params: { componentId: component.id, type: component.type, path },
+  });
+
+  // DEV MODE: Save via local API endpoint (unless forced to use GitHub API)
+  if (import.meta.env.DEV && !forceGitHubAPI) {
+    try {
+      const response = await fetch('/api/save-page', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path, content: component })
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to save component');
+      }
+
+      logAPIResponse('saveComponent', 'LOCAL', { path, success: true });
+      return { success: true };
+    } catch (error) {
+      logAPIResponse('saveComponent', 'LOCAL', null, error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to save component'
+      };
+    }
+  }
+
+  // PRODUCTION MODE: Commit to GitHub
+  const contentString = JSON.stringify(component, null, 2);
+  const message = `Update component: ${component.name}`;
+
+  const result = await commitToGitHub({
+    token,
+    owner,
+    repo,
+    path,
+    content: contentString,
+    message,
+    branch: 'main'
+  });
+
+  if (result.success) {
+    logAPIResponse('saveComponent', 'GITHUB_API', { path, committed: true });
+  } else {
+    logAPIResponse('saveComponent', 'GITHUB_API', null, result.error);
+  }
+
+  return result;
+}

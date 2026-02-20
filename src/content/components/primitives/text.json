@@ -1,0 +1,33 @@
+{
+  "id": "text",
+  "name": "Text",
+  "description": "Basic text content with optional heading",
+  "type": "primitive",
+  "icon": "📝",
+  "fields": [
+    {
+      "name": "content",
+      "label": "Content",
+      "type": "string",
+      "required": true,
+      "multiline": true,
+      "description": "The main text content"
+    },
+    {
+      "name": "heading",
+      "label": "Heading",
+      "type": "string",
+      "required": false,
+      "description": "Optional heading above the content"
+    },
+    {
+      "name": "alignment",
+      "label": "Text Alignment",
+      "type": "enum",
+      "required": false,
+      "defaultValue": "left",
+      "values": ["left", "center", "right"],
+      "description": "How to align the text"
+    }
+  ]
+}

@@ -14,6 +14,61 @@ export type ContentCollectionType = string;
 export type ContentListDisplayMode = 'cards' | 'table' | 'list';
 
 // =============================================================================
+// Component System Type Definitions
+// =============================================================================
+
+export type ComponentType = 'primitive' | 'composite';
+
+export type FieldType = 'string' | 'number' | 'boolean' | 'array' | 'object' | 'enum' | 'date';
+
+export interface ComponentField {
+  name: string;
+  label: string;
+  type: FieldType;
+  required: boolean;
+  defaultValue?: any;
+  description?: string;
+  multiline?: boolean; // For string fields
+  itemType?: string; // For array fields
+  values?: string[]; // For enum fields
+}
+
+export interface PrimitiveComponent {
+  id: string;
+  name: string;
+  description: string;
+  type: 'primitive';
+  icon?: string;
+  fields: ComponentField[];
+}
+
+export interface CompositeComponentInstance {
+  id: string; // Unique ID for this instance within the composite
+  primitive: string; // ID of the primitive component to use
+  props: Record<string, any>; // Props to pass to the primitive (can include {{template}} variables)
+}
+
+export interface CompositeComponent {
+  id: string;
+  name: string;
+  description: string;
+  type: 'composite';
+  icon?: string;
+  components: CompositeComponentInstance[]; // Ordered list of primitive components
+  dataSchema: ComponentField[]; // Schema for data that gets passed to the composite
+}
+
+export type Component = PrimitiveComponent | CompositeComponent;
+
+// Runtime instance of a component with actual data
+export interface ComponentInstance {
+  componentId: string; // ID of the primitive or composite component
+  instanceId: string; // Unique ID for this instance on the page
+  data: Record<string, any>; // Actual data values
+  order: number;
+}
+
+// =============================================================================
 // Navigation Type Definitions
 // =============================================================================
 

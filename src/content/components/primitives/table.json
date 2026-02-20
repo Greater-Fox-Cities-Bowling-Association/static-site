@@ -1,0 +1,48 @@
+{
+  "id": "table",
+  "name": "Table",
+  "description": "Data table with headers and rows",
+  "type": "primitive",
+  "icon": "📊",
+  "fields": [
+    {
+      "name": "heading",
+      "label": "Table Heading",
+      "type": "string",
+      "required": false,
+      "description": "Optional heading above the table"
+    },
+    {
+      "name": "headers",
+      "label": "Column Headers",
+      "type": "array",
+      "required": true,
+      "itemType": "string",
+      "description": "Column header names"
+    },
+    {
+      "name": "rows",
+      "label": "Table Rows",
+      "type": "array",
+      "required": true,
+      "itemType": "array",
+      "description": "Data rows (array of arrays)"
+    },
+    {
+      "name": "striped",
+      "label": "Striped Rows",
+      "type": "boolean",
+      "required": false,
+      "defaultValue": true,
+      "description": "Alternate row background colors"
+    },
+    {
+      "name": "bordered",
+      "label": "Bordered",
+      "type": "boolean",
+      "required": false,
+      "defaultValue": true,
+      "description": "Show table borders"
+    }
+  ]
+}

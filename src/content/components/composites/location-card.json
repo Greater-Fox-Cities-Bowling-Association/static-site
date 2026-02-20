@@ -1,0 +1,121 @@
+{
+  "id": "location-card",
+  "name": "Location Card",
+  "description": "Displays bowling center information with contact details",
+  "type": "composite",
+  "icon": "🎳",
+  "components": [
+    {
+      "id": "card-section",
+      "primitive": "section",
+      "props": {
+        "backgroundColor": "#ffffff",
+        "padding": "medium"
+      }
+    },
+    {
+      "id": "center-name",
+      "primitive": "text",
+      "props": {
+        "heading": "{{name}}",
+        "alignment": "left"
+      }
+    },
+    {
+      "id": "address",
+      "primitive": "text",
+      "props": {
+        "content": "{{address}}, {{city}}, {{state}} {{zip}}"
+      }
+    },
+    {
+      "id": "phone",
+      "primitive": "link",
+      "props": {
+        "text": "📞 {{phone}}",
+        "href": "tel:{{phone}}"
+      }
+    },
+    {
+      "id": "website-link",
+      "primitive": "link",
+      "props": {
+        "text": "Visit Website",
+        "href": "{{website}}",
+        "openInNewTab": true
+      }
+    },
+    {
+      "id": "lanes-info",
+      "primitive": "text",
+      "props": {
+        "content": "🎳 {{lanes}} lanes"
+      }
+    },
+    {
+      "id": "features-list",
+      "primitive": "list",
+      "props": {
+        "heading": "Features",
+        "items": "{{features}}",
+        "ordered": false
+      }
+    }
+  ],
+  "dataSchema": [
+    {
+      "name": "name",
+      "label": "Center Name",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "address",
+      "label": "Address",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "city",
+      "label": "City",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "state",
+      "label": "State",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "zip",
+      "label": "ZIP Code",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "phone",
+      "label": "Phone",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "website",
+      "label": "Website",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "lanes",
+      "label": "Number of Lanes",
+      "type": "number",
+      "required": false
+    },
+    {
+      "name": "features",
+      "label": "Features",
+      "type": "array",
+      "required": false
+    }
+  ]
+}

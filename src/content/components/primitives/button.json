@@ -1,0 +1,49 @@
+{
+  "id": "button",
+  "name": "Button",
+  "description": "Clickable button with link",
+  "type": "primitive",
+  "icon": "🔘",
+  "fields": [
+    {
+      "name": "text",
+      "label": "Button Text",
+      "type": "string",
+      "required": true,
+      "description": "Text displayed on the button"
+    },
+    {
+      "name": "link",
+      "label": "Link URL",
+      "type": "string",
+      "required": true,
+      "description": "URL the button links to"
+    },
+    {
+      "name": "style",
+      "label": "Button Style",
+      "type": "enum",
+      "required": false,
+      "defaultValue": "primary",
+      "values": ["primary", "secondary", "outline", "text"],
+      "description": "Visual style of the button"
+    },
+    {
+      "name": "size",
+      "label": "Size",
+      "type": "enum",
+      "required": false,
+      "defaultValue": "medium",
+      "values": ["small", "medium", "large"],
+      "description": "Button size"
+    },
+    {
+      "name": "openInNewTab",
+      "label": "Open in New Tab",
+      "type": "boolean",
+      "required": false,
+      "defaultValue": false,
+      "description": "Whether to open link in new tab"
+    }
+  ]
+}

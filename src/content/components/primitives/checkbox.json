@@ -1,0 +1,39 @@
+{
+  "id": "checkbox",
+  "name": "Checkbox",
+  "description": "Single checkbox input (for forms)",
+  "type": "primitive",
+  "icon": "☑️",
+  "fields": [
+    {
+      "name": "label",
+      "label": "Label",
+      "type": "string",
+      "required": true,
+      "description": "Checkbox label text"
+    },
+    {
+      "name": "name",
+      "label": "Field Name",
+      "type": "string",
+      "required": true,
+      "description": "Form field name"
+    },
+    {
+      "name": "checked",
+      "label": "Checked by Default",
+      "type": "boolean",
+      "required": false,
+      "defaultValue": false,
+      "description": "Whether checkbox is checked by default"
+    },
+    {
+      "name": "required",
+      "label": "Required",
+      "type": "boolean",
+      "required": false,
+      "defaultValue": false,
+      "description": "Whether this field is required"
+    }
+  ]
+}

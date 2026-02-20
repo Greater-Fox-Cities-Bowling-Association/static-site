@@ -7,8 +7,8 @@ import LayoutList from "./LayoutList";
 import LayoutEditor from "./LayoutEditor";
 import ThemeList from "./ThemeList";
 import ThemeEditor from "./ThemeEditor";
-import ComponentSchemaEditor from "./ComponentSchemaEditor";
-import ComponentSchemaList from "./ComponentSchemaList";
+import ComponentList from "./ComponentList";
+import PrimitiveComponentEditor from "./PrimitiveComponentEditor";
 
 type Mode =
   | "themes"
@@ -18,7 +18,8 @@ type Mode =
   | "pages"
   | "page-editor"
   | "components"
-  | "component-editor";
+  | "primitive-editor"
+  | "composite-editor";
 
 export default function ImportAdmin() {
   const { isLoading, error, isAuthenticated, user, logout, getIdTokenClaims } =
@@ -32,7 +33,10 @@ export default function ImportAdmin() {
   const [editingThemeId, setEditingThemeId] = useState<string | undefined>(
     undefined,
   );
-  const [editingComponentName, setEditingComponentName] = useState<
+  const [editingPrimitiveId, setEditingPrimitiveId] = useState<
+    string | undefined
+  >(undefined);
+  const [editingCompositeId, setEditingCompositeId] = useState<
     string | undefined
   >(undefined);
 
@@ -206,24 +210,44 @@ export default function ImportAdmin() {
     setEditingThemeId(undefined);
   };
 
-  const handleEditComponent = (componentName: string) => {
-    setEditingComponentName(componentName);
-    setMode("component-editor");
+  const handleEditPrimitive = (componentId: string) => {
+    setEditingPrimitiveId(componentId);
+    setMode("primitive-editor");
   };
 
-  const handleCreateNewComponent = () => {
-    setEditingComponentName(undefined);
-    setMode("component-editor");
+  const handleCreateNewPrimitive = () => {
+    setEditingPrimitiveId(undefined);
+    setMode("primitive-editor");
   };
 
-  const handleComponentSaved = () => {
+  const handlePrimitiveSaved = () => {
     setMode("components");
-    setEditingComponentName(undefined);
+    setEditingPrimitiveId(undefined);
   };
 
-  const handleCancelComponentEdit = () => {
+  const handleCancelPrimitiveEdit = () => {
     setMode("components");
-    setEditingComponentName(undefined);
+    setEditingPrimitiveId(undefined);
+  };
+
+  const handleEditComposite = (componentId: string) => {
+    setEditingCompositeId(componentId);
+    setMode("composite-editor");
+  };
+
+  const handleCreateNewComposite = () => {
+    setEditingCompositeId(undefined);
+    setMode("composite-editor");
+  };
+
+  const handleCompositeSaved = () => {
+    setMode("components");
+    setEditingCompositeId(undefined);
+  };
+
+  const handleCancelCompositeEdit = () => {
+    setMode("components");
+    setEditingCompositeId(undefined);
   };
 
   return (
@@ -359,17 +383,19 @@ export default function ImportAdmin() {
               <button
                 onClick={() => setMode("components")}
                 className={`p-6 rounded-lg border-2 transition-all ${
-                  mode === "components" || mode === "component-editor"
+                  mode === "components" ||
+                  mode === "primitive-editor" ||
+                  mode === "composite-editor"
                     ? "border-primary bg-primary/10"
                     : "border-text/20 hover:border-primary/50"
                 }`}
               >
                 <div className="text-4xl mb-3">🧩</div>
                 <h3 className="font-semibold text-text mb-1">
-                  Component Schema
+                  Component Library
                 </h3>
                 <p className="text-sm text-text-secondary">
-                  Define reusable component schemas
+                  Build reusable components
                 </p>
               </button>
             </div>
@@ -433,22 +459,36 @@ export default function ImportAdmin() {
           )}
 
           {mode === "components" && (
-            <ComponentSchemaList
+            <ComponentList
               token={githubToken}
-              onEdit={handleEditComponent}
-              onCreateNew={handleCreateNewComponent}
+              onEditComposite={handleEditComposite}
+              onCreateComposite={handleCreateNewComposite}
               useGitHubAPI={useGitHubAPI}
             />
           )}
 
-          {mode === "component-editor" && (
-            <ComponentSchemaEditor
-              componentName={editingComponentName ?? "new-component"}
+          {mode === "primitive-editor" && (
+            <PrimitiveComponentEditor
+              componentId={editingPrimitiveId}
               token={githubToken}
-              onSave={handleComponentSaved}
-              onCancel={handleCancelComponentEdit}
+              onSave={handlePrimitiveSaved}
+              onCancel={handleCancelPrimitiveEdit}
               useGitHubAPI={useGitHubAPI}
             />
+          )}
+
+          {mode === "composite-editor" && (
+            <div className="bg-white rounded-lg shadow-sm p-8 text-center">
+              <p className="text-gray-600 mb-4">
+                Composite Component Editor coming soon!
+              </p>
+              <button
+                onClick={handleCancelCompositeEdit}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                Back to Components
+              </button>
+            </div>
           )}
         </div>
       )}

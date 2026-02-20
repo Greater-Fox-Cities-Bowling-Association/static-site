@@ -1,0 +1,39 @@
+{
+  "id": "link",
+  "name": "Link",
+  "description": "Text hyperlink",
+  "type": "primitive",
+  "icon": "🔗",
+  "fields": [
+    {
+      "name": "text",
+      "label": "Link Text",
+      "type": "string",
+      "required": true,
+      "description": "Text to display"
+    },
+    {
+      "name": "href",
+      "label": "URL",
+      "type": "string",
+      "required": true,
+      "description": "Link destination URL"
+    },
+    {
+      "name": "openInNewTab",
+      "label": "Open in New Tab",
+      "type": "boolean",
+      "required": false,
+      "defaultValue": false,
+      "description": "Whether to open link in new tab"
+    },
+    {
+      "name": "underline",
+      "label": "Underline",
+      "type": "boolean",
+      "required": false,
+      "defaultValue": true,
+      "description": "Show underline on link"
+    }
+  ]
+}

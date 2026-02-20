@@ -1,0 +1,41 @@
+{
+  "id": "section",
+  "name": "Section",
+  "description": "Container section with optional background and padding",
+  "type": "primitive",
+  "icon": "📦",
+  "fields": [
+    {
+      "name": "backgroundColor",
+      "label": "Background Color",
+      "type": "string",
+      "required": false,
+      "description": "Section background color (hex, rgb, or named color)"
+    },
+    {
+      "name": "padding",
+      "label": "Padding",
+      "type": "enum",
+      "required": false,
+      "defaultValue": "medium",
+      "values": ["none", "small", "medium", "large"],
+      "description": "Section padding size"
+    },
+    {
+      "name": "maxWidth",
+      "label": "Max Width",
+      "type": "enum",
+      "required": false,
+      "defaultValue": "container",
+      "values": ["full", "container", "narrow"],
+      "description": "Maximum width constraint"
+    },
+    {
+      "name": "id",
+      "label": "Section ID",
+      "type": "string",
+      "required": false,
+      "description": "HTML ID for anchor links"
+    }
+  ]
+}

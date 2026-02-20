@@ -1,0 +1,46 @@
+{
+  "id": "radiobutton",
+  "name": "Radio Button Group",
+  "description": "Group of radio buttons (for forms)",
+  "type": "primitive",
+  "icon": "🔘",
+  "fields": [
+    {
+      "name": "label",
+      "label": "Group Label",
+      "type": "string",
+      "required": true,
+      "description": "Label for the radio button group"
+    },
+    {
+      "name": "name",
+      "label": "Field Name",
+      "type": "string",
+      "required": true,
+      "description": "Form field name"
+    },
+    {
+      "name": "options",
+      "label": "Options",
+      "type": "array",
+      "required": true,
+      "itemType": "object",
+      "description": "Radio button options with label and value"
+    },
+    {
+      "name": "required",
+      "label": "Required",
+      "type": "boolean",
+      "required": false,
+      "defaultValue": false,
+      "description": "Whether this field is required"
+    },
+    {
+      "name": "defaultValue",
+      "label": "Default Value",
+      "type": "string",
+      "required": false,
+      "description": "Default selected value"
+    }
+  ]
+}

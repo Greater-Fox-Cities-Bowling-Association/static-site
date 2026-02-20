@@ -1,115 +1,142 @@
 import { useState, useEffect } from "react";
-import { getCollection, saveCollection } from "../../utils/githubApi";
+import type {
+  PrimitiveComponent,
+  ComponentField,
+  FieldType,
+} from "../../types/cms";
+import { fetchPrimitiveComponents, saveComponent } from "../../utils/githubApi";
 
-interface ComponentSchemaEditorProps {
-  componentName?: string;
+interface PrimitiveComponentEditorProps {
+  componentId?: string;
   token: string;
   onSave: () => void;
   onCancel: () => void;
   useGitHubAPI: boolean;
 }
 
-interface Field {
-  name: string;
-  type: "string" | "number" | "boolean" | "array" | "object" | "date";
-  required: boolean;
-  description?: string;
-}
-
-interface ComponentSchema {
-  name: string;
-  description?: string;
-  fields: Field[];
-}
-
-const FIELD_TYPES = [
+const FIELD_TYPES: { value: FieldType; label: string }[] = [
   { value: "string", label: "Text (string)" },
   { value: "number", label: "Number" },
   { value: "boolean", label: "True/False (boolean)" },
   { value: "array", label: "List (array)" },
   { value: "object", label: "Object" },
+  { value: "enum", label: "Selection (enum)" },
   { value: "date", label: "Date" },
-] as const;
+];
 
-export default function ComponentSchemaEditor({
-  componentName,
+export default function PrimitiveComponentEditor({
+  componentId,
   token,
   onSave,
   onCancel,
   useGitHubAPI,
-}: ComponentSchemaEditorProps) {
-  const [loading, setLoading] = useState(!!componentName);
+}: PrimitiveComponentEditorProps) {
+  const [loading, setLoading] = useState(!!componentId);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [schema, setSchema] = useState<ComponentSchema>({
+  const [component, setComponent] = useState<PrimitiveComponent>({
+    id: "",
     name: "",
     description: "",
+    type: "primitive",
+    icon: "",
     fields: [],
   });
 
   useEffect(() => {
-    if (componentName) {
-      loadSchema();
+    if (componentId) {
+      loadComponent();
     }
-  }, [componentName]);
+  }, [componentId]);
 
-  const loadSchema = async () => {
-    if (!componentName) return;
+  const loadComponent = async () => {
+    if (!componentId) return;
 
     setLoading(true);
     setError(null);
     try {
-      const data = await getCollection(componentName, token, useGitHubAPI);
-      setSchema(data);
-    } catch (err) {
-      console.error("Error loading component schema:", err);
-      setError(
-        err instanceof Error ? err.message : "Failed to load component schema",
+      const components = await fetchPrimitiveComponents(
+        token,
+        undefined,
+        undefined,
+        useGitHubAPI,
       );
+      const found = components.find((c) => c.id === componentId);
+      if (found) {
+        setComponent(found);
+      } else {
+        throw new Error("Component not found");
+      }
+    } catch (err) {
+      console.error("Error loading component:", err);
+      setError(err instanceof Error ? err.message : "Failed to load component");
     } finally {
       setLoading(false);
     }
   };
 
   const handleAddField = () => {
-    setSchema({
-      ...schema,
+    setComponent({
+      ...component,
       fields: [
-        ...schema.fields,
-        { name: "", type: "string", required: false, description: "" },
+        ...component.fields,
+        {
+          name: "",
+          label: "",
+          type: "string",
+          required: false,
+          description: "",
+        },
       ],
     });
   };
 
   const handleRemoveField = (index: number) => {
-    setSchema({
-      ...schema,
-      fields: schema.fields.filter((_, i) => i !== index),
+    setComponent({
+      ...component,
+      fields: component.fields.filter((_, i) => i !== index),
     });
   };
 
-  const handleFieldChange = (index: number, field: Partial<Field>) => {
-    const newFields = [...schema.fields];
-    newFields[index] = { ...newFields[index], ...field } as Field;
-    setSchema({ ...schema, fields: newFields });
+  const handleFieldChange = (index: number, field: Partial<ComponentField>) => {
+    const newFields = [...component.fields];
+    newFields[index] = { ...newFields[index], ...field } as ComponentField;
+    setComponent({ ...component, fields: newFields });
   };
 
   const handleSave = async () => {
     // Validation
-    if (!schema.name.trim()) {
-      alert("Component schema name is required");
+    if (!component.id.trim()) {
+      alert("Component ID is required");
       return;
     }
 
-    if (schema.fields.length === 0) {
+    if (!component.name.trim()) {
+      alert("Component name is required");
+      return;
+    }
+
+    // Validate ID format (lowercase, hyphens only)
+    if (!/^[a-z0-9-]+$/.test(component.id)) {
+      alert(
+        "Component ID must contain only lowercase letters, numbers, and hyphens",
+      );
+      return;
+    }
+
+    if (component.fields.length === 0) {
       alert("At least one field is required");
       return;
     }
 
-    for (const field of schema.fields) {
+    for (const field of component.fields) {
       if (!field.name.trim()) {
         alert("All fields must have a name");
+        return;
+      }
+      if (!field.label.trim()) {
+        alert("All fields must have a label");
         return;
       }
     }
@@ -118,14 +145,21 @@ export default function ComponentSchemaEditor({
     setError(null);
 
     try {
-      await saveCollection(schema, token, useGitHubAPI);
+      const result = await saveComponent(
+        component,
+        token,
+        undefined,
+        undefined,
+        useGitHubAPI,
+      );
+      if (!result.success) {
+        throw new Error(result.error || "Failed to save component");
+      }
       setSaving(false);
       onSave();
     } catch (err) {
-      console.error("Error saving component schema:", err);
-      setError(
-        err instanceof Error ? err.message : "Failed to save component schema",
-      );
+      console.error("Error saving component:", err);
+      setError(err instanceof Error ? err.message : "Failed to save component");
       setSaving(false);
     }
   };
@@ -135,9 +169,7 @@ export default function ComponentSchemaEditor({
       <div className="bg-white rounded-lg shadow-sm p-8">
         <div className="flex items-center justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <span className="ml-3 text-gray-600">
-            Loading component schema...
-          </span>
+          <span className="ml-3 text-gray-600">Loading component...</span>
         </div>
       </div>
     );
@@ -147,12 +179,12 @@ export default function ComponentSchemaEditor({
     <div className="bg-white rounded-lg shadow-sm p-6">
       <div className="mb-6">
         <h2 className="text-xl font-semibold text-gray-900">
-          {componentName
-            ? `Edit Component Schema: ${componentName}`
-            : "Create New Component Schema"}
+          {componentId
+            ? `Edit Primitive: ${componentId}`
+            : "Create New Primitive Component"}
         </h2>
         <p className="text-sm text-gray-600 mt-1">
-          Define the schema for your component assembled from primitive types
+          Define a basic building block for your pages
         </p>
       </div>
 
@@ -164,34 +196,69 @@ export default function ComponentSchemaEditor({
 
       <div className="space-y-6">
         {/* Basic Info */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Schema Name *
-          </label>
-          <input
-            type="text"
-            value={schema.name}
-            onChange={(e) => setSchema({ ...schema, name: e.target.value })}
-            disabled={!!componentName}
-            placeholder="e.g., honors, tournaments, centers"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
-          />
-          <p className="text-xs text-gray-500 mt-1">
-            Use lowercase letters, numbers, and hyphens only
-          </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Component ID *
+            </label>
+            <input
+              type="text"
+              value={component.id}
+              onChange={(e) =>
+                setComponent({ ...component, id: e.target.value.toLowerCase() })
+              }
+              disabled={!!componentId}
+              placeholder="e.g., text, image, button"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Lowercase letters, numbers, and hyphens only
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Component Name *
+            </label>
+            <input
+              type="text"
+              value={component.name}
+              onChange={(e) =>
+                setComponent({ ...component, name: e.target.value })
+              }
+              placeholder="e.g., Text, Image, Button"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Description
+            Description *
           </label>
           <textarea
-            value={schema.description}
+            value={component.description}
             onChange={(e) =>
-              setSchema({ ...schema, description: e.target.value })
+              setComponent({ ...component, description: e.target.value })
             }
-            placeholder="Brief description of this component schema"
+            placeholder="Brief description of this component"
             rows={2}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Icon (Emoji)
+          </label>
+          <input
+            type="text"
+            value={component.icon}
+            onChange={(e) =>
+              setComponent({ ...component, icon: e.target.value })
+            }
+            placeholder="e.g., 📝, 🖼️, 🔘"
+            maxLength={2}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
@@ -200,7 +267,7 @@ export default function ComponentSchemaEditor({
         <div>
           <div className="flex items-center justify-between mb-3">
             <label className="text-sm font-medium text-gray-700">
-              Schema Fields (Primitive Components) *
+              Component Fields *
             </label>
             <button
               onClick={handleAddField}
@@ -211,12 +278,12 @@ export default function ComponentSchemaEditor({
           </div>
 
           <div className="space-y-3">
-            {schema.fields.map((field, index) => (
+            {component.fields.map((field, index) => (
               <div
                 key={index}
                 className="p-4 border border-gray-200 rounded-lg"
               >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1">
                       Field Name *
@@ -227,20 +294,35 @@ export default function ComponentSchemaEditor({
                       onChange={(e) =>
                         handleFieldChange(index, { name: e.target.value })
                       }
-                      placeholder="e.g., title, date, score"
+                      placeholder="e.g., content, src"
                       className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                     />
                   </div>
 
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1">
-                      Primitive Type *
+                      Label *
+                    </label>
+                    <input
+                      type="text"
+                      value={field.label}
+                      onChange={(e) =>
+                        handleFieldChange(index, { label: e.target.value })
+                      }
+                      placeholder="e.g., Content, Image URL"
+                      className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">
+                      Type *
                     </label>
                     <select
                       value={field.type}
                       onChange={(e) =>
                         handleFieldChange(index, {
-                          type: e.target.value as Field["type"],
+                          type: e.target.value as FieldType,
                         })
                       }
                       className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
@@ -294,7 +376,7 @@ export default function ComponentSchemaEditor({
               </div>
             ))}
 
-            {schema.fields.length === 0 && (
+            {component.fields.length === 0 && (
               <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
                 <p className="text-gray-500 mb-2">No fields added yet</p>
                 <button
@@ -324,24 +406,10 @@ export default function ComponentSchemaEditor({
           >
             {saving
               ? "Saving..."
-              : componentName
-                ? "Update Schema"
-                : "Create Schema"}
+              : componentId
+                ? "Update Component"
+                : "Create Component"}
           </button>
-        </div>
-      </div>
-
-      <div className="mt-6 p-4 bg-amber-50 rounded-lg border border-amber-200">
-        <div className="flex items-start gap-3">
-          <div className="text-xl">⚠️</div>
-          <div>
-            <h4 className="font-semibold text-amber-900 mb-1">Important</h4>
-            <p className="text-sm text-amber-800">
-              Changing the component schema may affect existing content items.
-              Make sure to update your content items to match the new schema
-              structure.
-            </p>
-          </div>
         </div>
       </div>
     </div>

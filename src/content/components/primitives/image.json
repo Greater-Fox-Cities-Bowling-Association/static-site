@@ -1,0 +1,44 @@
+{
+  "id": "image",
+  "name": "Image",
+  "description": "Display an image with optional caption",
+  "type": "primitive",
+  "icon": "🖼️",
+  "fields": [
+    {
+      "name": "src",
+      "label": "Image URL",
+      "type": "string",
+      "required": true,
+      "description": "URL or path to the image"
+    },
+    {
+      "name": "alt",
+      "label": "Alt Text",
+      "type": "string",
+      "required": true,
+      "description": "Alternative text for accessibility"
+    },
+    {
+      "name": "caption",
+      "label": "Caption",
+      "type": "string",
+      "required": false,
+      "description": "Optional caption below the image"
+    },
+    {
+      "name": "width",
+      "label": "Width",
+      "type": "string",
+      "required": false,
+      "description": "Image width (e.g., '100%', '300px')"
+    },
+    {
+      "name": "height",
+      "label": "Height",
+      "type": "string",
+      "required": false,
+      "description": "Image height (e.g., 'auto', '200px')"
+    }
+  ]
+}

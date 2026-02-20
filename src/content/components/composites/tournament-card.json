@@ -1,0 +1,110 @@
+{
+  "id": "tournament-card",
+  "name": "Tournament Card",
+  "description": "Displays tournament information with image, details, and register button",
+  "type": "composite",
+  "icon": "🏆",
+  "components": [
+    {
+      "id": "card-section",
+      "primitive": "section",
+      "props": {
+        "backgroundColor": "#f9fafb",
+        "padding": "medium"
+      }
+    },
+    {
+      "id": "tournament-image",
+      "primitive": "image",
+      "props": {
+        "src": "{{imageUrl}}",
+        "alt": "{{name}}",
+        "width": "100%"
+      }
+    },
+    {
+      "id": "tournament-name",
+      "primitive": "text",
+      "props": {
+        "heading": "{{name}}",
+        "alignment": "center"
+      }
+    },
+    {
+      "id": "tournament-date",
+      "primitive": "text",
+      "props": {
+        "content": "📅 {{date}}"
+      }
+    },
+    {
+      "id": "tournament-location",
+      "primitive": "text",
+      "props": {
+        "content": "📍 {{location}}"
+      }
+    },
+    {
+      "id": "tournament-description",
+      "primitive": "text",
+      "props": {
+        "content": "{{description}}"
+      }
+    },
+    {
+      "id": "divider",
+      "primitive": "divider",
+      "props": {
+        "margin": "small"
+      }
+    },
+    {
+      "id": "register-button",
+      "primitive": "button",
+      "props": {
+        "text": "Register Now",
+        "link": "{{registrationLink}}",
+        "style": "primary",
+        "size": "large"
+      }
+    }
+  ],
+  "dataSchema": [
+    {
+      "name": "name",
+      "label": "Tournament Name",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "date",
+      "label": "Date",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "location",
+      "label": "Location",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "description",
+      "label": "Description",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "imageUrl",
+      "label": "Image URL",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "registrationLink",
+      "label": "Registration Link",
+      "type": "string",
+      "required": true
+    }
+  ]
+}

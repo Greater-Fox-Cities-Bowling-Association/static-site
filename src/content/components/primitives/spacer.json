@@ -1,0 +1,18 @@
+{
+  "id": "spacer",
+  "name": "Spacer",
+  "description": "Vertical spacing between elements",
+  "type": "primitive",
+  "icon": "↕️",
+  "fields": [
+    {
+      "name": "size",
+      "label": "Spacing Size",
+      "type": "enum",
+      "required": false,
+      "defaultValue": "medium",
+      "values": ["small", "medium", "large", "xlarge"],
+      "description": "Amount of vertical space"
+    }
+  ]
+}

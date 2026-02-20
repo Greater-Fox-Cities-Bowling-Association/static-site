@@ -1,0 +1,32 @@
+{
+  "id": "list",
+  "name": "List",
+  "description": "Ordered or unordered list of items",
+  "type": "primitive",
+  "icon": "📋",
+  "fields": [
+    {
+      "name": "items",
+      "label": "List Items",
+      "type": "array",
+      "required": true,
+      "itemType": "string",
+      "description": "Items in the list"
+    },
+    {
+      "name": "ordered",
+      "label": "Ordered",
+      "type": "boolean",
+      "required": false,
+      "defaultValue": false,
+      "description": "Whether to use numbered list (true) or bullet points (false)"
+    },
+    {
+      "name": "heading",
+      "label": "Heading",
+      "type": "string",
+      "required": false,
+      "description": "Optional heading above the list"
+    }
+  ]
+}
