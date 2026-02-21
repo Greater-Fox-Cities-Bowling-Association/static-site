@@ -6,7 +6,7 @@
 
 export type PageStatus = 'draft' | 'published';
 
-export type SectionType = 'hero' | 'text' | 'cardGrid' | 'cta' | 'contentList';
+export type SectionType = 'hero' | 'text' | 'cardGrid' | 'cta' | 'contentList' | 'component';
 
 // Collection names are dynamic - any collection defined in config.ts can be used
 export type ContentCollectionType = string;
@@ -98,6 +98,7 @@ export interface BaseSection {
   id: string;
   type: SectionType;
   order: number;
+  children?: Section[]; // Nested child blocks
 }
 
 export interface HeroSection extends BaseSection {
@@ -148,7 +149,16 @@ export interface ContentListSection extends BaseSection {
   showFilters?: boolean; // Allow users to filter/search the list
 }
 
-export type Section = HeroSection | TextSection | CardGridSection | CtaSection | ContentListSection;
+export interface ComponentSection extends BaseSection {
+  type: 'component';
+  componentId: string;           // ID of the primitive or composite component
+  componentType: 'primitive' | 'composite';
+  columns: number;               // Actual column span on this page (1–12)
+  data: Record<string, any>;     // Content data keyed by dataSchema field names
+  label?: string;                // Optional display label in the page builder
+}
+
+export type Section = HeroSection | TextSection | CardGridSection | CtaSection | ContentListSection | ComponentSection;
 
 // =============================================================================
 // Layout Type Definitions

@@ -1,5 +1,6 @@
 import React from "react";
 import type { SectionEditorProps } from "../../../types/cms";
+import { useSectionEditorContext } from "./SectionEditorContext";
 
 interface SectionWrapperProps extends Pick<
   SectionEditorProps,
@@ -18,6 +19,14 @@ export default function SectionWrapper({
   canMoveUp,
   canMoveDown,
 }: SectionWrapperProps) {
+  const { panelMode } = useSectionEditorContext();
+
+  // In the slide-out panel the PageEditor provides the outer chrome (header,
+  // move/delete controls).  Render only the form fields.
+  if (panelMode) {
+    return <div className="p-5 space-y-4">{children}</div>;
+  }
+
   const typeLabels: Record<string, string> = {
     hero: "Hero Section",
     text: "Text Block",

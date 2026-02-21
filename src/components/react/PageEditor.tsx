@@ -1,9 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, type ReactNode } from "react";
 import type {
   PageContent,
   Section,
   SectionType,
   Layout,
+  ComponentSection,
+  CompositeComponent,
 } from "../../types/cms";
 import {
   fetchPageContent,
@@ -11,6 +13,7 @@ import {
   fetchPagesDirectory,
   fetchLayoutsDirectory,
   fetchLayoutContent,
+  fetchCompositeComponents,
 } from "../../utils/githubApi";
 import {
   loadDraft,
@@ -24,6 +27,8 @@ import TextEditor from "./sections/TextEditor";
 import CardGridEditor from "./sections/CardGridEditor";
 import CtaEditor from "./sections/CtaEditor";
 import ContentListEditor from "./sections/ContentListEditor";
+import ComponentSectionEditor from "./sections/ComponentSectionEditor";
+import { SectionEditorContext } from "./sections/SectionEditorContext";
 
 interface PageEditorProps {
   slug: string | undefined; // undefined = creating new page
@@ -31,6 +36,225 @@ interface PageEditorProps {
   onSave: () => void;
   onCancel: () => void;
   useGitHubAPI?: boolean;
+}
+
+// Metadata for the legacy section palette tiles (ASCII icons only)
+const SECTION_META = {
+  hero: {
+    label: "Hero",
+    icon: "[H]",
+    description: "Large banner with title and CTA",
+    color: "#6366f1",
+  },
+  text: {
+    label: "Text Block",
+    icon: "[T]",
+    description: "Paragraph content with heading",
+    color: "#0ea5e9",
+  },
+  cardGrid: {
+    label: "Card Grid",
+    icon: "[G]",
+    description: "Multiple cards in a grid",
+    color: "#f59e0b",
+  },
+  cta: {
+    label: "Call to Action",
+    icon: "[!]",
+    description: "Prominent button with heading",
+    color: "#ef4444",
+  },
+  contentList: {
+    label: "Content List",
+    icon: "[L]",
+    description: "Items from a collection",
+    color: "#10b981",
+  },
+} satisfies Partial<
+  Record<
+    SectionType,
+    { label: string; icon: string; description: string; color: string }
+  >
+>;
+
+type PaletteTab = "settings" | "blocks";
+
+type DragSource =
+  | { kind: "palette"; sectionType: SectionType }
+  | { kind: "composite"; composite: CompositeComponent }
+  | {
+      kind: "canvas";
+      sectionId: string;
+      index: number;
+      parentId: string | null;
+    };
+
+type DropTarget = { parentId: string | null; index: number } | null;
+
+/** Returns display metadata for a canvas card, resolving composite names dynamically */
+function getCanvasCardMeta(
+  section: Section,
+  composites: CompositeComponent[],
+): { label: string; icon: string; color: string } {
+  if (section.type === "component") {
+    const comp = composites.find((c) => c.id === section.componentId);
+    return {
+      label: section.label || comp?.name || section.componentId || "Component",
+      icon: "[C]",
+      color: "#8b5cf6",
+    };
+  }
+  return (
+    SECTION_META[section.type as keyof typeof SECTION_META] ?? {
+      label: section.type,
+      icon: "[ ]",
+      color: "#6b7280",
+    }
+  );
+}
+
+// ── Recursive tree helpers ──────────────────────────────────────────────────
+
+function findSectionById(sections: Section[], id: string): Section | null {
+  for (const s of sections) {
+    if (s.id === id) return s;
+    if (s.children?.length) {
+      const found = findSectionById(s.children, id);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
+function updateSectionById(
+  sections: Section[],
+  id: string,
+  updated: Section,
+): Section[] {
+  return sections.map((s) => {
+    if (s.id === id) return updated;
+    if (s.children?.length)
+      return { ...s, children: updateSectionById(s.children, id, updated) };
+    return s;
+  });
+}
+
+function deleteSectionById(sections: Section[], id: string): Section[] {
+  return sections
+    .filter((s) => s.id !== id)
+    .map((s, i) => ({
+      ...s,
+      order: i,
+      ...(s.children?.length
+        ? { children: deleteSectionById(s.children, id) }
+        : {}),
+    }));
+}
+
+function moveSectionById(
+  sections: Section[],
+  id: string,
+  dir: "up" | "down",
+): Section[] {
+  const idx = sections.findIndex((s) => s.id === id);
+  if (idx >= 0) {
+    const target = dir === "up" ? idx - 1 : idx + 1;
+    if (target < 0 || target >= sections.length) return sections;
+    const arr = [...sections];
+    [arr[idx], arr[target]] = [arr[target]!, arr[idx]!];
+    return arr.map((s, i) => ({ ...s, order: i }));
+  }
+  return sections.map((s) =>
+    s.children?.length
+      ? { ...s, children: moveSectionById(s.children, id, dir) }
+      : s,
+  );
+}
+
+function addSectionToList(
+  sections: Section[],
+  parentId: string | null,
+  newSection: Section,
+  atIndex?: number,
+): Section[] {
+  if (parentId === null) {
+    const arr = [...sections];
+    if (atIndex !== undefined) arr.splice(atIndex, 0, newSection);
+    else arr.push(newSection);
+    return arr.map((s, i) => ({ ...s, order: i }));
+  }
+  return sections.map((s) => {
+    if (s.id === parentId) {
+      const children = [...(s.children ?? [])];
+      if (atIndex !== undefined) children.splice(atIndex, 0, newSection);
+      else children.push(newSection);
+      return { ...s, children: children.map((c, i) => ({ ...c, order: i })) };
+    }
+    if (s.children?.length)
+      return {
+        ...s,
+        children: addSectionToList(s.children, parentId, newSection, atIndex),
+      };
+    return s;
+  });
+}
+
+function reorderSectionInList(
+  sections: Section[],
+  parentId: string | null,
+  fromIndex: number,
+  toIndex: number,
+): Section[] {
+  if (parentId === null) {
+    const arr = [...sections];
+    const [moved] = arr.splice(fromIndex, 1);
+    if (!moved) return sections;
+    const insertAt = fromIndex < toIndex ? toIndex - 1 : toIndex;
+    arr.splice(insertAt, 0, moved);
+    return arr.map((s, i) => ({ ...s, order: i }));
+  }
+  return sections.map((s) => {
+    if (s.id === parentId) {
+      const arr = [...(s.children ?? [])];
+      const [moved] = arr.splice(fromIndex, 1);
+      if (!moved) return s;
+      const insertAt = fromIndex < toIndex ? toIndex - 1 : toIndex;
+      arr.splice(insertAt, 0, moved);
+      return { ...s, children: arr.map((c, i) => ({ ...c, order: i })) };
+    }
+    if (s.children?.length)
+      return {
+        ...s,
+        children: reorderSectionInList(
+          s.children,
+          parentId,
+          fromIndex,
+          toIndex,
+        ),
+      };
+    return s;
+  });
+}
+
+function findSiblingInfo(
+  sections: Section[],
+  id: string,
+  parentId: string | null = null,
+): { isFirst: boolean; isLast: boolean; parentId: string | null } | null {
+  const idx = sections.findIndex((s) => s.id === id);
+  if (idx >= 0)
+    return {
+      isFirst: idx === 0,
+      isLast: idx === sections.length - 1,
+      parentId,
+    };
+  for (const s of sections) {
+    if (s.children?.length) {
+      const found = findSiblingInfo(s.children, id, s.id);
+      if (found) return found;
+    }
+  }
+  return null;
 }
 
 function generateSlug(title: string): string {
@@ -88,6 +312,39 @@ function createSection(type: SectionType, order: number): Section {
         displayMode: "cards",
         columns: 3,
       };
+    case "component":
+      return {
+        ...baseSection,
+        type: "component",
+        componentId: "",
+        componentType: "composite",
+        columns: 12,
+        data: {},
+      };
+  }
+}
+
+/** One-line preview text shown inside each canvas card */
+function getSectionPreview(section: Section): string {
+  switch (section.type) {
+    case "hero":
+      return section.title || "Untitled hero";
+    case "text":
+      return (
+        section.heading || section.content?.slice(0, 60) || "Empty text block"
+      );
+    case "cardGrid":
+      return `${section.cards.length} card${section.cards.length === 1 ? "" : "s"}${
+        section.heading ? ` - ${section.heading}` : ""
+      }`;
+    case "cta":
+      return section.heading || section.buttonText || "Empty CTA";
+    case "contentList":
+      return `${section.collection} - ${section.displayMode}`;
+    case "component":
+      return section.label || section.componentId || "Component";
+    default:
+      return "";
   }
 }
 
@@ -99,26 +356,44 @@ export default function PageEditor({
   useGitHubAPI = false,
 }: PageEditorProps) {
   const { colors } = useTheme();
+
+  // Page data
   const [page, setPage] = useState<PageContent>(createEmptyPage());
   const [loading, setLoading] = useState(!!slug);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [showAddSection, setShowAddSection] = useState(false);
   const [existingLandingPage, setExistingLandingPage] = useState<string | null>(
     null,
   );
   const [availableLayouts, setAvailableLayouts] = useState<Layout[]>([]);
 
-  useEffect(() => {
-    // Check for existing landing page
-    checkForLandingPage();
+  // Canvas / palette UI
+  const [paletteTab, setPaletteTab] = useState<PaletteTab>("blocks");
+  const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
+  const [expandedSectionIds, setExpandedSectionIds] = useState<Set<string>>(
+    new Set(),
+  );
+  const [compositeComponents, setCompositeComponents] = useState<
+    CompositeComponent[]
+  >([]);
+  const [loadingComposites, setLoadingComposites] = useState(true);
 
-    // Load available layouts
+  // Drag-and-drop
+  const dragSourceRef = useRef<DragSource | null>(null);
+  const [dropTarget, setDropTarget] = useState<DropTarget>(null);
+  const [nestTarget, setNestTarget] = useState<string | null>(null);
+  const [canvasMode, setCanvasMode] = useState<"blocks" | "preview">("blocks");
+  const [previewKey, setPreviewKey] = useState(0);
+
+  // ── Data loading ─────────────────────────────────────────────────────────
+
+  useEffect(() => {
+    checkForLandingPage();
     loadAvailableLayouts();
+    loadCompositeComponents();
 
     if (slug) {
-      // Try to load draft first
       const draft = loadDraft(slug);
       if (draft) {
         setPage(draft);
@@ -126,14 +401,11 @@ export default function PageEditor({
         setLoading(false);
         return;
       }
-
-      // Load from GitHub
       loadPageFromGitHub();
     }
   }, [slug]);
 
   useEffect(() => {
-    // Auto-save draft when page changes
     if (hasUnsavedChanges && page.slug) {
       autoSaveDraft(page);
     }
@@ -147,13 +419,10 @@ export default function PageEditor({
         undefined,
         useGitHubAPI,
       );
-
       if (result.success && result.files) {
-        // Check each page for isLandingPage flag
         for (const file of result.files) {
           const pageSlug = file.name.replace(".json", "");
-          if (pageSlug === slug) continue; // Skip current page
-
+          if (pageSlug === slug) continue;
           const pageResult = await fetchPageContent(
             pageSlug,
             token,
@@ -161,7 +430,6 @@ export default function PageEditor({
             undefined,
             useGitHubAPI,
           );
-
           if (pageResult.success && pageResult.content?.isLandingPage) {
             setExistingLandingPage(pageSlug);
             break;
@@ -175,16 +443,13 @@ export default function PageEditor({
 
   const loadAvailableLayouts = async () => {
     try {
-      // Fetch layouts from GitHub
       const result = await fetchLayoutsDirectory(
         token,
         undefined,
         undefined,
         useGitHubAPI,
       );
-
       if (result.success && result.files && result.files.length > 0) {
-        // Load the content for each layout
         const layouts: Layout[] = await Promise.all(
           result.files.map(async (file) => {
             const layoutId = file.name.replace(".json", "");
@@ -196,46 +461,56 @@ export default function PageEditor({
                 undefined,
                 useGitHubAPI,
               );
-              if (contentResult.success && contentResult.content) {
+              if (contentResult.success && contentResult.content)
                 return contentResult.content;
-              }
-            } catch (error) {
-              console.error(`Failed to load layout ${layoutId}:`, error);
-            }
-            // Return a default layout if fetch fails
+            } catch {}
             return {
               id: layoutId,
               name: layoutId,
               description: "",
-              header: { showNavigation: true, navigationStyle: "default" },
-              footer: { showFooter: true, footerStyle: "default" },
+              header: {
+                showNavigation: true,
+                navigationStyle: "default" as const,
+              },
+              footer: { showFooter: true, footerStyle: "default" as const },
             };
           }),
         );
-
         setAvailableLayouts(layouts);
-
-        // Auto-default new pages to the first available layout
         if (!slug && layouts.length > 0) {
           setPage((prev) => ({
             ...prev,
             useLayout: true,
-            layoutId: layouts?.[0]?.id ?? "",
+            layoutId: layouts[0]?.id ?? "",
           }));
         }
       } else {
-        // If no layouts found, provide empty array
         setAvailableLayouts([]);
       }
-    } catch (error) {
-      console.error("Error loading layouts:", error);
+    } catch {
       setAvailableLayouts([]);
+    }
+  };
+
+  const loadCompositeComponents = async () => {
+    setLoadingComposites(true);
+    try {
+      const components = await fetchCompositeComponents(
+        token,
+        undefined,
+        undefined,
+        useGitHubAPI,
+      );
+      setCompositeComponents(components);
+    } catch (err) {
+      console.error("Error loading composite components:", err);
+    } finally {
+      setLoadingComposites(false);
     }
   };
 
   const loadPageFromGitHub = async () => {
     if (!slug) return;
-
     setLoading(true);
     try {
       const result = await fetchPageContent(
@@ -245,7 +520,6 @@ export default function PageEditor({
         undefined,
         useGitHubAPI,
       );
-
       if (result.success && result.content) {
         setPage(result.content);
       } else {
@@ -260,94 +534,102 @@ export default function PageEditor({
     }
   };
 
+  // ── Page / section mutations ──────────────────────────────────────────────
+
   const updatePage = (updates: Partial<PageContent>) => {
     setPage((prev) => ({ ...prev, ...updates }));
     setHasUnsavedChanges(true);
   };
 
-  const updateSection = (index: number, updatedSection: Section) => {
-    const newSections = [...page.sections];
-    newSections[index] = updatedSection;
-    updatePage({ sections: newSections });
+  const updateSectionInPage = (id: string, updated: Section) => {
+    updatePage({ sections: updateSectionById(page.sections, id, updated) });
   };
 
-  const deleteSection = (index: number) => {
-    const newSections = page.sections.filter((_, i) => i !== index);
-    // Update order for remaining sections
-    const reorderedSections = newSections.map((section, i) => ({
-      ...section,
-      order: i,
-    }));
-    updatePage({ sections: reorderedSections });
+  const deleteSectionFromPage = (id: string) => {
+    if (activeSectionId === id) setActiveSectionId(null);
+    updatePage({ sections: deleteSectionById(page.sections, id) });
   };
 
-  const moveSection = (index: number, direction: "up" | "down") => {
-    const newSections = [...page.sections];
-    const targetIndex = direction === "up" ? index - 1 : index + 1;
-
-    if (
-      targetIndex < 0 ||
-      targetIndex >= newSections.length ||
-      !newSections[index] ||
-      !newSections[targetIndex]
-    )
-      return;
-
-    // Swap sections
-    const temp = newSections[index];
-    newSections[index] = newSections[targetIndex];
-    newSections[targetIndex] = temp;
-
-    // Update order
-    const reorderedSections = newSections.map((section, i) => ({
-      ...section,
-      order: i,
-    }));
-    updatePage({ sections: reorderedSections });
+  const moveSectionInPage = (id: string, dir: "up" | "down") => {
+    updatePage({ sections: moveSectionById(page.sections, id, dir) });
   };
 
-  const addSection = (type: SectionType) => {
-    const newSection = createSection(type, page.sections.length);
-    updatePage({ sections: [...page.sections, newSection] });
-    setShowAddSection(false);
+  const addSection = (
+    type: SectionType,
+    parentId: string | null = null,
+    atIndex?: number,
+  ) => {
+    const newSection = createSection(type, 0);
+    updatePage({
+      sections: addSectionToList(page.sections, parentId, newSection, atIndex),
+    });
+    setActiveSectionId(newSection.id);
+    if (parentId) setExpandedSectionIds((prev) => new Set([...prev, parentId]));
   };
+
+  const addCompositeSection = (
+    composite: CompositeComponent,
+    parentId: string | null = null,
+    atIndex?: number,
+  ) => {
+    const newSection: ComponentSection = {
+      id: generateSectionId(),
+      type: "component",
+      order: 0,
+      componentId: composite.id,
+      componentType: "composite",
+      columns: composite.defaultColumns,
+      data: {},
+      label: composite.name,
+    };
+    updatePage({
+      sections: addSectionToList(page.sections, parentId, newSection, atIndex),
+    });
+    setActiveSectionId(newSection.id);
+    if (parentId) setExpandedSectionIds((prev) => new Set([...prev, parentId]));
+  };
+
+  const handleTitleChange = (title: string) => {
+    const updates: Partial<PageContent> = { title };
+    if (!slug) updates.slug = generateSlug(title);
+    updatePage(updates);
+  };
+
+  // ── Save / publish ────────────────────────────────────────────────────────
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
-
-    if (!page.title.trim()) {
-      newErrors.title = "Title is required";
-    }
-
-    if (!page.slug.trim()) {
-      newErrors.slug = "Slug is required";
-    }
-
+    if (!page.title.trim()) newErrors.title = "Title is required";
+    if (!page.slug.trim()) newErrors.slug = "Slug is required";
     if (
       page.isLandingPage &&
       existingLandingPage &&
       existingLandingPage !== slug
     ) {
-      newErrors.isLandingPage = `Another page (${existingLandingPage}) is already set as the landing page`;
+      newErrors.isLandingPage = `"${existingLandingPage}" is already the landing page`;
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handlePublish = async () => {
-    if (!validate()) {
-      alert("Please fix validation errors before publishing");
+  const handleSaveDraft = () => {
+    if (!page.slug) {
+      alert("Please enter a slug before saving draft");
       return;
     }
+    const success = saveDraftToStore(page);
+    if (success) {
+      setHasUnsavedChanges(false);
+    } else {
+      alert("Failed to save draft");
+    }
+  };
 
+  const handlePublish = async () => {
+    if (!validate()) return;
     setSaving(true);
     try {
-      console.log("Publishing page:", { slug: page.slug, title: page.title });
-      const publishedPage = {
-        ...page,
-        status: "published" as const,
-      };
+      const publishedPage = { ...page, status: "published" as const };
       const result = await savePageFile(
         page.slug,
         publishedPage,
@@ -356,481 +638,1038 @@ export default function PageEditor({
         undefined,
         useGitHubAPI,
       );
-
-      console.log("Publish result:", result);
-
       if (result.success) {
-        // Delete draft after successful publish
-        if (page.slug) {
-          deleteDraft(page.slug);
-        }
+        if (page.slug) deleteDraft(page.slug);
         setPage(publishedPage);
         setHasUnsavedChanges(false);
-        alert("Page published successfully!");
         onSave();
       } else {
-        console.error("Publish failed:", result.error);
         alert(`Failed to publish: ${result.error || "Unknown error"}`);
       }
     } catch (error) {
-      console.error("Publish error:", error);
       alert(
-        `Error publishing page: ${error instanceof Error ? error.message : "Unknown error"}`,
+        `Error publishing: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
     } finally {
       setSaving(false);
     }
   };
 
-  const handleSaveDraft = () => {
-    if (!page.slug) {
-      alert("Please enter a slug before saving draft");
-      return;
-    }
+  // ── Drag and drop ─────────────────────────────────────────────────────────
 
-    const success = saveDraftToStore(page);
-    if (success) {
-      setHasUnsavedChanges(false);
-      alert("Draft saved locally");
-    } else {
-      alert("Failed to save draft");
-    }
+  const handlePaletteDragStart = (type: SectionType) => {
+    dragSourceRef.current = { kind: "palette", sectionType: type };
   };
 
-  const handleTitleChange = (title: string) => {
-    const updates: Partial<PageContent> = { title };
-
-    // Auto-generate slug for new pages
-    if (!slug) {
-      updates.slug = generateSlug(title);
-    }
-
-    updatePage(updates);
+  const handleCompositeDragStart = (composite: CompositeComponent) => {
+    dragSourceRef.current = { kind: "composite", composite };
   };
+
+  const handleCanvasDragStart = (
+    sectionId: string,
+    index: number,
+    parentId: string | null,
+  ) => {
+    dragSourceRef.current = { kind: "canvas", sectionId, index, parentId };
+  };
+
+  const handleDrop = (
+    e: React.DragEvent,
+    insertBefore: number,
+    parentId: string | null,
+  ) => {
+    e.preventDefault();
+    setDropTarget(null);
+    const src = dragSourceRef.current;
+    if (!src) return;
+    if (src.kind === "palette") {
+      addSection(src.sectionType, parentId, insertBefore);
+    } else if (src.kind === "composite") {
+      addCompositeSection(src.composite, parentId, insertBefore);
+    } else if (src.kind === "canvas") {
+      if (src.parentId === parentId) {
+        updatePage({
+          sections: reorderSectionInList(
+            page.sections,
+            parentId,
+            src.index,
+            insertBefore,
+          ),
+        });
+      } else {
+        const moved = findSectionById(page.sections, src.sectionId);
+        if (!moved) return;
+        let updated = deleteSectionById(page.sections, src.sectionId);
+        updated = addSectionToList(updated, parentId, moved, insertBefore);
+        updatePage({ sections: updated });
+        if (parentId)
+          setExpandedSectionIds((prev) => new Set([...prev, parentId]));
+      }
+    }
+    dragSourceRef.current = null;
+  };
+
+  const handleDragEnd = () => {
+    dragSourceRef.current = null;
+    setDropTarget(null);
+    setNestTarget(null);
+  };
+
+  // ── Derived ───────────────────────────────────────────────────────────────
+
+  const activeSection = activeSectionId
+    ? findSectionById(page.sections, activeSectionId)
+    : null;
+  const activeMeta = activeSection
+    ? getCanvasCardMeta(activeSection, compositeComponents)
+    : null;
+  const activeSiblingInfo = activeSectionId
+    ? findSiblingInfo(page.sections, activeSectionId)
+    : null;
+
+  // ── Recursive canvas renderer ─────────────────────────────────────────────
+
+  const renderSectionList = (
+    sections: Section[],
+    parentId: string | null,
+    depth: number,
+  ): ReactNode => {
+    const mkDrop = (index: number) => (
+      <div
+        key={`dz-${parentId ?? "root"}-${index}`}
+        onDragOver={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setDropTarget({ parentId, index });
+          setNestTarget(null);
+        }}
+        onDrop={(e) => {
+          e.stopPropagation();
+          handleDrop(e, index, parentId);
+        }}
+        onDragLeave={() => setDropTarget(null)}
+        className="transition-all duration-150"
+        style={{
+          height:
+            dropTarget?.parentId === parentId && dropTarget.index === index
+              ? "36px"
+              : depth > 0
+                ? "4px"
+                : "8px",
+          borderRadius: "6px",
+          backgroundColor:
+            dropTarget?.parentId === parentId && dropTarget.index === index
+              ? "#6366f120"
+              : "transparent",
+          border:
+            dropTarget?.parentId === parentId && dropTarget.index === index
+              ? "2px dashed #6366f1"
+              : "2px dashed transparent",
+        }}
+      />
+    );
+    return (
+      <>
+        {mkDrop(0)}
+        {sections.map((section, index) => {
+          const meta = getCanvasCardMeta(section, compositeComponents);
+          const isActive = activeSectionId === section.id;
+          const isExpanded = expandedSectionIds.has(section.id);
+          return (
+            <div key={section.id}>
+              <div
+                draggable
+                onDragStart={(e) => {
+                  e.stopPropagation();
+                  handleCanvasDragStart(section.id, index, parentId);
+                }}
+                onDragEnd={handleDragEnd}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const willExpand = !isExpanded || !isActive;
+                  setActiveSectionId(isActive ? null : section.id);
+                  setExpandedSectionIds((prev) => {
+                    const next = new Set(prev);
+                    if (willExpand) next.add(section.id);
+                    else next.delete(section.id);
+                    return next;
+                  });
+                }}
+                className="group relative flex items-stretch rounded-lg cursor-pointer select-none transition-shadow"
+                onDragOver={(e) => {
+                  if (!dragSourceRef.current) return;
+                  // Don't nest a section into itself
+                  if (
+                    dragSourceRef.current.kind === "canvas" &&
+                    dragSourceRef.current.sectionId === section.id
+                  )
+                    return;
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setDropTarget(null);
+                  setNestTarget(section.id);
+                }}
+                onDragLeave={(e) => {
+                  // Only clear if leaving the card itself (not entering a child)
+                  if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                    setNestTarget((prev) =>
+                      prev === section.id ? null : prev,
+                    );
+                  }
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setNestTarget(null);
+                  const childCount = (section.children ?? []).length;
+                  handleDrop(e, childCount, section.id);
+                  setExpandedSectionIds(
+                    (prev) => new Set([...prev, section.id]),
+                  );
+                }}
+                style={{
+                  marginLeft: depth > 0 ? `${depth * 12}px` : undefined,
+                  border: isActive
+                    ? `2px solid ${meta.color}`
+                    : nestTarget === section.id
+                      ? `2px dashed ${meta.color}`
+                      : `1px solid ${colors.secondary}`,
+                  backgroundColor: isActive
+                    ? meta.color + "08"
+                    : nestTarget === section.id
+                      ? meta.color + "12"
+                      : colors.background,
+                  boxShadow: isActive
+                    ? `0 0 0 3px ${meta.color}22`
+                    : nestTarget === section.id
+                      ? `0 0 0 3px ${meta.color}33`
+                      : undefined,
+                }}
+              >
+                <div
+                  className="w-1 rounded-l-lg shrink-0"
+                  style={{ backgroundColor: meta.color }}
+                />
+                <div className="flex items-center px-2 text-gray-300 group-hover:text-gray-500 cursor-grab active:cursor-grabbing shrink-0">
+                  <svg
+                    width="10"
+                    height="16"
+                    viewBox="0 0 10 16"
+                    fill="currentColor"
+                  >
+                    <circle cx="3" cy="3" r="1.5" />
+                    <circle cx="7" cy="3" r="1.5" />
+                    <circle cx="3" cy="8" r="1.5" />
+                    <circle cx="7" cy="8" r="1.5" />
+                    <circle cx="3" cy="13" r="1.5" />
+                    <circle cx="7" cy="13" r="1.5" />
+                  </svg>
+                </div>
+                <div className="flex-1 py-3 pr-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span
+                      className="text-xs font-mono font-bold"
+                      style={{ color: meta.color }}
+                    >
+                      {meta.icon}
+                    </span>
+                    <span
+                      className="text-xs font-semibold uppercase tracking-wide"
+                      style={{ color: meta.color }}
+                    >
+                      {meta.label}
+                    </span>
+                    {isActive && (
+                      <span
+                        className="text-xs ml-auto font-medium pr-1"
+                        style={{ color: meta.color }}
+                      >
+                        editing &rarr;
+                      </span>
+                    )}
+                  </div>
+                  {nestTarget === section.id ? (
+                    <p
+                      className="text-xs font-semibold animate-pulse"
+                      style={{ color: meta.color }}
+                    >
+                      Drop to nest inside &darr;
+                    </p>
+                  ) : (
+                    <p
+                      className="text-sm truncate"
+                      style={{ color: colors.textSecondary }}
+                    >
+                      {getSectionPreview(section)}
+                    </p>
+                  )}
+                </div>
+                <div className="flex items-center shrink-0 px-1">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setExpandedSectionIds((prev) => {
+                        const next = new Set(prev);
+                        if (isExpanded) next.delete(section.id);
+                        else next.add(section.id);
+                        return next;
+                      });
+                    }}
+                    className="p-1 rounded text-gray-300 hover:text-gray-600 hover:bg-gray-100"
+                    title={isExpanded ? "Collapse" : "Expand / add children"}
+                  >
+                    <svg
+                      width="10"
+                      height="10"
+                      viewBox="0 0 10 10"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                    >
+                      {isExpanded ? (
+                        <path d="M1 3l4 4 4-4" />
+                      ) : (
+                        <path d="M3 1l4 4-4 4" />
+                      )}
+                    </svg>
+                  </button>
+                </div>
+                <div
+                  className="flex items-center gap-1 pr-2 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button
+                    onClick={() => moveSectionInPage(section.id, "up")}
+                    disabled={index === 0}
+                    className="p-1 rounded hover:bg-gray-100 disabled:opacity-30"
+                    title="Move up"
+                  >
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 12 12"
+                      fill="currentColor"
+                    >
+                      <path d="M6 2L1 9h10L6 2z" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => moveSectionInPage(section.id, "down")}
+                    disabled={index === sections.length - 1}
+                    className="p-1 rounded hover:bg-gray-100 disabled:opacity-30"
+                    title="Move down"
+                  >
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 12 12"
+                      fill="currentColor"
+                    >
+                      <path d="M6 10L1 3h10L6 10z" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => deleteSectionFromPage(section.id)}
+                    className="p-1 rounded hover:bg-red-50 text-red-400 hover:text-red-600"
+                    title="Delete"
+                  >
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 12 12"
+                      fill="currentColor"
+                    >
+                      <path
+                        d="M2 2l8 8M10 2l-8 8"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        fill="none"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              {isExpanded && (
+                <div
+                  style={{
+                    borderLeft: `2px solid ${meta.color}50`,
+                    marginLeft: `${(depth + 1) * 12 + 4}px`,
+                  }}
+                >
+                  {renderSectionList(
+                    section.children ?? [],
+                    section.id,
+                    depth + 1,
+                  )}
+                </div>
+              )}
+              {mkDrop(index + 1)}
+            </div>
+          );
+        })}
+      </>
+    );
+  };
+
+  // ── Loading state ─────────────────────────────────────────────────────────
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div style={{ color: colors.textSecondary }}>Loading page...</div>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-50">
+        <p className="text-gray-500 text-lg">Loading page...</p>
       </div>
     );
   }
 
+  // ── Render ────────────────────────────────────────────────────────────────
+
   return (
-    <div className="max-w-5xl mx-auto">
-      <div className="mb-6 flex items-center justify-between">
-        <h2 style={{ color: colors.text }} className="text-2xl font-bold">
-          {slug ? "Edit Page" : "Create New Page"}
-        </h2>
-
-        <div className="flex gap-2">
-          <button
-            onClick={onCancel}
-            style={{
-              borderColor: colors.secondary,
-              color: colors.text,
-            }}
-            className="px-4 py-2 border rounded-lg hover:opacity-75"
-          >
-            Cancel
-          </button>
-
-          <button
-            onClick={handleSaveDraft}
-            style={{
-              borderColor: colors.secondary,
-              color: colors.text,
-            }}
-            className="px-4 py-2 border rounded-lg hover:opacity-75"
-            disabled={!page.slug}
-          >
-            Save Draft
-          </button>
-
-          <button
-            onClick={handlePublish}
-            style={{
-              backgroundColor: colors.primary,
-              color: "#ffffff",
-            }}
-            className="px-4 py-2 rounded-lg hover:opacity-90 disabled:opacity-50"
-            disabled={saving}
-          >
-            {saving ? "Publishing..." : "Publish"}
-          </button>
-        </div>
-      </div>
-
-      {hasUnsavedChanges && (
-        <div className="mb-4 px-4 py-2 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800 text-sm">
-          You have unsaved changes
-        </div>
-      )}
-
-      {/* Metadata Section */}
-      <div
+    <div
+      className="fixed inset-0 z-50 flex flex-col"
+      style={{ backgroundColor: colors.background, color: colors.text }}
+    >
+      {/* ── Top bar ── */}
+      <header
+        className="flex items-center gap-3 px-4 py-2 border-b shrink-0"
         style={{
-          backgroundColor: colors.background,
           borderColor: colors.secondary,
+          backgroundColor: colors.background,
         }}
-        className="mb-6 p-6 border rounded-lg"
       >
-        <h3
-          style={{ color: colors.text }}
-          className="text-lg font-semibold mb-4"
+        <button
+          onClick={onCancel}
+          className="px-3 py-1 text-sm border rounded hover:opacity-75 shrink-0"
+          style={{ borderColor: colors.secondary, color: colors.text }}
         >
-          Page Information
-        </h3>
+          &larr; Back
+        </button>
 
-        <div className="space-y-4">
-          <div>
-            <label
-              style={{ color: colors.text }}
-              className="block text-sm font-medium mb-1"
-            >
-              Title <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={page.title}
-              onChange={(e) => handleTitleChange(e.target.value)}
-              style={{
-                borderColor: errors.title ? "#ef4444" : colors.secondary,
-                backgroundColor: colors.background,
-                color: colors.text,
+        <div className="flex-1 min-w-0">
+          <input
+            type="text"
+            value={page.title}
+            onChange={(e) => handleTitleChange(e.target.value)}
+            placeholder="Page title"
+            className="w-full text-xl font-bold bg-transparent border-none outline-none placeholder-gray-400"
+            style={{ color: colors.text }}
+          />
+          {errors.title && (
+            <p className="text-xs text-red-500 mt-0.5">{errors.title}</p>
+          )}
+        </div>
+
+        {page.slug && (
+          <span
+            className="hidden sm:block px-2 py-0.5 text-xs font-mono rounded shrink-0"
+            style={{
+              backgroundColor: colors.secondary + "40",
+              color: colors.textSecondary,
+            }}
+          >
+            /{page.slug}
+          </span>
+        )}
+
+        <span
+          className={`px-2 py-0.5 text-xs font-medium rounded shrink-0 ${
+            page.status === "published"
+              ? "bg-green-100 text-green-700"
+              : "bg-yellow-100 text-yellow-700"
+          }`}
+        >
+          {page.status}
+        </span>
+
+        {hasUnsavedChanges && (
+          <span className="text-xs text-yellow-600 shrink-0">unsaved</span>
+        )}
+
+        {/* View toggle */}
+        <div
+          className="flex rounded overflow-hidden border shrink-0"
+          style={{ borderColor: colors.secondary }}
+        >
+          {(["blocks", "preview"] as const).map((mode) => (
+            <button
+              key={mode}
+              onClick={() => {
+                setCanvasMode(mode);
+                if (mode === "preview") setPreviewKey((k) => k + 1);
               }}
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2"
-              placeholder="Enter page title"
-            />
-            {errors.title && (
-              <p className="mt-1 text-sm text-red-500">{errors.title}</p>
-            )}
-          </div>
-
-          <div>
-            <label
-              style={{ color: colors.text }}
-              className="block text-sm font-medium mb-1"
-            >
-              Slug <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={page.slug}
-              onChange={(e) =>
-                updatePage({ slug: generateSlug(e.target.value) })
-              }
+              className="px-3 py-1 text-xs font-medium capitalize transition-colors"
               style={{
-                borderColor: errors.slug ? "#ef4444" : colors.secondary,
-                backgroundColor: colors.background,
-                color: colors.text,
+                backgroundColor:
+                  canvasMode === mode ? colors.primary : "transparent",
+                color: canvasMode === mode ? "#fff" : colors.textSecondary,
               }}
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 font-mono text-sm"
-              placeholder="page-url-slug"
-              disabled={!!slug} // Can't change slug when editing
-            />
-            {errors.slug && (
-              <p className="mt-1 text-sm text-red-500">{errors.slug}</p>
-            )}
-            {slug && (
-              <p
-                style={{ color: colors.textSecondary }}
-                className="mt-1 text-xs"
-              >
-                Slug cannot be changed when editing
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label
-              style={{ color: colors.text }}
-              className="block text-sm font-medium mb-1"
             >
-              Meta Description
-            </label>
-            <textarea
-              value={page.metaDescription || ""}
-              onChange={(e) => updatePage({ metaDescription: e.target.value })}
-              style={{
-                borderColor: colors.secondary,
-                backgroundColor: colors.background,
-                color: colors.text,
-              }}
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2"
-              rows={2}
-              placeholder="Brief description for SEO (optional)"
-            />
-          </div>
+              {mode === "blocks" ? "[=] Blocks" : "[>] Preview"}
+            </button>
+          ))}
+        </div>
 
-          <div>
-            <label
-              style={{ color: colors.text }}
-              className="block text-sm font-medium mb-1"
-            >
-              Status
-            </label>
-            <select
-              value={page.status}
-              onChange={(e) =>
-                updatePage({ status: e.target.value as "draft" | "published" })
-              }
-              style={{
-                borderColor: colors.secondary,
-                backgroundColor: colors.background,
-                color: colors.text,
-              }}
-              className="px-3 py-2 border rounded-md focus:outline-none focus:ring-2"
-            >
-              <option value="draft">Draft</option>
-              <option value="published">Published</option>
-            </select>
-          </div>
+        <button
+          onClick={handleSaveDraft}
+          disabled={!page.slug}
+          className="px-3 py-1.5 text-sm border rounded hover:opacity-75 shrink-0 disabled:opacity-40"
+          style={{ borderColor: colors.secondary, color: colors.text }}
+        >
+          Save Draft
+        </button>
 
-          <div>
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={page.isLandingPage || false}
-                onChange={(e) =>
-                  updatePage({ isLandingPage: e.target.checked })
-                }
+        <button
+          onClick={handlePublish}
+          disabled={saving}
+          className="px-3 py-1.5 text-sm rounded hover:opacity-90 shrink-0 disabled:opacity-50"
+          style={{ backgroundColor: colors.primary, color: "#fff" }}
+        >
+          {saving ? "Publishing..." : "Publish"}
+        </button>
+      </header>
+
+      {/* ── Body ── */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* ── Left sidebar: palette ── */}
+        <aside
+          className="w-52 shrink-0 flex flex-col border-r overflow-y-auto"
+          style={{
+            borderColor: colors.secondary,
+            backgroundColor: colors.background,
+          }}
+        >
+          {/* Tab bar */}
+          <div
+            className="flex border-b"
+            style={{ borderColor: colors.secondary }}
+          >
+            {(["settings", "blocks"] as PaletteTab[]).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setPaletteTab(tab)}
+                className="flex-1 py-2 text-xs font-medium capitalize transition-colors"
                 style={{
-                  borderColor: colors.secondary,
-                  accentColor: colors.primary,
+                  borderBottom:
+                    paletteTab === tab
+                      ? `2px solid ${colors.primary}`
+                      : "2px solid transparent",
+                  color:
+                    paletteTab === tab ? colors.primary : colors.textSecondary,
                 }}
-                className="w-4 h-4 rounded focus:ring-2"
-              />
-              <span
-                style={{ color: colors.text }}
-                className="text-sm font-medium"
               >
-                Set as landing page (homepage)
-              </span>
-            </label>
-            {page.isLandingPage &&
-              existingLandingPage &&
-              existingLandingPage !== slug && (
-                <p style={{ color: "#ca8a04" }} className="mt-1 text-sm">
-                  Warning: Page "{existingLandingPage}" is currently the landing
-                  page. Saving this will replace it.
-                </p>
-              )}
-            {errors.isLandingPage && (
-              <p className="mt-1 text-sm text-red-500">
-                {errors.isLandingPage}
-              </p>
-            )}
-            <p style={{ color: colors.textSecondary }} className="mt-1 text-xs">
-              The landing page will be displayed at the root URL (/)
-            </p>
+                {tab === "settings" ? "Settings" : "Blocks"}
+              </button>
+            ))}
           </div>
 
-          <div>
-            <label
-              style={{ color: colors.text }}
-              className="block text-sm font-medium mb-2"
-            >
-              Page Layout
-            </label>
-            <div className="space-y-2">
-              <label className="flex items-center gap-2">
+          {/* ── Settings tab ── */}
+          {paletteTab === "settings" && (
+            <div className="p-3 space-y-3 text-sm">
+              <div>
+                <label
+                  className="block text-xs font-medium mb-1"
+                  style={{ color: colors.textSecondary }}
+                >
+                  Slug
+                </label>
                 <input
-                  type="radio"
-                  name="layout"
-                  checked={page.useLayout === false}
-                  onChange={() => updatePage({ useLayout: false })}
+                  type="text"
+                  value={page.slug}
+                  onChange={(e) =>
+                    updatePage({ slug: generateSlug(e.target.value) })
+                  }
+                  disabled={!!slug}
+                  className="w-full px-2 py-1 border rounded text-xs font-mono disabled:opacity-60"
                   style={{
                     borderColor: colors.secondary,
-                    accentColor: colors.primary,
+                    backgroundColor: colors.background,
+                    color: colors.text,
                   }}
-                  className="w-4 h-4 rounded focus:ring-2"
                 />
-                <span style={{ color: colors.text }} className="text-sm">
-                  No Layout
-                </span>
-              </label>
+                {errors.slug && (
+                  <p className="text-xs text-red-500 mt-0.5">{errors.slug}</p>
+                )}
+              </div>
 
-              {availableLayouts.map((layout) => (
-                <label key={layout.id} className="flex items-center gap-2">
+              <div>
+                <label
+                  className="block text-xs font-medium mb-1"
+                  style={{ color: colors.textSecondary }}
+                >
+                  Meta Description
+                </label>
+                <textarea
+                  value={page.metaDescription || ""}
+                  onChange={(e) =>
+                    updatePage({ metaDescription: e.target.value })
+                  }
+                  className="w-full px-2 py-1 border rounded text-xs"
+                  style={{
+                    borderColor: colors.secondary,
+                    backgroundColor: colors.background,
+                    color: colors.text,
+                  }}
+                  rows={3}
+                  placeholder="SEO description"
+                />
+              </div>
+
+              <div>
+                <label
+                  className="block text-xs font-medium mb-1"
+                  style={{ color: colors.textSecondary }}
+                >
+                  Layout
+                </label>
+                <div className="space-y-1">
+                  <label className="flex items-center gap-1.5 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="layout"
+                      checked={page.useLayout === false}
+                      onChange={() => updatePage({ useLayout: false })}
+                      style={{ accentColor: colors.primary }}
+                    />
+                    <span className="text-xs">None</span>
+                  </label>
+                  {availableLayouts.map((layout) => (
+                    <label
+                      key={layout.id}
+                      className="flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <input
+                        type="radio"
+                        name="layout"
+                        checked={
+                          page.useLayout !== false &&
+                          page.layoutId === layout.id
+                        }
+                        onChange={() =>
+                          updatePage({ useLayout: true, layoutId: layout.id })
+                        }
+                        style={{ accentColor: colors.primary }}
+                      />
+                      <span className="text-xs">{layout.name}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="flex items-center gap-1.5 cursor-pointer">
                   <input
-                    type="radio"
-                    name="layout"
-                    checked={
-                      page.useLayout !== false && page.layoutId === layout.id
+                    type="checkbox"
+                    checked={page.isLandingPage || false}
+                    onChange={(e) =>
+                      updatePage({ isLandingPage: e.target.checked })
                     }
-                    onChange={() =>
-                      updatePage({
-                        useLayout: true,
-                        layoutId: layout.id,
-                      })
-                    }
-                    style={{
-                      borderColor: colors.secondary,
-                      accentColor: colors.primary,
-                    }}
-                    className="w-4 h-4 rounded focus:ring-2"
+                    style={{ accentColor: colors.primary }}
                   />
-                  <div>
-                    <div
-                      style={{ color: colors.text }}
-                      className="text-sm font-medium"
+                  <span className="text-xs font-medium">Landing page</span>
+                </label>
+                {errors.isLandingPage && (
+                  <p className="text-xs text-red-500 mt-0.5">
+                    {errors.isLandingPage}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ── Blocks tab ── */}
+          {paletteTab === "blocks" && (
+            <div className="p-2 space-y-1.5">
+              {activeSectionId && (
+                <div
+                  className="text-xs px-2 py-1 rounded flex items-center gap-1"
+                  style={{
+                    backgroundColor: colors.primary + "15",
+                    color: colors.primary,
+                  }}
+                >
+                  <span className="truncate">
+                    Adding child of <strong>{activeMeta?.label}</strong>
+                  </span>
+                  <button
+                    onClick={() => setActiveSectionId(null)}
+                    className="ml-auto shrink-0 opacity-60 hover:opacity-100 font-bold"
+                    title="Add at root level instead"
+                  >
+                    x
+                  </button>
+                </div>
+              )}
+              <p
+                className="text-xs px-1 pt-1 font-semibold uppercase tracking-wide"
+                style={{ color: colors.textSecondary }}
+              >
+                Built-in
+              </p>
+              {(
+                Object.keys(SECTION_META) as Array<keyof typeof SECTION_META>
+              ).map((type) => {
+                const meta = SECTION_META[type];
+                return (
+                  <div
+                    key={type}
+                    draggable
+                    onDragStart={() => handlePaletteDragStart(type)}
+                    onDragEnd={handleDragEnd}
+                    onClick={() => addSection(type, activeSectionId)}
+                    className="flex items-start gap-2 px-2 py-2 rounded cursor-grab active:cursor-grabbing hover:opacity-80 select-none"
+                    style={{
+                      backgroundColor: meta.color + "18",
+                      border: `1px solid ${meta.color}55`,
+                    }}
+                  >
+                    <span
+                      className="text-xs font-mono font-bold shrink-0 mt-0.5 w-8 text-center"
+                      style={{ color: meta.color }}
                     >
-                      {layout.name}
-                    </div>
-                    <div
-                      style={{ color: colors.textSecondary }}
-                      className="text-xs"
-                    >
-                      {layout.description}
+                      {meta.icon}
+                    </span>
+                    <div className="min-w-0">
+                      <div
+                        className="text-xs font-semibold"
+                        style={{ color: colors.text }}
+                      >
+                        {meta.label}
+                      </div>
+                      <div
+                        className="text-xs leading-tight"
+                        style={{ color: colors.textSecondary }}
+                      >
+                        {meta.description}
+                      </div>
                     </div>
                   </div>
-                </label>
-              ))}
+                );
+              })}
+              <p
+                className="text-xs px-1 pt-2 font-semibold uppercase tracking-wide"
+                style={{ color: colors.textSecondary }}
+              >
+                Components
+              </p>
+              {loadingComposites ? (
+                <p className="text-xs text-gray-400 px-1">Loading...</p>
+              ) : compositeComponents.length === 0 ? (
+                <p className="text-xs text-gray-400 italic px-1">
+                  No components yet. Create them in the Components manager.
+                </p>
+              ) : (
+                compositeComponents.map((comp) => (
+                  <div
+                    key={comp.id}
+                    draggable
+                    onDragStart={() => handleCompositeDragStart(comp)}
+                    onDragEnd={handleDragEnd}
+                    onClick={() => addCompositeSection(comp, activeSectionId)}
+                    className="flex items-start gap-2 px-2 py-2 rounded cursor-grab active:cursor-grabbing hover:opacity-80 select-none"
+                    style={{
+                      backgroundColor: "#8b5cf618",
+                      border: "1px solid #8b5cf655",
+                    }}
+                  >
+                    <span
+                      className="text-xs font-mono font-bold shrink-0 mt-0.5 w-8 text-center"
+                      style={{ color: "#8b5cf6" }}
+                    >
+                      [C]
+                    </span>
+                    <div className="min-w-0">
+                      <div
+                        className="text-xs font-semibold"
+                        style={{ color: colors.text }}
+                      >
+                        {comp.name}
+                      </div>
+                      <div
+                        className="text-xs leading-tight"
+                        style={{ color: colors.textSecondary }}
+                      >
+                        {comp.description}
+                      </div>
+                      <div
+                        className="text-xs mt-0.5"
+                        style={{ color: colors.textSecondary }}
+                      >
+                        {comp.defaultColumns} col
+                        {comp.defaultColumns !== 1 ? "s" : ""}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
-            <p style={{ color: colors.textSecondary }} className="mt-2 text-xs">
-              {availableLayouts.length === 1
-                ? "Only one layout is available, and will be used by default."
-                : "Select a layout for this page, or choose 'No Layout' to render without a layout wrapper."}
-            </p>
-          </div>
-        </div>
-      </div>
+          )}
+        </aside>
 
-      {/* Sections */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 style={{ color: colors.text }} className="text-lg font-semibold">
-            Page Sections
-          </h3>
-          <button
-            onClick={() => setShowAddSection(!showAddSection)}
-            style={{
-              backgroundColor: colors.accent || "#16a34a",
-              color: "#ffffff",
-            }}
-            className="px-4 py-2 rounded-lg hover:opacity-90"
-          >
-            + Add Section
-          </button>
-        </div>
+        {/* ── Center canvas ── */}
+        <main
+          className="flex-1 overflow-hidden relative flex flex-col"
+          style={{
+            backgroundColor: canvasMode === "preview" ? "#e5e7eb" : "#f9fafb",
+          }}
+        >
+          {canvasMode === "blocks" ? (
+            <div className="flex-1 overflow-y-auto">
+              <div className="max-w-2xl mx-auto py-8 px-4">
+                {page.sections.length === 0 ? (
+                  <div
+                    className="flex flex-col items-center justify-center py-24 border-2 border-dashed rounded-xl text-center"
+                    style={{ borderColor: colors.secondary }}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      setDropTarget({ parentId: null, index: 0 });
+                    }}
+                    onDrop={(e) => handleDrop(e, 0, null)}
+                    onDragLeave={() => setDropTarget(null)}
+                  >
+                    <div className="text-4xl mb-3 font-mono text-gray-400">
+                      [+]
+                    </div>
+                    <p className="text-gray-500 font-medium mb-1">
+                      No blocks yet
+                    </p>
+                    <p className="text-sm text-gray-400">
+                      Drag a block from the left sidebar, or click one to add
+                      it.
+                    </p>
+                  </div>
+                ) : (
+                  renderSectionList(page.sections, null, 0)
+                )}
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Preview toolbar */}
+              <div
+                className="flex items-center gap-2 px-3 py-1.5 border-b shrink-0 text-xs"
+                style={{
+                  borderColor: colors.secondary,
+                  backgroundColor: colors.background,
+                }}
+              >
+                <span className="font-mono text-gray-400 truncate flex-1">
+                  /{page.slug || "(unsaved)"}
+                </span>
+                {hasUnsavedChanges && (
+                  <span className="text-yellow-600 shrink-0">
+                    Unsaved changes — save draft first to see them here
+                  </span>
+                )}
+                <button
+                  onClick={() => setPreviewKey((k) => k + 1)}
+                  className="shrink-0 px-2 py-1 rounded border hover:opacity-75"
+                  style={{
+                    borderColor: colors.secondary,
+                    color: colors.textSecondary,
+                  }}
+                >
+                  Refresh
+                </button>
+              </div>
+              {/* Scaled iframe */}
+              {page.slug ? (
+                <div className="flex-1 overflow-hidden relative">
+                  <iframe
+                    key={previewKey}
+                    src={`/${page.slug}`}
+                    title="Page preview"
+                    style={{
+                      border: "none",
+                      width: "200%",
+                      height: "200%",
+                      transform: "scale(0.5)",
+                      transformOrigin: "top left",
+                      pointerEvents: "none",
+                    }}
+                  />
+                </div>
+              ) : (
+                <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">
+                  Set a page slug first to preview the page.
+                </div>
+              )}
+            </>
+          )}
+        </main>
 
-        {showAddSection && (
-          <div
+        {/* ── Right slide-out edit panel ── */}
+        {/* ── Right slide-out edit panel ── */}
+        {activeSection && (
+          <aside
+            className="w-96 shrink-0 flex flex-col border-l overflow-y-auto"
             style={{
-              backgroundColor: colors.background,
               borderColor: colors.secondary,
+              backgroundColor: colors.background,
             }}
-            className="mb-4 p-4 border rounded-lg"
           >
-            <p
-              style={{ color: colors.text }}
-              className="text-sm font-medium mb-3"
+            {/* Panel header */}
+            <div
+              className="flex items-center justify-between px-4 py-3 border-b shrink-0"
+              style={{ borderColor: colors.secondary }}
             >
-              Select section type:
-            </p>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={() => addSection("hero")}
-                className="px-4 py-2 bg-background border border-text/20 rounded hover:bg-primary/5 text-left"
-              >
-                <div className="font-medium">Hero</div>
-                <div className="text-xs text-text-secondary">
-                  Large banner with title and CTA
-                </div>
-              </button>
-
-              <button
-                onClick={() => addSection("text")}
-                className="px-4 py-2 bg-background border border-text/20 rounded hover:bg-primary/5 text-left"
-              >
-                <div className="font-medium">Text Block</div>
-                <div className="text-xs text-text-secondary">
-                  Paragraph content with optional heading
-                </div>
-              </button>
-
-              <button
-                onClick={() => addSection("cardGrid")}
-                className="px-4 py-2 bg-background border border-text/20 rounded hover:bg-primary/5 text-left"
-              >
-                <div className="font-medium">Card Grid</div>
-                <div className="text-xs text-text-secondary">
-                  Multiple cards in a grid layout
-                </div>
-              </button>
-
-              <button
-                onClick={() => addSection("cta")}
-                className="px-4 py-2 bg-background border border-text/20 rounded hover:bg-primary/5 text-left"
-              >
-                <div className="font-medium">Call to Action</div>
-                <div className="text-xs text-text-secondary">
-                  Prominent button with heading
-                </div>
-              </button>
-
-              <button
-                onClick={() => addSection("contentList")}
-                className="px-4 py-2 bg-background border border-text/20 rounded hover:bg-primary/5 text-left"
-              >
-                <div className="font-medium">Content List</div>
-                <div className="text-xs text-text-secondary">
-                  Display items from content collections
-                </div>
-              </button>
+              <div className="flex items-center gap-2">
+                <span
+                  className="text-xs font-mono font-bold"
+                  style={{ color: activeMeta?.color }}
+                >
+                  {activeMeta?.icon}
+                </span>
+                <span
+                  className="font-semibold text-sm"
+                  style={{ color: colors.text }}
+                >
+                  {activeMeta?.label}
+                </span>
+              </div>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => moveSectionInPage(activeSection.id, "up")}
+                  disabled={activeSiblingInfo?.isFirst}
+                  className="p-1 rounded hover:bg-gray-100 disabled:opacity-30"
+                  title="Move up"
+                >
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 12 12"
+                    fill="currentColor"
+                  >
+                    <path d="M6 2L1 9h10L6 2z" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => moveSectionInPage(activeSection.id, "down")}
+                  disabled={activeSiblingInfo?.isLast}
+                  className="p-1 rounded hover:bg-gray-100 disabled:opacity-30"
+                  title="Move down"
+                >
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 12 12"
+                    fill="currentColor"
+                  >
+                    <path d="M6 10L1 3h10L6 10z" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => deleteSectionFromPage(activeSection.id)}
+                  className="p-1 rounded hover:bg-red-50 text-red-400 hover:text-red-600 ml-1"
+                  title="Delete"
+                >
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 12 12"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M2 2l8 8M10 2l-8 8"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      fill="none"
+                    />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => setActiveSectionId(null)}
+                  className="p-1 rounded hover:bg-gray-100 ml-1 text-gray-400"
+                  title="Close panel"
+                >
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 14 14"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M2 2l10 10M12 2l-10 10"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      fill="none"
+                    />
+                  </svg>
+                </button>
+              </div>
             </div>
-          </div>
-        )}
 
-        {page.sections.length === 0 && (
-          <div className="text-center py-12 bg-background rounded-lg border-2 border-dashed border-text/20">
-            <p className="text-text-secondary">
-              No sections yet. Click "Add Section" to create content.
-            </p>
-          </div>
-        )}
-
-        {page.sections.map((section, index) => {
-          const props = {
-            section,
-            onChange: (updated: Section) => updateSection(index, updated),
-            onDelete: () => deleteSection(index),
-            onMoveUp: () => moveSection(index, "up"),
-            onMoveDown: () => moveSection(index, "down"),
-            canMoveUp: index > 0,
-            canMoveDown: index < page.sections.length - 1,
-          };
-
-          switch (section.type) {
-            case "hero":
-              return (
-                <HeroEditor key={section.id} {...props} section={section} />
-              );
-            case "text":
-              return (
-                <TextEditor key={section.id} {...props} section={section} />
-              );
-            case "cardGrid":
-              return (
-                <CardGridEditor key={section.id} {...props} section={section} />
-              );
-            case "cta":
-              return (
-                <CtaEditor key={section.id} {...props} section={section} />
-              );
-            case "contentList":
-              return (
-                <ContentListEditor
-                  key={section.id}
-                  {...props}
-                  section={section}
+            {/* Panel body */}
+            <SectionEditorContext.Provider value={{ panelMode: true }}>
+              {activeSection.type === "hero" && (
+                <HeroEditor
+                  section={activeSection}
+                  onChange={(s) => updateSectionInPage(activeSection.id, s)}
+                  onDelete={() => deleteSectionFromPage(activeSection.id)}
+                  onMoveUp={() => moveSectionInPage(activeSection.id, "up")}
+                  onMoveDown={() => moveSectionInPage(activeSection.id, "down")}
+                  canMoveUp={!activeSiblingInfo?.isFirst}
+                  canMoveDown={!activeSiblingInfo?.isLast}
                 />
-              );
-            default:
-              return null;
-          }
-        })}
+              )}
+              {activeSection.type === "text" && (
+                <TextEditor
+                  section={activeSection}
+                  onChange={(s) => updateSectionInPage(activeSection.id, s)}
+                  onDelete={() => deleteSectionFromPage(activeSection.id)}
+                  onMoveUp={() => moveSectionInPage(activeSection.id, "up")}
+                  onMoveDown={() => moveSectionInPage(activeSection.id, "down")}
+                  canMoveUp={!activeSiblingInfo?.isFirst}
+                  canMoveDown={!activeSiblingInfo?.isLast}
+                />
+              )}
+              {activeSection.type === "cardGrid" && (
+                <CardGridEditor
+                  section={activeSection}
+                  onChange={(s) => updateSectionInPage(activeSection.id, s)}
+                  onDelete={() => deleteSectionFromPage(activeSection.id)}
+                  onMoveUp={() => moveSectionInPage(activeSection.id, "up")}
+                  onMoveDown={() => moveSectionInPage(activeSection.id, "down")}
+                  canMoveUp={!activeSiblingInfo?.isFirst}
+                  canMoveDown={!activeSiblingInfo?.isLast}
+                />
+              )}
+              {activeSection.type === "cta" && (
+                <CtaEditor
+                  section={activeSection}
+                  onChange={(s) => updateSectionInPage(activeSection.id, s)}
+                  onDelete={() => deleteSectionFromPage(activeSection.id)}
+                  onMoveUp={() => moveSectionInPage(activeSection.id, "up")}
+                  onMoveDown={() => moveSectionInPage(activeSection.id, "down")}
+                  canMoveUp={!activeSiblingInfo?.isFirst}
+                  canMoveDown={!activeSiblingInfo?.isLast}
+                />
+              )}
+              {activeSection.type === "contentList" && (
+                <ContentListEditor
+                  section={activeSection}
+                  onChange={(s) => updateSectionInPage(activeSection.id, s)}
+                  onDelete={() => deleteSectionFromPage(activeSection.id)}
+                  onMoveUp={() => moveSectionInPage(activeSection.id, "up")}
+                  onMoveDown={() => moveSectionInPage(activeSection.id, "down")}
+                  canMoveUp={!activeSiblingInfo?.isFirst}
+                  canMoveDown={!activeSiblingInfo?.isLast}
+                />
+              )}
+              {activeSection.type === "component" && (
+                <ComponentSectionEditor
+                  section={activeSection as ComponentSection}
+                  onChange={(s) => updateSectionInPage(activeSection.id, s)}
+                  onDelete={() => deleteSectionFromPage(activeSection.id)}
+                  onMoveUp={() => moveSectionInPage(activeSection.id, "up")}
+                  onMoveDown={() => moveSectionInPage(activeSection.id, "down")}
+                  canMoveUp={!activeSiblingInfo?.isFirst}
+                  canMoveDown={!activeSiblingInfo?.isLast}
+                  token={token}
+                  useGitHubAPI={useGitHubAPI}
+                />
+              )}
+            </SectionEditorContext.Provider>
+          </aside>
+        )}
       </div>
     </div>
   );
