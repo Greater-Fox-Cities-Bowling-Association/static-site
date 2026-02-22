@@ -6,6 +6,7 @@ import type {
   Layout,
   ComponentSection,
   CompositeComponent,
+  PrimitiveComponent,
   SectionStyleOverrides,
   ThemeColorKey,
   ThemeFontKey,
@@ -17,6 +18,7 @@ import {
   fetchLayoutsDirectory,
   fetchLayoutContent,
   fetchCompositeComponents,
+  fetchPrimitiveComponents,
 } from "../../utils/githubApi";
 import {
   loadDraft,
@@ -85,6 +87,7 @@ type PaletteTab = "settings" | "blocks";
 type DragSource =
   | { kind: "palette"; sectionType: SectionType }
   | { kind: "composite"; composite: CompositeComponent }
+  | { kind: "primitive"; primitive: PrimitiveComponent }
   | {
       kind: "canvas";
       sectionId: string;
@@ -98,8 +101,18 @@ type DropTarget = { parentId: string | null; index: number } | null;
 function getCanvasCardMeta(
   section: Section,
   composites: CompositeComponent[],
+  primitives: PrimitiveComponent[] = [],
 ): { label: string; icon: string; color: string } {
   if (section.type === "component") {
+    if (section.componentType === "primitive") {
+      const prim = primitives.find((p) => p.id === section.componentId);
+      return {
+        label:
+          section.label || prim?.name || section.componentId || "Primitive",
+        icon: "[P]",
+        color: "#06b6d4",
+      };
+    }
     const comp = composites.find((c) => c.id === section.componentId);
     return {
       label: section.label || comp?.name || section.componentId || "Component",
@@ -380,6 +393,9 @@ export default function PageEditor({
   const [compositeComponents, setCompositeComponents] = useState<
     CompositeComponent[]
   >([]);
+  const [primitiveComponents, setPrimitiveComponents] = useState<
+    PrimitiveComponent[]
+  >([]);
   const [loadingComposites, setLoadingComposites] = useState(true);
 
   // Drag-and-drop
@@ -498,15 +514,14 @@ export default function PageEditor({
   const loadCompositeComponents = async () => {
     setLoadingComposites(true);
     try {
-      const components = await fetchCompositeComponents(
-        token,
-        undefined,
-        undefined,
-        useGitHubAPI,
-      );
-      setCompositeComponents(components);
+      const [composites, primitives] = await Promise.all([
+        fetchCompositeComponents(token, undefined, undefined, useGitHubAPI),
+        fetchPrimitiveComponents(token, undefined, undefined, useGitHubAPI),
+      ]);
+      setCompositeComponents(composites);
+      setPrimitiveComponents(primitives);
     } catch (err) {
-      console.error("Error loading composite components:", err);
+      console.error("Error loading components:", err);
     } finally {
       setLoadingComposites(false);
     }
@@ -584,6 +599,28 @@ export default function PageEditor({
       columns: composite.defaultColumns,
       data: {},
       label: composite.name,
+    };
+    updatePage({
+      sections: addSectionToList(page.sections, parentId, newSection, atIndex),
+    });
+    setActiveSectionId(newSection.id);
+    if (parentId) setExpandedSectionIds((prev) => new Set([...prev, parentId]));
+  };
+
+  const addPrimitiveSection = (
+    primitive: PrimitiveComponent,
+    parentId: string | null = null,
+    atIndex?: number,
+  ) => {
+    const newSection: ComponentSection = {
+      id: generateSectionId(),
+      type: "component",
+      order: 0,
+      componentId: primitive.id,
+      componentType: "primitive",
+      columns: 12,
+      data: {},
+      label: primitive.name,
     };
     updatePage({
       sections: addSectionToList(page.sections, parentId, newSection, atIndex),
@@ -711,6 +748,8 @@ export default function PageEditor({
       addSection(src.sectionType, parentId, insertBefore);
     } else if (src.kind === "composite") {
       addCompositeSection(src.composite, parentId, insertBefore);
+    } else if (src.kind === "primitive") {
+      addPrimitiveSection(src.primitive, parentId, insertBefore);
     } else if (src.kind === "canvas") {
       if (src.parentId === parentId) {
         updatePage({
@@ -746,7 +785,7 @@ export default function PageEditor({
     ? findSectionById(page.sections, activeSectionId)
     : null;
   const activeMeta = activeSection
-    ? getCanvasCardMeta(activeSection, compositeComponents)
+    ? getCanvasCardMeta(activeSection, compositeComponents, primitiveComponents)
     : null;
   const activeSiblingInfo = activeSectionId
     ? findSiblingInfo(page.sections, activeSectionId)
@@ -797,7 +836,11 @@ export default function PageEditor({
       <>
         {mkDrop(0)}
         {sections.map((section, index) => {
-          const meta = getCanvasCardMeta(section, compositeComponents);
+          const meta = getCanvasCardMeta(
+            section,
+            compositeComponents,
+            primitiveComponents,
+          );
           const isActive = activeSectionId === section.id;
           const isExpanded = expandedSectionIds.has(section.id);
           return (
@@ -1373,13 +1416,13 @@ export default function PageEditor({
                 className="text-xs px-1 pt-2 font-semibold uppercase tracking-wide"
                 style={{ color: colors.textSecondary }}
               >
-                Components
+                Composites
               </p>
               {loadingComposites ? (
                 <p className="text-xs text-gray-400 px-1">Loading...</p>
               ) : compositeComponents.length === 0 ? (
                 <p className="text-xs text-gray-400 italic px-1">
-                  No components yet. Create them in the Components manager.
+                  No composites yet.
                 </p>
               ) : (
                 compositeComponents.map((comp) => (
@@ -1420,6 +1463,60 @@ export default function PageEditor({
                       >
                         {comp.defaultColumns} col
                         {comp.defaultColumns !== 1 ? "s" : ""}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+              <p
+                className="text-xs px-1 pt-2 font-semibold uppercase tracking-wide"
+                style={{ color: colors.textSecondary }}
+              >
+                Primitives
+              </p>
+              {loadingComposites ? (
+                <p className="text-xs text-gray-400 px-1">Loading...</p>
+              ) : primitiveComponents.length === 0 ? (
+                <p className="text-xs text-gray-400 italic px-1">
+                  No primitives found.
+                </p>
+              ) : (
+                primitiveComponents.map((prim) => (
+                  <div
+                    key={prim.id}
+                    draggable
+                    onDragStart={() => {
+                      dragSourceRef.current = {
+                        kind: "primitive",
+                        primitive: prim,
+                      };
+                    }}
+                    onDragEnd={handleDragEnd}
+                    onClick={() => addPrimitiveSection(prim, activeSectionId)}
+                    className="flex items-start gap-2 px-2 py-2 rounded cursor-grab active:cursor-grabbing hover:opacity-80 select-none"
+                    style={{
+                      backgroundColor: "#06b6d418",
+                      border: "1px solid #06b6d455",
+                    }}
+                  >
+                    <span
+                      className="text-xs font-mono font-bold shrink-0 mt-0.5 w-8 text-center"
+                      style={{ color: "#06b6d4" }}
+                    >
+                      [P]
+                    </span>
+                    <div className="min-w-0">
+                      <div
+                        className="text-xs font-semibold"
+                        style={{ color: colors.text }}
+                      >
+                        {prim.name}
+                      </div>
+                      <div
+                        className="text-xs leading-tight"
+                        style={{ color: colors.textSecondary }}
+                      >
+                        {prim.description}
                       </div>
                     </div>
                   </div>
