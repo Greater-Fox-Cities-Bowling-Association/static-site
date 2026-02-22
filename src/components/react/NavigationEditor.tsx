@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import type { NavigationConfig, NavigationItem } from "../../types/cms";
 import { useTheme } from "../../utils/useTheme";
+import { fetchPagesDirectory } from "../../utils/githubApi";
 
 interface NavigationEditorProps {
   navigationId?: string;
@@ -12,6 +13,15 @@ interface NavigationEditorProps {
 
 function generateNavItemId(): string {
   return `nav-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+}
+
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 function createEmptyNavItem(order: number): NavigationItem {
@@ -30,32 +40,89 @@ export default function NavigationEditor({
   onCancel,
   useGitHubAPI = false,
 }: NavigationEditorProps) {
+  const isNew = !navigationId;
   const { colors } = useTheme();
   const [navigation, setNavigation] = useState<NavigationConfig>({
-    id: navigationId || "default",
-    name: "Default Navigation",
+    id: navigationId || "",
+    name: "",
     description: "",
     items: [],
   });
+  // Track whether the user has manually edited the id so auto-slug doesn't overwrite
+  const [idManuallyEdited, setIdManuallyEdited] = useState(false);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pageOptions, setPageOptions] = useState<
+    { slug: string; label: string }[]
+  >([]);
 
   useEffect(() => {
     if (navigationId) {
       loadNavigation();
     }
+    loadPageOptions();
   }, [navigationId]);
+
+  const loadPageOptions = async () => {
+    try {
+      if (import.meta.env.DEV && !useGitHubAPI) {
+        // Local dev: use glob
+        const mods = import.meta.glob<{
+          default: { slug?: string; title?: string };
+        }>("../../content/pages/*.json");
+        const opts: { slug: string; label: string }[] = [];
+        for (const path in mods) {
+          const loader = mods[path];
+          if (!loader) continue;
+          const mod = await loader();
+          const slug =
+            mod.default?.slug ??
+            path.split("/").pop()?.replace(".json", "") ??
+            "";
+          const label = mod.default?.title ?? slug;
+          if (slug) opts.push({ slug: `/${slug}`, label });
+        }
+        opts.sort((a, b) => a.label.localeCompare(b.label));
+        setPageOptions(opts);
+      } else {
+        // GitHub API mode
+        const result = await fetchPagesDirectory(
+          token,
+          undefined,
+          undefined,
+          true,
+        );
+        if (result.success && result.files) {
+          const opts = result.files
+            .filter((f) => f.name.endsWith(".json"))
+            .map((f) => {
+              const slug = f.name.replace(".json", "");
+              return { slug: `/${slug}`, label: slug };
+            })
+            .sort((a, b) => a.label.localeCompare(b.label));
+          setPageOptions(opts);
+        }
+      }
+    } catch (err) {
+      // Non-fatal — fall back to free-text input
+      console.warn("Could not load page list for navigation href picker", err);
+    }
+  };
 
   const loadNavigation = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const module = await import(
-        `../../content/navigation/${navigationId}.json`
+      const modules = import.meta.glob<{ default: NavigationConfig }>(
+        "../../content/navigation/*.json",
       );
-      setNavigation(module.default);
+      const key = `../../content/navigation/${navigationId}.json`;
+      const loader = modules[key];
+      if (!loader) throw new Error(`Navigation "${navigationId}" not found`);
+      const mod = await loader();
+      setNavigation(mod.default);
     } catch (err) {
       setError("Failed to load navigation configuration");
       console.error(err);
@@ -75,15 +142,10 @@ export default function NavigationEditor({
 
   const addChildItem = (parentIndex: number) => {
     const newItems = [...navigation.items];
-    const parent = newItems[parentIndex];
-    const children = parent.children || [];
+    const parent = newItems[parentIndex]!;
+    const children = parent.children ?? [];
     const newChild = createEmptyNavItem(children.length + 1);
-
-    newItems[parentIndex] = {
-      ...parent,
-      children: [...children, newChild],
-    };
-
+    newItems[parentIndex] = { ...parent, children: [...children, newChild] };
     updateNavigation({ items: newItems });
   };
 
@@ -96,13 +158,16 @@ export default function NavigationEditor({
 
     if (childIndex !== undefined) {
       // Updating a child item
-      const parent = newItems[index];
-      const children = [...(parent.children || [])];
-      children[childIndex] = { ...children[childIndex], ...updates };
+      const parent = newItems[index]!;
+      const children = [...(parent.children ?? [])];
+      children[childIndex] = {
+        ...children[childIndex]!,
+        ...updates,
+      } as NavigationItem;
       newItems[index] = { ...parent, children };
     } else {
       // Updating a top-level item
-      newItems[index] = { ...newItems[index], ...updates };
+      newItems[index] = { ...newItems[index]!, ...updates } as NavigationItem;
     }
 
     updateNavigation({ items: newItems });
@@ -113,14 +178,17 @@ export default function NavigationEditor({
 
     if (childIndex !== undefined) {
       // Deleting a child item
-      const parent = newItems[index];
-      const children = (parent.children || []).filter(
+      const parent = newItems[index]!;
+      const remaining = (parent.children ?? []).filter(
         (_, i) => i !== childIndex,
       );
-      newItems[index] = {
-        ...parent,
-        children: children.length > 0 ? children : undefined,
-      };
+      if (remaining.length > 0) {
+        newItems[index] = { ...parent, children: remaining };
+      } else {
+        // Omit children entirely rather than setting to undefined (exactOptionalPropertyTypes)
+        const { children: _children, ...rest } = parent;
+        newItems[index] = rest as NavigationItem;
+      }
     } else {
       // Deleting a top-level item
       newItems.splice(index, 1);
@@ -142,14 +210,14 @@ export default function NavigationEditor({
 
     if (childIndex !== undefined) {
       // Moving a child item
-      const parent = newItems[index];
-      const children = [...(parent.children || [])];
+      const parent = newItems[index]!;
+      const children = [...(parent.children ?? [])];
       const targetIndex = direction === "up" ? childIndex - 1 : childIndex + 1;
 
       if (targetIndex >= 0 && targetIndex < children.length) {
         [children[childIndex], children[targetIndex]] = [
-          children[targetIndex],
-          children[childIndex],
+          children[targetIndex]!,
+          children[childIndex]!,
         ];
         children.forEach((child, i) => {
           child.order = i + 1;
@@ -162,8 +230,8 @@ export default function NavigationEditor({
 
       if (targetIndex >= 0 && targetIndex < newItems.length) {
         [newItems[index], newItems[targetIndex]] = [
-          newItems[targetIndex],
-          newItems[index],
+          newItems[targetIndex]!,
+          newItems[index]!,
         ];
         newItems.forEach((item, i) => {
           item.order = i + 1;
@@ -175,6 +243,14 @@ export default function NavigationEditor({
   };
 
   const handleSave = async () => {
+    if (!navigation.id.trim()) {
+      setError("Please enter a valid ID for this navigation menu.");
+      return;
+    }
+    if (!navigation.name.trim()) {
+      setError("Please enter a name for this navigation menu.");
+      return;
+    }
     setSaving(true);
     setError(null);
 
@@ -278,7 +354,14 @@ export default function NavigationEditor({
             <input
               type="text"
               value={navigation.name}
-              onChange={(e) => updateNavigation({ name: e.target.value })}
+              onChange={(e) => {
+                const newName = e.target.value;
+                if (isNew && !idManuallyEdited) {
+                  updateNavigation({ name: newName, id: slugify(newName) });
+                } else {
+                  updateNavigation({ name: newName });
+                }
+              }}
               style={{
                 backgroundColor: colors.background,
                 borderColor: colors.secondary,
@@ -288,6 +371,39 @@ export default function NavigationEditor({
               placeholder="Navigation name"
             />
           </div>
+
+          {isNew && (
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                ID / Filename
+              </label>
+              <input
+                type="text"
+                value={navigation.id}
+                onChange={(e) => {
+                  setIdManuallyEdited(true);
+                  updateNavigation({ id: e.target.value });
+                }}
+                style={{
+                  backgroundColor: colors.background,
+                  borderColor: colors.secondary,
+                  color: colors.text,
+                }}
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 font-mono text-sm"
+                placeholder="e.g. main-nav (used as filename)"
+              />
+              <p
+                className="text-xs mt-1"
+                style={{ color: colors.textSecondary }}
+              >
+                Saved as{" "}
+                <code className="bg-text/5 px-1 rounded">
+                  src/content/navigation/{navigation.id || "<id>"}.json
+                </code>{" "}
+                — auto-generated from the name.
+              </p>
+            </div>
+          )}
 
           <div>
             <label className="block text-sm font-medium mb-2">
@@ -355,6 +471,7 @@ export default function NavigationEditor({
                   <div className="flex-1">
                     <input
                       type="text"
+                      list={`href-options-${item.id}`}
                       value={item.href}
                       onChange={(e) =>
                         updateItem(index, { href: e.target.value })
@@ -365,8 +482,15 @@ export default function NavigationEditor({
                         color: colors.text,
                       }}
                       className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2"
-                      placeholder="URL (e.g., '/honors')"
+                      placeholder="URL or pick a page…"
                     />
+                    {pageOptions.length > 0 && (
+                      <datalist id={`href-options-${item.id}`}>
+                        {pageOptions.map((p) => (
+                          <option key={p.slug} value={p.slug} label={p.label} />
+                        ))}
+                      </datalist>
+                    )}
                   </div>
                   <div className="flex gap-1">
                     <button
@@ -423,6 +547,7 @@ export default function NavigationEditor({
                         <div className="flex-1">
                           <input
                             type="text"
+                            list={`href-options-${child.id}`}
                             value={child.href}
                             onChange={(e) =>
                               updateItem(
@@ -437,8 +562,19 @@ export default function NavigationEditor({
                               color: colors.text,
                             }}
                             className="w-full px-2 py-1 text-sm border rounded-md focus:outline-none focus:ring-1"
-                            placeholder="Submenu URL"
+                            placeholder="URL or pick a page…"
                           />
+                          {pageOptions.length > 0 && (
+                            <datalist id={`href-options-${child.id}`}>
+                              {pageOptions.map((p) => (
+                                <option
+                                  key={p.slug}
+                                  value={p.slug}
+                                  label={p.label}
+                                />
+                              ))}
+                            </datalist>
+                          )}
                         </div>
                         <div className="flex gap-1">
                           <button

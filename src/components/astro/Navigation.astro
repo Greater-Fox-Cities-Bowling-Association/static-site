@@ -1,13 +1,26 @@
 ---
-import type { NavigationItem } from "../../types/cms";
+import type { NavigationItem, NavigationConfig } from "../../types/cms";
+
+interface Props {
+  navigationId?: string;
+}
+
+const { navigationId = "default" } = Astro.props;
 
 // Try to load navigation config, fallback to default if not found
 let navItems: NavigationItem[] = [];
 
 try {
-  const navigationModule =
-    await import("../../content/navigation/default.json");
-  navItems = navigationModule.default.items || [];
+  const modules = import.meta.glob<{ default: NavigationConfig }>(
+    "../../content/navigation/*.json",
+  );
+  const key = `../../content/navigation/${navigationId}.json`;
+  const fallbackKey = "../../content/navigation/default.json";
+  const loader = modules[key] ?? modules[fallbackKey];
+  if (loader) {
+    const mod = await loader();
+    navItems = mod.default?.items ?? [];
+  }
 } catch (error) {
   // Fallback to minimal single home link if no navigation config is found
   navItems = [{ id: "home", label: "Home", href: "/", order: 1 }];

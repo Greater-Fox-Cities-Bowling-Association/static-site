@@ -13,7 +13,7 @@ const { layout } = Astro.props;
 <div class="page-layout">
   {layout?.header.showNavigation && (
     <header class="page-layout__header">
-      <Navigation />
+      <Navigation {...(layout.navigationId ? { navigationId: layout.navigationId } : {})} />
     </header>
   )}
   

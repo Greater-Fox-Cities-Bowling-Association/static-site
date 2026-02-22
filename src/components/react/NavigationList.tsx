@@ -5,12 +5,14 @@ import { useTheme } from "../../utils/useTheme";
 interface NavigationListProps {
   token: string;
   onEdit: (navigationId: string) => void;
+  onCreateNew: () => void;
   useGitHubAPI?: boolean;
 }
 
 export default function NavigationList({
   token,
   onEdit,
+  onCreateNew,
   useGitHubAPI = false,
 }: NavigationListProps) {
   const { colors } = useTheme();
@@ -27,10 +29,20 @@ export default function NavigationList({
     setError(null);
 
     try {
-      // For now, we'll just load the default navigation
-      // In the future, this could be expanded to support multiple navigation configs
-      const module = await import("../../content/navigation/default.json");
-      setNavigations([module.default]);
+      // Dynamically load all navigation configs from the navigation directory
+      const modules = import.meta.glob<{ default: NavigationConfig }>(
+        "../../content/navigation/*.json",
+      );
+      const configs: NavigationConfig[] = [];
+      for (const path in modules) {
+        const loader = modules[path];
+        if (!loader) continue;
+        const mod = await loader();
+        configs.push(mod.default);
+      }
+      // Sort alphabetically by name for stable ordering
+      configs.sort((a, b) => a.name.localeCompare(b.name));
+      setNavigations(configs);
     } catch (err) {
       setError("Failed to load navigation configurations");
       console.error(err);
@@ -61,9 +73,21 @@ export default function NavigationList({
   return (
     <div className="max-w-5xl mx-auto">
       <div className="mb-6">
-        <h2 style={{ color: colors.text }} className="text-2xl font-bold mb-2">
-          Navigation Menus
-        </h2>
+        <div className="flex items-center justify-between mb-2">
+          <h2 style={{ color: colors.text }} className="text-2xl font-bold">
+            Navigation Menus
+          </h2>
+          <button
+            onClick={onCreateNew}
+            style={{
+              backgroundColor: colors.primary,
+              color: colors.background,
+            }}
+            className="px-4 py-2 rounded-md hover:opacity-90 transition-opacity text-sm"
+          >
+            + Create New Menu
+          </button>
+        </div>
         <p style={{ color: colors.textSecondary }} className="text-sm">
           Configure the navigation menus for your website. Support for dropdown
           menus with submenu items.

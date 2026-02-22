@@ -13,6 +13,8 @@ import CollectionList from "./CollectionList";
 import CollectionItemEditor from "./CollectionItemEditor";
 import CollectionDefEditor from "./CollectionDefEditor";
 import CollectionDefList from "./CollectionDefList";
+import NavigationList from "./NavigationList";
+import NavigationEditor from "./NavigationEditor";
 
 type Mode =
   | "themes"
@@ -26,7 +28,9 @@ type Mode =
   | "collections"
   | "collection-item-editor"
   | "collection-defs"
-  | "collection-def-editor";
+  | "collection-def-editor"
+  | "navigation"
+  | "navigation-editor";
 
 export default function ImportAdmin() {
   const { isLoading, error, isAuthenticated, user, logout, getIdTokenClaims } =
@@ -82,6 +86,11 @@ export default function ImportAdmin() {
   const [editingDefId, setEditingDefId] = useState<string | undefined>(
     undefined,
   );
+
+  // Navigation management state
+  const [editingNavigationId, setEditingNavigationId] = useState<
+    string | undefined
+  >(undefined);
 
   // GitHub authentication state
   const [githubToken, setGithubToken] = useState<string>("");
@@ -322,6 +331,26 @@ export default function ImportAdmin() {
     setEditingDefId(undefined);
   };
 
+  const handleEditNavigation = (navigationId: string) => {
+    setEditingNavigationId(navigationId);
+    setMode("navigation-editor");
+  };
+
+  const handleCreateNewNavigation = () => {
+    setEditingNavigationId(undefined);
+    setMode("navigation-editor");
+  };
+
+  const handleNavigationSaved = () => {
+    setMode("navigation");
+    setEditingNavigationId(undefined);
+  };
+
+  const handleCancelNavigationEdit = () => {
+    setMode("navigation");
+    setEditingNavigationId(undefined);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <header className="bg-background shadow-sm border-b border-text/10">
@@ -496,6 +525,20 @@ export default function ImportAdmin() {
                   Define custom data structures
                 </p>
               </button>
+              <button
+                onClick={() => setMode("navigation")}
+                className={`p-6 rounded-lg border-2 transition-all ${
+                  mode === "navigation" || mode === "navigation-editor"
+                    ? "border-primary bg-primary/10"
+                    : "border-text/20 hover:border-primary/50"
+                }`}
+              >
+                <div className="text-4xl mb-3">🧭</div>
+                <h3 className="font-semibold text-text mb-1">Navigation</h3>
+                <p className="text-sm text-text-secondary">
+                  Manage menus, links, and dropdowns
+                </p>
+              </button>
             </div>
           </div>
 
@@ -614,6 +657,27 @@ export default function ImportAdmin() {
               token={githubToken}
               onSave={handleCollectionDefSaved}
               onCancel={handleCancelCollectionDefEdit}
+              useGitHubAPI={useGitHubAPI}
+            />
+          )}
+
+          {mode === "navigation" && (
+            <NavigationList
+              token={githubToken}
+              onEdit={handleEditNavigation}
+              onCreateNew={handleCreateNewNavigation}
+              useGitHubAPI={useGitHubAPI}
+            />
+          )}
+
+          {mode === "navigation-editor" && (
+            <NavigationEditor
+              {...(editingNavigationId
+                ? { navigationId: editingNavigationId }
+                : {})}
+              token={githubToken}
+              onSave={handleNavigationSaved}
+              onCancel={handleCancelNavigationEdit}
               useGitHubAPI={useGitHubAPI}
             />
           )}
