@@ -11,6 +11,8 @@ import ComponentList from "./ComponentList";
 import CompositeComponentEditor from "./CompositeComponentEditor";
 import CollectionList from "./CollectionList";
 import CollectionItemEditor from "./CollectionItemEditor";
+import CollectionDefEditor from "./CollectionDefEditor";
+import CollectionDefList from "./CollectionDefList";
 
 type Mode =
   | "themes"
@@ -22,7 +24,9 @@ type Mode =
   | "components"
   | "composite-editor"
   | "collections"
-  | "collection-item-editor";
+  | "collection-item-editor"
+  | "collection-defs"
+  | "collection-def-editor";
 
 export default function ImportAdmin() {
   const { isLoading, error, isAuthenticated, user, logout, getIdTokenClaims } =
@@ -73,6 +77,11 @@ export default function ImportAdmin() {
   const [editingCollectionFile, setEditingCollectionFile] = useState<
     string | undefined
   >(undefined);
+
+  // Collection definition management state
+  const [editingDefId, setEditingDefId] = useState<string | undefined>(
+    undefined,
+  );
 
   // GitHub authentication state
   const [githubToken, setGithubToken] = useState<string>("");
@@ -291,6 +300,26 @@ export default function ImportAdmin() {
     setEditingCollectionFile(undefined);
   };
 
+  const handleEditCollectionDef = (defId: string) => {
+    setEditingDefId(defId);
+    setMode("collection-def-editor");
+  };
+
+  const handleCreateCollectionDef = () => {
+    setEditingDefId(undefined);
+    setMode("collection-def-editor");
+  };
+
+  const handleCollectionDefSaved = () => {
+    setMode("collection-defs");
+    setEditingDefId(undefined);
+  };
+
+  const handleCancelCollectionDefEdit = () => {
+    setMode("collection-defs");
+    setEditingDefId(undefined);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <header className="bg-background shadow-sm border-b border-text/10">
@@ -448,7 +477,23 @@ export default function ImportAdmin() {
                 <div className="text-4xl mb-3">📦</div>
                 <h3 className="font-semibold text-text mb-1">Collections</h3>
                 <p className="text-sm text-text-secondary">
-                  Manage centers, news, honors &amp; more
+                  Manage data entries for any collection
+                </p>
+              </button>
+              <button
+                onClick={() => setMode("collection-defs")}
+                className={`p-6 rounded-lg border-2 transition-all ${
+                  mode === "collection-defs" || mode === "collection-def-editor"
+                    ? "border-primary bg-primary/10"
+                    : "border-text/20 hover:border-primary/50"
+                }`}
+              >
+                <div className="text-4xl mb-3">🗂️</div>
+                <h3 className="font-semibold text-text mb-1">
+                  Collection Types
+                </h3>
+                <p className="text-sm text-text-secondary">
+                  Define custom data structures
                 </p>
               </button>
             </div>
@@ -550,6 +595,25 @@ export default function ImportAdmin() {
               token={githubToken}
               onSave={handleCollectionItemSaved}
               onCancel={handleCancelCollectionItemEdit}
+              useGitHubAPI={useGitHubAPI}
+            />
+          )}
+
+          {mode === "collection-defs" && (
+            <CollectionDefList
+              token={githubToken}
+              onEdit={handleEditCollectionDef}
+              onCreate={handleCreateCollectionDef}
+              useGitHubAPI={useGitHubAPI}
+            />
+          )}
+
+          {mode === "collection-def-editor" && (
+            <CollectionDefEditor
+              {...(editingDefId ? { defId: editingDefId } : {})}
+              token={githubToken}
+              onSave={handleCollectionDefSaved}
+              onCancel={handleCancelCollectionDefEdit}
               useGitHubAPI={useGitHubAPI}
             />
           )}

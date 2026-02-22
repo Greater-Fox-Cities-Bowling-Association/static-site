@@ -1,0 +1,26 @@
+{
+  "id": "committees",
+  "name": "Committees",
+  "description": "Committees and their members",
+  "icon": "👥",
+  "displayField": "name",
+  "summaryField": "description",
+  "fields": [
+    { "name": "name", "label": "Committee Name", "type": "string", "required": true },
+    { "name": "role", "label": "Role / Purpose", "type": "string", "required": true },
+    { "name": "description", "label": "Description", "type": "string" },
+    {
+      "name": "members",
+      "label": "Members",
+      "type": "array",
+      "description": "Committee members with their positions",
+      "arrayFields": [
+        { "name": "name", "label": "Name", "type": "string", "required": true },
+        { "name": "position", "label": "Position", "type": "string", "required": true },
+        { "name": "email", "label": "Email", "type": "string" },
+        { "name": "phone", "label": "Phone", "type": "string" }
+      ]
+    }
+  ],
+  "createdAt": "2026-02-22"
+}

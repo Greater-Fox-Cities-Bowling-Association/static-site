@@ -8,8 +8,44 @@ export type PageStatus = 'draft' | 'published';
 
 export type SectionType = 'hero' | 'text' | 'cardGrid' | 'cta' | 'contentList' | 'component';
 
-// Collection names are dynamic - any collection defined in config.ts can be used
+// Collection names are fully dynamic — defined by users via collection-def JSON files.
 export type ContentCollectionType = string;
+
+// =============================================================================
+// Collection Definition System
+// =============================================================================
+
+/** Field types supported in a user-defined collection schema. */
+export type CollectionFieldType = 'string' | 'number' | 'boolean' | 'select' | 'date' | 'array' | 'object';
+
+/** A single field descriptor within a collection definition. */
+export interface CollectionField {
+  name: string;            // JSON key
+  label: string;           // Display label in the admin UI
+  type: CollectionFieldType;
+  required?: boolean;
+  options?: string[];      // Enum options for 'select' fields
+  description?: string;    // Help text shown below the field
+  arrayFields?: CollectionField[]; // Nested field schema for 'array' of objects
+}
+
+/**
+ * A user-created collection definition.
+ * Stored as JSON in src/content/collection-defs/{id}.json.
+ * The actual data items live in src/content/{id}/*.json and are loaded
+ * via import.meta.glob — not via Astro's getCollection().
+ */
+export interface CollectionDef {
+  id: string;              // Matches the folder name under src/content/
+  name: string;            // Human-readable name shown in admin
+  description?: string;
+  icon?: string;           // Emoji or icon identifier
+  displayField?: string;   // Field used as the item title in list views
+  summaryField?: string;   // Field used as the item description in list views
+  fields: CollectionField[];
+  createdAt?: string;
+  updatedAt?: string;
+}
 
 export type ContentListDisplayMode = 'cards' | 'table' | 'list';
 

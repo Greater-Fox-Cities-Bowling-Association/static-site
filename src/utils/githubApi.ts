@@ -1727,7 +1727,7 @@ export async function getCollections(
  */
 export async function getCollection(
   collectionName: string,
-  token: string,
+  _token: string,
   forceGitHubAPI: boolean = false
 ): Promise<any> {
   logAPICall({
@@ -1761,7 +1761,7 @@ export async function getCollection(
  */
 export async function saveCollection(
   schema: any,
-  token: string,
+  _token: string,
   forceGitHubAPI: boolean = false
 ): Promise<void> {
   logAPICall({
@@ -1790,9 +1790,187 @@ export async function saveCollection(
   }
 }
 
-// Content collections available for item management (excludes meta-collections)
-export const CONTENT_COLLECTIONS = ['centers', 'tournaments', 'honors', 'news', 'committees'] as const;
-export type ContentCollectionName = typeof CONTENT_COLLECTIONS[number];
+// Content collections are now fully user-defined via collection-def JSON files.
+// Use fetchCollectionDefs() to get the list of available collections at runtime.
+
+const COLLECTION_DEFS_PATH = 'src/content/collection-defs';
+
+/**
+ * Fetch all collection definition files
+ */
+export async function fetchCollectionDefs(
+  token: string,
+  owner: string = DEFAULT_OWNER,
+  repo: string = DEFAULT_REPO,
+  forceGitHubAPI: boolean = false
+): Promise<{ success: boolean; defs?: any[]; error?: string }> {
+  try {
+    if (import.meta.env.DEV && !forceGitHubAPI) {
+      const modules = import.meta.glob('/src/content/collection-defs/*.json', { eager: false });
+      const defs = await Promise.all(
+        Object.entries(modules).map(async ([_path, loader]) => {
+          const mod = await (loader as () => Promise<any>)();
+          return mod.default ?? mod;
+        })
+      );
+      return { success: true, defs };
+    }
+
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${COLLECTION_DEFS_PATH}?ref=main`;
+    const response = await fetch(apiUrl, {
+      headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' },
+    });
+    if (!response.ok) {
+      if (response.status === 404) return { success: true, defs: [] };
+      const err = await response.json();
+      throw new Error(err.message || 'Failed to fetch collection definitions');
+    }
+    const files: GitHubFileResponse[] = await response.json();
+    const jsonFiles = files.filter(f => f.type === 'file' && f.name.endsWith('.json'));
+    const defs = await Promise.all(
+      jsonFiles.map(async f => {
+        const res = await fetch(f.url, {
+          headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' },
+        });
+        if (!res.ok) return null;
+        const data = await res.json();
+        const content = atob(data.content.replace(/\n/g, ''));
+        return JSON.parse(content);
+      })
+    );
+    return { success: true, defs: defs.filter(Boolean) };
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
+/**
+ * Fetch a single collection definition by id
+ */
+export async function fetchCollectionDef(
+  id: string,
+  token: string,
+  owner: string = DEFAULT_OWNER,
+  repo: string = DEFAULT_REPO,
+  forceGitHubAPI: boolean = false
+): Promise<any> {
+  try {
+    if (import.meta.env.DEV && !forceGitHubAPI) {
+      const modules = import.meta.glob('/src/content/collection-defs/*.json', { eager: false });
+      const key = `/src/content/collection-defs/${id}.json`;
+      const loader = modules[key];
+      if (!loader) throw new Error(`Collection definition not found: ${id}`);
+      const mod = await (loader as () => Promise<any>)();
+      return mod.default ?? mod;
+    }
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${COLLECTION_DEFS_PATH}/${id}.json?ref=main`;
+    const response = await fetch(apiUrl, {
+      headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' },
+    });
+    if (!response.ok) throw new Error(`Failed to fetch collection def: ${response.statusText}`);
+    const fileData = await response.json();
+    const content = atob(fileData.content.replace(/\n/g, ''));
+    return JSON.parse(content);
+  } catch (error) {
+    throw error instanceof Error ? error : new Error('Unknown error loading collection definition');
+  }
+}
+
+/**
+ * Save (create or update) a collection definition
+ */
+export async function saveCollectionDef(
+  def: any,
+  token: string,
+  owner: string = DEFAULT_OWNER,
+  repo: string = DEFAULT_REPO,
+  forceGitHubAPI: boolean = false
+): Promise<{ success: boolean; error?: string }> {
+  const filePath = `${COLLECTION_DEFS_PATH}/${def.id}.json`;
+
+  if (import.meta.env.DEV && !forceGitHubAPI) {
+    try {
+      const response = await fetch('/api/save-file', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: filePath, content: JSON.stringify(def, null, 2) }),
+      });
+      if (!response.ok) {
+        const text = await response.text();
+        return { success: false, error: `Server error: ${response.status}. ${text}` };
+      }
+      const result = await response.json();
+      if (!result.success) return { success: false, error: result.error || 'Save failed' };
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  }
+
+  return commitToGitHub({
+    token, owner, repo,
+    path: filePath,
+    content: JSON.stringify(def, null, 2),
+    message: `CMS: Update collection definition ${def.id}`,
+  });
+}
+
+/**
+ * Delete a collection definition
+ */
+export async function deleteCollectionDef(
+  id: string,
+  token: string,
+  owner: string = DEFAULT_OWNER,
+  repo: string = DEFAULT_REPO,
+  forceGitHubAPI: boolean = false
+): Promise<{ success: boolean; error?: string }> {
+  const filePath = `${COLLECTION_DEFS_PATH}/${id}.json`;
+
+  if (import.meta.env.DEV && !forceGitHubAPI) {
+    try {
+      const response = await fetch('/api/delete-file', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: filePath }),
+      });
+      if (!response.ok) {
+        const text = await response.text();
+        return { success: false, error: `Server error: ${response.status}. ${text}` };
+      }
+      const result = await response.json();
+      if (!result.success) return { success: false, error: result.error || 'Delete failed' };
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  }
+
+  try {
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}?ref=main`;
+    const existingRes = await fetch(apiUrl, {
+      headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' },
+    });
+    if (!existingRes.ok) return { success: false, error: `File not found: ${id}` };
+    const fileData = await existingRes.json();
+    const deleteRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `token ${token}`,
+        Accept: 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ message: `CMS: Delete collection definition ${id}`, sha: fileData.sha, branch: 'main' }),
+    });
+    if (!deleteRes.ok) {
+      const err = await deleteRes.json();
+      return { success: false, error: err.message || 'Delete failed' };
+    }
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
 
 /**
  * Fetch all JSON items from a content collection folder

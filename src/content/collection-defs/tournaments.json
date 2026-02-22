@@ -1,0 +1,31 @@
+{
+  "id": "tournaments",
+  "name": "Tournaments",
+  "description": "Tournament events and schedules",
+  "icon": "🏆",
+  "displayField": "name",
+  "summaryField": "description",
+  "fields": [
+    { "name": "name", "label": "Tournament Name", "type": "string", "required": true },
+    { "name": "date", "label": "Date", "type": "date", "required": true },
+    { "name": "location", "label": "Location", "type": "string", "required": true },
+    { "name": "description", "label": "Description", "type": "string", "required": true },
+    { "name": "entryFee", "label": "Entry Fee", "type": "string" },
+    { "name": "prizeFund", "label": "Prize Fund", "type": "string" },
+    { "name": "rules", "label": "Rules", "type": "string" },
+    {
+      "name": "status",
+      "label": "Status",
+      "type": "select",
+      "options": ["upcoming", "registration-open", "completed"]
+    },
+    {
+      "name": "contact",
+      "label": "Contact",
+      "type": "object",
+      "description": "Primary contact for this tournament"
+    },
+    { "name": "links", "label": "Links", "type": "array", "description": "Related links" }
+  ],
+  "createdAt": "2026-02-22"
+}

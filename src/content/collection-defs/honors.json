@@ -1,0 +1,24 @@
+{
+  "id": "honors",
+  "name": "Honors & Awards",
+  "description": "Awards, records, and honorees",
+  "icon": "🥇",
+  "displayField": "title",
+  "summaryField": "description",
+  "fields": [
+    { "name": "category", "label": "Category", "type": "string", "required": true, "description": "e.g. hall-of-fame, bowler-of-the-year, 300-games" },
+    { "name": "title", "label": "Display Title", "type": "string", "required": true },
+    { "name": "description", "label": "Description", "type": "string" },
+    { "name": "year", "label": "Year", "type": "number" },
+    {
+      "name": "format",
+      "label": "Format",
+      "type": "select",
+      "options": ["tabular", "recipients"],
+      "description": "tabular: structured table rows (Hall of Fame, High Average), recipients: named individuals (300 games)"
+    },
+    { "name": "data", "label": "Tabular Data", "type": "array", "description": "Use for tabular format — rows of structured data" },
+    { "name": "recipients", "label": "Recipients", "type": "array", "description": "Use for recipients format — list of named individuals" }
+  ],
+  "createdAt": "2026-02-22"
+}

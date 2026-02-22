@@ -1,6 +1,6 @@
 ---
-import { getCollection } from "astro:content";
 import type { ContentListSection } from "../../../types/cms";
+import type { CollectionDef } from "../../../types/cms";
 
 interface Props {
   section: ContentListSection;
@@ -16,99 +16,88 @@ const {
   columns = 3,
 } = section;
 
-// Fetch all items from the specified collection
-const allItems: any[] = await getCollection(collection as any);
+// ── Load all items from the collection folder via glob ────────────────────────
+// Items are NOT registered as Astro collections — they live in src/content/{name}/
+// and are read generically so any user-defined collection works without code changes.
+const allFiles = import.meta.glob<{ default: Record<string, any> }>(
+  "/src/content/**/*.json",
+  { eager: true },
+);
+
+const prefix = `/src/content/${collection}/`;
+let allItems = Object.entries(allFiles)
+  .filter(([path]) => path.startsWith(prefix) && path.endsWith(".json"))
+  .map(([path, mod]) => ({
+    id: path.replace(prefix, "").replace(".json", ""),
+    data: mod.default ?? (mod as unknown as Record<string, any>),
+  }));
 
 // Filter to specific items if itemIds is provided
-let items =
-  itemIds && itemIds.length > 0
-    ? allItems.filter((item) => itemIds.includes(item.id))
-    : allItems;
+if (itemIds && itemIds.length > 0) {
+  allItems = allItems.filter((item) => itemIds.includes(item.id));
+}
 
 // Apply limit if specified
 if (limit && limit > 0) {
-  items = items.slice(0, limit);
+  allItems = allItems.slice(0, limit);
 }
 
-// Helper to get display data based on collection type
-function getItemDisplayData(item: any) {
-  const data = item.data;
+// ── Load the collection definition to get display field hints ─────────────────
+const defFiles = import.meta.glob<{ default: CollectionDef }>(
+  "/src/content/collection-defs/*.json",
+  { eager: true },
+);
+const defFile = defFiles[`/src/content/collection-defs/${collection}.json`];
+const def: CollectionDef | undefined = defFile
+  ? (defFile.default ?? (defFile as unknown as CollectionDef))
+  : undefined;
 
-  // Specific mappings for known collection types
-  switch (collection) {
-    case "centers":
-      return {
-        title: data.name,
-        subtitle: `${data.city}, ${data.state}`,
-        description: data.lanes ? `${data.lanes} lanes` : "",
-        details: [data.address, data.phone, data.website].filter(Boolean),
-        link: data.website,
-      };
+// Determine which field to use as the primary title and summary
+const displayField =
+  def?.displayField ??
+  def?.fields?.find((f) => f.type === "string")?.name ??
+  "name";
+const summaryField =
+  def?.summaryField ??
+  def?.fields?.find((f) => f.name === "description" || f.name === "excerpt")
+    ?.name ??
+  "description";
 
-    case "honors":
-      return {
-        title: data.title,
-        subtitle: data.year ? `${data.year}` : "",
-        description: data.description || "",
-        details: data.recipients
-          ? [`${data.recipients.length} recipients`]
-          : [],
-        link: `/honors/${item.id}`,
-      };
-
-    case "news":
-      return {
-        title: data.title,
-        subtitle: data.date,
-        description: data.excerpt,
-        details: [data.author].filter(Boolean),
-        link: `/news/${item.id}`,
-      };
-
-    case "tournaments":
-      return {
-        title: data.name,
-        subtitle: data.date,
-        description: data.description,
-        details: [data.location, data.status].filter(Boolean),
-        link: `/tournaments/${item.id}`,
-      };
-
-    case "committees":
-      return {
-        title: data.name,
-        subtitle: data.role || "",
-        description: data.description || "",
-        details: data.members ? [`${data.members.length} members`] : [],
-        link: `/committees/${item.id}`,
-      };
-
-    default:
-      // Generic fallback for any custom collection
-      // Try to intelligently extract common fields
-      const title = data.title || data.name || item.id;
-      const subtitle = data.subtitle || data.date || data.year || "";
-      const description =
-        data.description || data.excerpt || data.content || "";
-
-      // Extract any useful details from remaining fields
-      const details = [];
-      if (data.location) details.push(data.location);
-      if (data.date && !subtitle) details.push(data.date);
-      if (data.author) details.push(data.author);
-      if (data.category) details.push(data.category);
-
-      return {
-        title,
-        subtitle,
-        description,
-        details: details.filter(Boolean),
-        link: `/${collection}/${item.id}`,
-      };
+// ── Generic display mapper (no domain-specific logic) ─────────────────────────
+function getItemDisplayData(item: { id: string; data: Record<string, any> }) {
+  const d = item.data;
+  const title = d[displayField] ?? d.title ?? d.name ?? item.id;
+  const description = d[summaryField] ?? d.description ?? d.excerpt ?? "";
+  // Use a date/year field as subtitle if present
+  const subtitle = d.date ?? (d.year ? String(d.year) : "") ?? "";
+  // Build a detail line from the first few non-title string fields
+  const details: string[] = [];
+  if (def?.fields) {
+    for (const f of def.fields) {
+      if (
+        f.name !== displayField &&
+        f.name !== summaryField &&
+        f.name !== "date" &&
+        f.name !== "year" &&
+        (f.type === "string" || f.type === "number") &&
+        d[f.name] != null &&
+        d[f.name] !== ""
+      ) {
+        details.push(String(d[f.name]));
+        if (details.length >= 3) break;
+      }
+    }
   }
+  return {
+    title,
+    subtitle,
+    description,
+    details,
+    link: `/${collection}/${item.id}`,
+  };
 }
 
-const displayItems = items.map((item) => ({
+const displayItems = allItems.map((item) => ({
   id: item.id,
   ...getItemDisplayData(item),
   rawData: item.data,

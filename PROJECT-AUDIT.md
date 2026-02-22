@@ -2,7 +2,7 @@
 
 **Date:** 2026-02-22  
 **Project:** Greater Fox Cities Bowling Association website  
-**Stack:** Astro 4 (hybrid output) · React 18 · Tailwind CSS 3 · TypeScript · Zod · Auth0 · GitHub API
+**Stack:** Astro 4 (hybrid output) · React 18 · Tailwind CSS 3 · TypeScript · Auth0 · GitHub API
 
 ---
 
@@ -56,7 +56,7 @@ Pages are generated from `src/content/pages/*.json`. The single dynamic route `[
 
 ### 2. Theme System
 
-**Data model:** JSON files in `src/content/themes/`. One file has `isActive: true` at a time. Schema enforced by Zod in `src/content/config.ts`.
+**Data model:** JSON files in `src/content/themes/`. One file has `isActive: true` at a time. A Zod schema exists in `src/content/config.ts` and runs at build time, but the admin reads and writes theme files directly as JSON via `githubApi.ts` — the JSON file is the source of truth.
 
 **Server path:** `themeLoader.ts` reads the filesystem directly with Node's `fs` module. Falls back to `default.json` if no active theme exists.
 
@@ -78,16 +78,16 @@ Pages are generated from `src/content/pages/*.json`. The single dynamic route `[
 
 **Assignment:** A page sets `layoutId` to a layout's `id`, or omits it to auto-use `default`. Set `useLayout: false` to render with no shell.
 
-**Gap:** The `Layout` TypeScript interface in `cms.ts` has a `navigationId` field (which navigation menu to use) but the Zod schema in `config.ts` does **not** include `navigationId`. This field is therefore never validated or persisted.  
+**Gap:** The `Layout` TypeScript interface in `cms.ts` has a `navigationId` field (which navigation menu to use), but `LayoutEditor.tsx` does not appear to write this field. Additionally, `[slug].astro` reads layouts via `getEntry("layouts", id)`, which uses Astro's content system — any field absent from the Zod schema would be stripped from the result. Either way, the layout → navigation link is not functional.  
 → See issue #2.
 
 ---
 
 ### 4. Navigation System
 
-**Data model:** `src/content/navigation/*.json`. Items have `id`, `label`, `href`, `order`, `children` (recursive). Validated with a `z.lazy()` recursive Zod schema.
+**Data model:** `src/content/navigation/*.json`. Items have `id`, `label`, `href`, `order`, `children` (recursive). A recursive Zod schema exists for build-time use, but the admin reads and writes navigation files directly as JSON.
 
-**Rendering:** `Navigation.astro` reads the navigation collection and renders it. There is no visible runtime link from a Layout's `navigationId` to the actual navigation file because `navigationId` is absent from the Zod schema (see above). The `Navigation.astro` component likely loads a hardcoded or default navigation entry.
+**Rendering:** `Navigation.astro` reads the navigation collection and renders it. There is no visible runtime link from a Layout's `navigationId` to the actual navigation file — see issue #2.
 
 ---
 
@@ -132,13 +132,17 @@ Composite instances support `{{template}}` variable interpolation in `props`. A 
 
 ### 7. Content Collections
 
-All collections are stored as JSON and validated by Zod at build time.
+All collections are stored as JSON files. There are two distinct tiers regarding how they are read:
+
+**Infrastructure collections** (`pages`, `layouts`, `themes`, `navigation`) are loaded at render time via Astro's `getCollection()` / `getEntry()` in `[slug].astro`. A Zod schema in `config.ts` validates these at build time and shapes the returned data.
+
+**Data content collections** (`centers`, `tournaments`, `honors`, `news`, `committees`) are read and written directly as JSON by the admin via `githubApi.ts`. Zod schemas exist for them in `config.ts` and run at build time when `ContentListSection.astro` calls `getCollection()`, but the **source of truth for these data shapes is the JSON template** defined in `CollectionItemEditor.tsx` — not the Zod schema.
 
 | Collection    | Key Fields                            | Notes                                                   |
 | ------------- | ------------------------------------- | ------------------------------------------------------- |
-| `centers`     | name, address, phone, lanes           | Straightforward, stable schema                          |
+| `centers`     | name, address, phone, lanes           | Stable shape; JSON template matches files on disk       |
 | `tournaments` | name, date, location, status          | `status` enum: upcoming / completed / registration-open |
-| `honors`      | category, title, data[], recipients[] | Two incompatible sub-shapes (see issue #4)              |
+| `honors`      | category, title, data[], recipients[] | JSON template initializes both arrays; see issue #4     |
 | `news`        | title, date, excerpt, content         | No slug — filename is the identifier                    |
 | `committees`  | name, role, members[]                 | Single-entry pattern (one file = one committee)         |
 | `pages`       | slug, sections[], status              | CMS-managed; see Page Builder above                     |
@@ -152,7 +156,7 @@ All collections are stored as JSON and validated by Zod at build time.
 
 `CSVImporter.tsx` (drag-and-drop, PapaParse) → `csvMappers.ts` (heuristic mapping) → `DataPreview.tsx` → `githubApi.commitToGitHub()`.
 
-`csvMappers.ts` uses column-detection heuristics (`hasYearColumn`, `hasMultipleCategories`, `hasScore`, `hasAverage`) to decide which JSON shape to produce for honors. This works for the known export formats but is fragile against column renames — see issue #4.
+`csvMappers.ts` uses column-detection heuristics (`hasYearColumn`, `hasMultipleCategories`, `hasScore`, `hasAverage`) to decide which JSON shape to produce for honors. This works for the known export formats but is fragile against column renames. The resulting JSON is committed directly — no Zod validation runs in this path. See issue #4.
 
 ---
 
@@ -208,39 +212,41 @@ Both endpoints have `export const prerender = false` so Astro emits them as SSR 
 
 ---
 
-### Issue #2 — `navigationId` missing from Layout Zod schema
+### Issue #2 — `navigationId` not wired in Layout editor or renderer
 
-**Files:** `src/types/cms.ts` (has `navigationId`), `src/content/config.ts` (Zod schema — missing it)  
-The TypeScript `Layout` interface has `navigationId?: string` but the Zod schema does not. Any `navigationId` written by the editor is silently stripped on next build validation.  
-The runtime renderer almost certainly falls back to a hardcoded navigation because the field is never persisted.  
-**Fix:** Add `navigationId: z.string().optional()` to the layouts Zod schema.
-
----
-
-### Issue #3 — `ComponentSection` type mismatch between schema and interface
-
-**Files:** `src/types/cms.ts` vs `src/content/config.ts`
-
-| Field            | TypeScript interface         | Zod schema                       |
-| ---------------- | ---------------------------- | -------------------------------- |
-| `componentType`  | `'primitive' \| 'composite'` | ❌ absent                        |
-| `columns`        | `number`                     | ❌ absent (has `defaultColumns`) |
-| `data`           | `Record<string, any>`        | ❌ absent (has `props`)          |
-| `label`          | `string?`                    | ❌ absent                        |
-| `props`          | absent                       | `z.record(z.any())`              |
-| `defaultColumns` | absent                       | `z.number().optional()`          |
-
-These are not just naming differences — `data` (interface) vs `props` (schema) suggests different runtime keys. A page saved via the editor will have `data` but Zod expects `props`, meaning the saved JSON may fail schema validation. This is the single most critical type inconsistency in the project.  
-**Fix:** Reconcile both definitions into a single agreed shape. Use `props` consistently (or `data` — just pick one) and add all fields to the Zod schema.
+**Files:** `src/types/cms.ts`, `src/components/react/LayoutEditor.tsx`, `src/pages/[slug].astro`  
+The `Layout` TypeScript interface has `navigationId?: string` to specify which navigation menu a layout should use, but `LayoutEditor.tsx` has no field for it, so it is never written to the layout JSON. Additionally, `[slug].astro` reads layouts via `getEntry("layouts", id)` — the layouts Zod schema also lacks this field, meaning even if it were written to the file it would be stripped at runtime.  
+The result is that every layout silently falls back to a hardcoded navigation.  
+**Fix:** Add a `navigationId` selector to `LayoutEditor.tsx`, add `navigationId: z.string().optional()` to the layouts Zod schema, and update `[slug].astro` / `PageLayout.astro` to load and pass the correct navigation.
 
 ---
 
-### Issue #4 — Honors collection has two incompatible shapes
+### Issue #3 — `ComponentSection` type mismatch between TypeScript interface and actual saved JSON
 
-**Files:** `src/content/config.ts`, `src/utils/csvMappers.ts`  
-The honors Zod schema declares **both** `data` (tabular) and `recipients` (individual) as optional arrays. Any given honors file uses one or the other, never both. The CSV mapper decides which shape to produce via column-detection heuristics, which means minor CSV format changes silently produce the wrong shape.  
-`ContentListSection.astro` / `ContentListSection.astro` then has to handle both shapes at render time, adding branching complexity.  
-**Fix:** Split into two separate honor schemas — `honors-tabular` and `honors-recipients` — or use a discriminated union with an explicit `format` field set by the importer.
+**Files:** `src/types/cms.ts` vs `src/content/config.ts` vs `PageEditor.tsx`
+
+The TypeScript `ComponentSection` interface and the Zod schema for `componentSectionSchema` disagree on field names. More importantly, neither clearly matches what `PageEditor.tsx` actually writes to the page JSON file:
+
+| Field            | TypeScript interface (`cms.ts`) | Zod schema (`config.ts`)         |
+| ---------------- | ------------------------------- | -------------------------------- |
+| `componentType`  | `'primitive' \| 'composite'`    | ❌ absent                        |
+| `columns`        | `number`                        | ❌ absent (has `defaultColumns`) |
+| `data`           | `Record<string, any>`           | ❌ absent (has `props`)          |
+| `label`          | `string?`                       | ❌ absent                        |
+| `props`          | absent                          | `z.record(z.any())`              |
+| `defaultColumns` | absent                          | `z.number().optional()`          |
+
+Since pages are read via `getEntry("pages", slug)` in `[slug].astro`, any field the Zod schema doesn't know about is stripped before the renderer sees it. This means `componentType`, `columns`, `data`, and `label` — written by the editor — are silently dropped at render time. This is the single most critical inconsistency in the project.  
+**Fix:** Reconcile all three (TypeScript interface, Zod schema, editor output) into one agreed shape. The Zod schema must include every field the editor writes.
+
+---
+
+### Issue #4 — Honors JSON template initializes both shapes, producing noisy files
+
+**Files:** `src/components/react/CollectionItemEditor.tsx`, `src/utils/csvMappers.ts`, `src/components/astro/sections/ContentListSection.astro`  
+The `CollectionItemEditor` template for `honors` initializes every new file with **both** `data: []` and `recipients: []`. In practice a given honors entry is either tabular (Hall of Fame, Bowler of Year, High Average) or a recipients list (300 games) — never both. The CSV importer picks one via column-detection heuristics, but the editor template always writes the other as an empty array.  
+This means every honors file on disk carries an unused empty array, and `ContentListSection.astro` must branch on both shapes at render time.  
+**Fix:** Add an explicit `format: 'tabular' | 'recipients'` field to the honors template. Initialize only the matching array (`data` or `recipients`). Update `ContentListSection.astro` to drive branching off `format` instead of presence-checking both fields.
 
 ---
 
@@ -295,27 +301,27 @@ All GitHub API functions for every collection live in one file. Functions follow
 
 ## Homogeneity Assessment
 
-| Dimension                 | Score      | Notes                                                                                          |
-| ------------------------- | ---------- | ---------------------------------------------------------------------------------------------- |
-| TypeScript coverage       | 🟢 Good    | Strong typing throughout; all public APIs have interfaces                                      |
-| Zod schema coverage       | 🟡 Partial | All collections validated; but schema lags behind TypeScript types in 2 places                 |
-| Naming conventions        | 🟢 Good    | Files, functions, and IDs follow consistent `kebab-case` / `camelCase` conventions             |
-| Save pattern              | 🟢 Good    | Every editor follows the same save flow: validate → call `save<X>File()` → `onSave()` callback |
-| Editor component shape    | 🟢 Good    | All `*Editor` components share `{ id, token, onSave, onCancel, useGitHubAPI }` props           |
-| List component shape      | 🟢 Good    | All `*List` components share `{ token, onEdit, onCreate, useGitHubAPI }` props                 |
-| Section editor shape      | 🟢 Good    | All section editors use `SectionEditorContext` and `onChange(section)` pattern                 |
-| CSS theming               | 🟢 Good    | All styling routed through CSS variables; Tailwind config bridges to theme tokens              |
-| Dev vs prod divergence    | 🟡 Partial | Dual persistence path is managed but adds complexity; see issue #10                            |
-| Schema / interface parity | 🔴 Gap     | `ComponentSection` type inconsistency (issue #3) is the critical gap                           |
-| Dead code                 | 🟡 Partial | `tokenDerivation.ts` and `public/admin/` are unused (issues #5, #6)                            |
+| Dimension                 | Score      | Notes                                                                                                                                                           |
+| ------------------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| TypeScript coverage       | 🟢 Good    | Strong typing throughout; all public APIs have interfaces                                                                                                       |
+| Schema / JSON parity      | 🟡 Partial | Data collections are JSON-first (admin writes directly); `pages` still validated by Zod via `getEntry()` and schema lags editor output for `component` sections |
+| Naming conventions        | 🟢 Good    | Files, functions, and IDs follow consistent `kebab-case` / `camelCase` conventions                                                                              |
+| Save pattern              | 🟢 Good    | Every editor follows the same save flow: validate → call `save<X>File()` → `onSave()` callback                                                                  |
+| Editor component shape    | 🟢 Good    | All `*Editor` components share `{ id, token, onSave, onCancel, useGitHubAPI }` props                                                                            |
+| List component shape      | 🟢 Good    | All `*List` components share `{ token, onEdit, onCreate, useGitHubAPI }` props                                                                                  |
+| Section editor shape      | 🟢 Good    | All section editors use `SectionEditorContext` and `onChange(section)` pattern                                                                                  |
+| CSS theming               | 🟢 Good    | All styling routed through CSS variables; Tailwind config bridges to theme tokens                                                                               |
+| Dev vs prod divergence    | 🟡 Partial | Dual persistence path is managed but adds complexity; see issue #10                                                                                             |
+| Schema / interface parity | 🔴 Gap     | `ComponentSection` type inconsistency (issue #3) is the critical gap                                                                                            |
+| Dead code                 | 🟡 Partial | `tokenDerivation.ts` and `public/admin/` are unused (issues #5, #6)                                                                                             |
 
 ---
 
 ## Recommendations (Priority Order)
 
-1. **[Critical]** Fix `ComponentSection` type mismatch (issue #3). Agree on `props` vs `data`, update both `cms.ts` and `config.ts`, and verify all `ComponentSection` JSON files on disk use the correct key.
+1. **[Critical]** Fix `ComponentSection` type mismatch (issue #3). Agree on the field names (`props` vs `data`, `defaultColumns` vs `columns`), update `cms.ts`, `config.ts`, and the editor output, then verify all component-section JSON files on disk use the correct keys.
 
-2. **[High]** Add `navigationId` to layouts Zod schema (issue #2) so the layout → navigation link is actually persisted and functional.
+2. **[High]** Wire `navigationId` in the layout editor and Zod schema (issue #2) so the layout → navigation link is actually persisted and functional at render time.
 
 3. **[High]** Fix admin page theme injection (issue #7) so the admin UI renders correctly in production.
 

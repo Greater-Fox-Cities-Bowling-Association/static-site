@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import {
-  CONTENT_COLLECTIONS,
+  fetchCollectionDefs,
   fetchCollectionDirectory,
   deleteCollectionItem,
 } from "../../utils/githubApi";
+import type { CollectionDef } from "../../types/cms";
 
 interface CollectionListProps {
   token: string;
@@ -24,14 +25,6 @@ interface CollectionItem {
   label: string;
 }
 
-const COLLECTION_META: Record<string, { icon: string; description: string }> = {
-  centers: { icon: "🎳", description: "Bowling center locations and details" },
-  tournaments: { icon: "🏆", description: "Tournament events and schedules" },
-  honors: { icon: "🥇", description: "Awards, records, and honorees" },
-  news: { icon: "📰", description: "News articles and announcements" },
-  committees: { icon: "👥", description: "Committees and their members" },
-};
-
 function getPrimaryLabel(data: Record<string, unknown>): string {
   const labelFields = ["title", "name", "category", "role"];
   for (const field of labelFields) {
@@ -49,6 +42,9 @@ export default function CollectionList({
   useGitHubAPI = false,
 }: CollectionListProps) {
   const [collections, setCollections] = useState<CollectionMeta[]>([]);
+  const [collectionDefs, setCollectionDefs] = useState<
+    Record<string, CollectionDef>
+  >({});
   const [selectedCollection, setSelectedCollection] = useState<string | null>(
     null,
   );
@@ -68,21 +64,32 @@ export default function CollectionList({
     setLoadingCollections(true);
     setError(null);
     try {
+      // Dynamically load collection definitions — no hardcoded list
+      const defsResult = await fetchCollectionDefs(
+        token,
+        undefined,
+        undefined,
+        useGitHubAPI,
+      );
+      const defs: CollectionDef[] = defsResult.defs ?? [];
+      const defsMap: Record<string, CollectionDef> = {};
+      for (const def of defs) defsMap[def.id] = def;
+      setCollectionDefs(defsMap);
+
       const results = await Promise.all(
-        CONTENT_COLLECTIONS.map(async (name) => {
+        defs.map(async (def) => {
           const result = await fetchCollectionDirectory(
-            name,
+            def.id,
             token,
             undefined,
             undefined,
             useGitHubAPI,
           );
           return {
-            name,
+            name: def.id,
             itemCount: result.success ? (result.files?.length ?? 0) : 0,
-            icon: COLLECTION_META[name]?.icon ?? "📁",
-            description:
-              COLLECTION_META[name]?.description ?? `${name} collection`,
+            icon: def.icon ?? "📁",
+            description: def.description ?? `${def.name} collection`,
           };
         }),
       );
@@ -260,9 +267,11 @@ export default function CollectionList({
   }
 
   // ── Render: items within a selected collection ─────────────────────────────
-  const collMeta = COLLECTION_META[selectedCollection] ?? {
-    icon: "📁",
-    description: "",
+  const activeDef = collectionDefs[selectedCollection ?? ""];
+  const collMeta = {
+    icon: activeDef?.icon ?? "📁",
+    description: activeDef?.description ?? "",
+    displayName: activeDef?.name ?? selectedCollection ?? "",
   };
 
   return (
@@ -284,7 +293,7 @@ export default function CollectionList({
           <div>
             <h2 className="text-2xl font-bold text-text flex items-center gap-2">
               <span>{collMeta.icon}</span>
-              <span className="capitalize">{selectedCollection}</span>
+              <span>{collMeta.displayName}</span>
             </h2>
             <p className="text-sm text-text-secondary">
               {collMeta.description}

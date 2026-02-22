@@ -1,0 +1,21 @@
+{
+  "id": "centers",
+  "name": "Bowling Centers",
+  "description": "Bowling center locations and details",
+  "icon": "🎳",
+  "displayField": "name",
+  "summaryField": "address",
+  "fields": [
+    { "name": "name", "label": "Center Name", "type": "string", "required": true },
+    { "name": "address", "label": "Street Address", "type": "string", "required": true },
+    { "name": "city", "label": "City", "type": "string", "required": true },
+    { "name": "state", "label": "State", "type": "string", "required": true },
+    { "name": "zip", "label": "ZIP Code", "type": "string", "required": true },
+    { "name": "phone", "label": "Phone", "type": "string", "required": true },
+    { "name": "email", "label": "Email", "type": "string" },
+    { "name": "website", "label": "Website URL", "type": "string" },
+    { "name": "lanes", "label": "Number of Lanes", "type": "number" },
+    { "name": "features", "label": "Features", "type": "array", "description": "List of amenities or features" }
+  ],
+  "createdAt": "2026-02-22"
+}

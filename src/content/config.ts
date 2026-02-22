@@ -1,99 +1,34 @@
 import { defineCollection, z } from 'astro:content';
 
-// Pages collection removed - will be recreated when CMS is built
+// ── User-defined collection definitions ───────────────────────────────────────
+// Data collections (centers, tournaments, honors, etc.) are NOT registered here.
+// Their shape is described by the user via collection-def JSON files in
+// src/content/collection-defs/. Items are loaded at render time via import.meta.glob.
 
-// Schema for bowling centers
-const centersCollection = defineCollection({
-  type: 'data',
-  schema: z.object({
+const collectionFieldSchema: z.ZodType<any> = z.lazy(() =>
+  z.object({
     name: z.string(),
-    address: z.string(),
-    city: z.string(),
-    state: z.string(),
-    zip: z.string(),
-    phone: z.string(),
-    email: z.string().optional(),
-    website: z.string().optional(),
-    lanes: z.number().optional(),
-    features: z.array(z.string()).optional(),
-  }),
-});
-
-// Schema for tournament information
-const tournamentsCollection = defineCollection({
-  type: 'data',
-  schema: z.object({
-    name: z.string(),
-    date: z.string(),
-    location: z.string(),
-    description: z.string(),
-    entryFee: z.string().optional(),
-    prizeFund: z.string().optional(),
-    rules: z.string().optional(),
-    contact: z.object({
-      name: z.string(),
-      phone: z.string(),
-      email: z.string(),
-    }).optional(),
-    status: z.enum(['upcoming', 'completed', 'registration-open']).optional(),
-    links: z.array(z.object({
-      text: z.string(),
-      url: z.string(),
-    })).optional(),
-  }),
-});
-
-// Schema for honors/awards - flexible to support different honor types
-const honorsCollection = defineCollection({
-  type: 'data',
-  schema: z.object({
-    category: z.string(), // e.g., "hall-of-fame", "bowler-of-the-year", "high-average", etc.
-    title: z.string(), // Display title
+    label: z.string(),
+    type: z.enum(['string', 'number', 'boolean', 'select', 'date', 'array', 'object']),
+    required: z.boolean().optional(),
+    options: z.array(z.string()).optional(),       // for 'select' type
     description: z.string().optional(),
-    year: z.number().optional(), // For year-specific honors
-    // For tabular data (Hall of Fame, Bowler of Year, High Average, etc.)
-    data: z.array(z.record(z.any())).optional(),
-    // For individual recipients (300 games, etc.)
-    recipients: z.array(z.object({
-      name: z.string(),
-      achievement: z.string().optional(),
-      score: z.number().optional(),
-      date: z.string().optional(),
-      games: z.number().optional(),
-      average: z.number().optional(),
-      team: z.string().optional(),
-      position: z.string().optional(),
-    })).optional(),
-  }),
-});
+    arrayFields: z.array(collectionFieldSchema).optional(), // nested fields for 'array' type
+  })
+);
 
-// Schema for news articles
-const newsCollection = defineCollection({
+const collectionDefsCollection = defineCollection({
   type: 'data',
   schema: z.object({
-    title: z.string(),
-    date: z.string(),
-    author: z.string().optional(),
-    excerpt: z.string(),
-    content: z.string(),
-    image: z.string().optional(),
-    tags: z.array(z.string()).optional(),
-  }),
-});
-
-// Schema for committee members
-const committeesCollection = defineCollection({
-  type: 'data',
-  schema: z.object({
+    id: z.string(),
     name: z.string(),
-    role: z.string(),
-    members: z.array(z.object({
-      name: z.string(),
-      position: z.string(),
-      email: z.string().optional(),
-      phone: z.string().optional(),
-    })),
     description: z.string().optional(),
+    icon: z.string().optional(),
+    displayField: z.string().optional(),   // which field is the "title" in list views
+    summaryField: z.string().optional(),   // which field is the "description" in list views
+    fields: z.array(collectionFieldSchema),
+    createdAt: z.string().optional(),
+    updatedAt: z.string().optional(),
   }),
 });
 
@@ -128,6 +63,7 @@ const layoutSchema = z.object({
   id: z.string(),
   name: z.string(),
   description: z.string(),
+  navigationId: z.string().optional(), // which navigation menu this layout uses
   header: z.object({
     showNavigation: z.boolean(),
     navigationStyle: z.enum(['default', 'minimal', 'full']),
@@ -237,8 +173,10 @@ const contentListSectionSchema = baseSectionSchema.extend({
 const componentSectionSchema = baseSectionSchema.extend({
   type: z.literal('component'),
   componentId: z.string(),
-  defaultColumns: z.number().optional(),
-  props: z.record(z.any()).optional(),
+  componentType: z.enum(['primitive', 'composite']).optional(),
+  columns: z.number().optional(),
+  data: z.record(z.any()).optional(),
+  label: z.string().optional(),
 });
 
 const sectionSchema = z.discriminatedUnion('type', [
@@ -271,9 +209,5 @@ export const collections = {
   'layouts': layoutsCollection,
   'themes': themesCollection,
   'navigation': navigationCollection,
-  'centers': centersCollection,
-  'tournaments': tournamentsCollection,
-  'honors': honorsCollection,
-  'news': newsCollection,
-  'committees': committeesCollection,
+  'collection-defs': collectionDefsCollection,
 };

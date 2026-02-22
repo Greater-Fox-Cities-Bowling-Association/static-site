@@ -1,0 +1,18 @@
+{
+  "id": "news",
+  "name": "News",
+  "description": "News articles and announcements",
+  "icon": "📰",
+  "displayField": "title",
+  "summaryField": "excerpt",
+  "fields": [
+    { "name": "title", "label": "Title", "type": "string", "required": true },
+    { "name": "date", "label": "Date", "type": "date", "required": true },
+    { "name": "author", "label": "Author", "type": "string" },
+    { "name": "excerpt", "label": "Excerpt", "type": "string", "required": true, "description": "Short summary shown in lists" },
+    { "name": "content", "label": "Content", "type": "string", "required": true, "description": "Full article body" },
+    { "name": "image", "label": "Image URL", "type": "string" },
+    { "name": "tags", "label": "Tags", "type": "array", "description": "List of topic tags" }
+  ],
+  "createdAt": "2026-02-22"
+}
