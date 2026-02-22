@@ -1,15 +1,6 @@
 import { useState, useEffect } from "react";
-import type {
-  Layout,
-  LayoutHeader,
-  LayoutFooter,
-  NavigationConfig,
-} from "../../types/cms";
-import {
-  fetchLayoutContent,
-  saveLayoutFile,
-  fetchNavigationDirectory,
-} from "../../utils/githubApi";
+import type { Layout, LayoutHeader, LayoutFooter } from "../../types/cms";
+import { fetchLayoutContent, saveLayoutFile } from "../../utils/githubApi";
 
 interface LayoutEditorProps {
   layoutId: string | undefined; // undefined = creating new layout
@@ -56,7 +47,9 @@ export default function LayoutEditor({
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [availableNavigation, setAvailableNavigation] = useState<string[]>([]);
+  const [availableNavigation, setAvailableNavigation] = useState<
+    { id: string; name: string }[]
+  >([]);
 
   useEffect(() => {
     if (layoutId) {
@@ -94,24 +87,24 @@ export default function LayoutEditor({
 
   const loadAvailableNavigation = async () => {
     try {
-      const result = await fetchNavigationDirectory(
-        token,
-        undefined,
-        undefined,
-        useGitHubAPI,
-      );
-
-      if (result.success && result.files) {
-        // Extract navigation IDs from filenames (e.g., "default.json" -> "default")
-        const navIds = result.files.map((file) =>
-          file.name.replace(/\.json$/, ""),
-        );
-        setAvailableNavigation(navIds);
+      const mods = import.meta.glob<{
+        default: { id?: string; name?: string };
+      }>("../../content/navigation/*.json");
+      const navs: { id: string; name: string }[] = [];
+      for (const path in mods) {
+        const loader = mods[path];
+        if (!loader) continue;
+        const mod = await loader();
+        const id =
+          mod.default?.id ?? path.split("/").pop()?.replace(".json", "") ?? "";
+        const name = mod.default?.name ?? id;
+        if (id) navs.push({ id, name });
       }
+      navs.sort((a, b) => a.name.localeCompare(b.name));
+      setAvailableNavigation(navs);
     } catch (error) {
       console.error("Error loading navigation menus:", error);
-      // Set a default if loading fails
-      setAvailableNavigation(["default"]);
+      setAvailableNavigation([{ id: "default", name: "Default Navigation" }]);
     }
   };
 
@@ -312,16 +305,18 @@ export default function LayoutEditor({
             <select
               value={layout.navigationId || ""}
               onChange={(e) =>
-                updateLayout({
-                  navigationId: e.target.value || undefined,
-                })
+                updateLayout(
+                  (e.target.value
+                    ? { navigationId: e.target.value }
+                    : { navigationId: undefined }) as Partial<Layout>,
+                )
               }
               className="w-full px-3 py-2 border border-text/20 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="">None (Use default navigation)</option>
-              {availableNavigation.map((navId) => (
-                <option key={navId} value={navId}>
-                  {navId.charAt(0).toUpperCase() + navId.slice(1)}
+              {availableNavigation.map((nav) => (
+                <option key={nav.id} value={nav.id}>
+                  {nav.name}
                 </option>
               ))}
             </select>
@@ -467,52 +462,82 @@ export default function LayoutEditor({
           </div>
 
           {layout.footer.showFooter && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Footer Style
-              </label>
-              <div className="space-y-2">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    name="footerStyle"
-                    value="default"
-                    checked={layout.footer.footerStyle === "default"}
-                    onChange={(e) =>
-                      updateFooter({ footerStyle: e.target.value as any })
-                    }
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-                  />
-                  <span className="text-sm text-gray-700">Default</span>
+            <>
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-2">
+                  Footer Navigation Menu
                 </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    name="footerStyle"
-                    value="minimal"
-                    checked={layout.footer.footerStyle === "minimal"}
-                    onChange={(e) =>
-                      updateFooter({ footerStyle: e.target.value as any })
-                    }
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-                  />
-                  <span className="text-sm text-gray-700">Minimal</span>
-                </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    name="footerStyle"
-                    value="full"
-                    checked={layout.footer.footerStyle === "full"}
-                    onChange={(e) =>
-                      updateFooter({ footerStyle: e.target.value as any })
-                    }
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-                  />
-                  <span className="text-sm text-gray-700">Full Width</span>
-                </label>
+                <select
+                  value={layout.footerNavigationId || ""}
+                  onChange={(e) =>
+                    updateLayout(
+                      (e.target.value
+                        ? { footerNavigationId: e.target.value }
+                        : { footerNavigationId: undefined }) as Partial<Layout>,
+                    )
+                  }
+                  className="w-full px-3 py-2 border border-text/20 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="">Same as header navigation</option>
+                  {availableNavigation.map((nav) => (
+                    <option key={nav.id} value={nav.id}>
+                      {nav.name}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-1 text-xs text-gray-500">
+                  Choose which navigation menu provides the quick links in the
+                  footer. Defaults to the header navigation if not set.
+                </p>
               </div>
-            </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Footer Style
+                </label>
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="footerStyle"
+                      value="default"
+                      checked={layout.footer.footerStyle === "default"}
+                      onChange={(e) =>
+                        updateFooter({ footerStyle: e.target.value as any })
+                      }
+                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-gray-700">Default</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="footerStyle"
+                      value="minimal"
+                      checked={layout.footer.footerStyle === "minimal"}
+                      onChange={(e) =>
+                        updateFooter({ footerStyle: e.target.value as any })
+                      }
+                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-gray-700">Minimal</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="footerStyle"
+                      value="full"
+                      checked={layout.footer.footerStyle === "full"}
+                      onChange={(e) =>
+                        updateFooter({ footerStyle: e.target.value as any })
+                      }
+                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-gray-700">Full Width</span>
+                  </label>
+                </div>
+              </div>
+            </>
           )}
 
           <div>

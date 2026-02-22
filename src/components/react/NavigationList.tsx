@@ -10,10 +10,10 @@ interface NavigationListProps {
 }
 
 export default function NavigationList({
-  token,
+  token: _token,
   onEdit,
   onCreateNew,
-  useGitHubAPI = false,
+  useGitHubAPI: _useGitHubAPI = false,
 }: NavigationListProps) {
   const { colors } = useTheme();
   const [navigations, setNavigations] = useState<NavigationConfig[]>([]);

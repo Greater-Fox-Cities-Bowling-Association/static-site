@@ -914,6 +914,101 @@ export async function saveLayoutFile(
 }
 
 /**
+ * Save a navigation config file
+ */
+export async function saveNavigationFile(
+  navigationId: string,
+  content: any,
+  token: string,
+  owner: string = DEFAULT_OWNER,
+  repo: string = DEFAULT_REPO,
+  forceGitHubAPI: boolean = false
+): Promise<{ success: boolean; error?: string }> {
+  const filename = `${navigationId}.json`;
+  const path = `${NAVIGATION_PATH}/${filename}`;
+
+  const contentWithTimestamp = {
+    ...content,
+    updatedAt: new Date().toISOString()
+  };
+
+  // DEV MODE: Save to local filesystem via API endpoint
+  if (import.meta.env.DEV && !forceGitHubAPI) {
+    logAPICall({
+      function: 'saveNavigationFile',
+      mode: 'LOCAL',
+      params: { navigationId, path, name: content.name },
+      url: '/api/save-page',
+      method: 'POST'
+    });
+
+    try {
+      const response = await fetch('/api/save-page', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path, content: contentWithTimestamp })
+      });
+
+      let result;
+      try {
+        result = await response.json();
+      } catch (jsonError) {
+        const text = await response.text();
+        logAPIResponse('saveNavigationFile', 'LOCAL', null, `Server error: ${response.status}. Response: ${text}`);
+        return {
+          success: false,
+          error: `Server error: ${response.status}. Check dev server console for details.`
+        };
+      }
+
+      if (!response.ok) {
+        logAPIResponse('saveNavigationFile', 'LOCAL', null, result.error || 'Server returned error');
+        return { success: false, error: result.error || 'Failed to save file locally' };
+      }
+
+      logAPIResponse('saveNavigationFile', 'LOCAL', { path, success: true });
+      return { success: true };
+    } catch (error) {
+      logAPIResponse('saveNavigationFile', 'LOCAL', null, error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to save file locally'
+      };
+    }
+  }
+
+  // PRODUCTION MODE: Commit to GitHub
+  const contentString = JSON.stringify(contentWithTimestamp, null, 2);
+  const message = `Update navigation: ${content.name || navigationId}`;
+
+  logAPICall({
+    function: 'saveNavigationFile (via commitToGitHub)',
+    mode: 'GITHUB_API',
+    params: { navigationId, path, name: content.name, message },
+    url: `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
+    method: 'PUT'
+  });
+
+  const result = await commitToGitHub({
+    token,
+    owner,
+    repo,
+    path,
+    content: contentString,
+    message,
+    branch: 'main'
+  });
+
+  if (result.success) {
+    logAPIResponse('saveNavigationFile', 'GITHUB_API', { path, committed: true });
+  } else {
+    logAPIResponse('saveNavigationFile', 'GITHUB_API', null, result.error);
+  }
+
+  return result;
+}
+
+/**
  * Delete a layout file
  */
 export async function deleteLayoutFile(

@@ -251,7 +251,8 @@ export interface Layout {
   id: string;
   name: string;
   description: string;
-  navigationId?: string; // ID of the navigation menu to use (e.g., 'default')
+  navigationId?: string;        // Navigation menu used in the header
+  footerNavigationId?: string;  // Navigation menu used in the footer (defaults to navigationId)
   header: LayoutHeader;
   footer: LayoutFooter;
   updatedAt?: string;

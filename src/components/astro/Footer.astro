@@ -1,75 +1,102 @@
 ---
 // Load navigation items to use as footer quick links
-import type { NavigationItem } from "../../types/cms";
+import type { NavigationItem, NavigationConfig } from "../../types/cms";
+
+interface Props {
+  navigationId?: string;
+  footerStyle?: 'default' | 'minimal' | 'full';
+}
+
+const { navigationId = "default", footerStyle = "default" } = Astro.props;
 
 const currentYear = new Date().getFullYear();
 const siteName = import.meta.env.PUBLIC_SITE_NAME || "";
 
 let navItems: NavigationItem[] = [];
-try {
-  const navigationModule =
-    await import("../../content/navigation/default.json");
-  navItems = (navigationModule.default.items || []).slice(0, 5);
-} catch {
-  // No navigation config; quick links section will be empty
+
+// Only load nav items when we actually need them (not minimal)
+if (footerStyle !== "minimal") {
+  try {
+    const modules = import.meta.glob<{ default: NavigationConfig }>(
+      "../../content/navigation/*.json",
+    );
+    const key = `../../content/navigation/${navigationId}.json`;
+    const fallbackKey = "../../content/navigation/default.json";
+    const loader = modules[key] ?? modules[fallbackKey];
+    if (loader) {
+      const mod = await loader();
+      navItems = (mod.default?.items ?? []).slice(0, 5);
+    }
+  } catch {
+    // No navigation config; quick links section will be empty
+  }
 }
 ---
 
-<footer class="bg-secondary text-text-secondary mt-16">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-      <!-- Site name / About -->
-      <div>
+{footerStyle === "minimal" ? (
+  <div class="bg-secondary border-t border-text/20 py-4 text-sm text-center text-text-secondary">
+    <p>&copy; {currentYear}{siteName ? ` ${siteName}` : ""}. All rights reserved.</p>
+  </div>
+) : (
+  <footer class="bg-secondary text-text-secondary mt-16">
+    <div class:list={[
+      "px-4 sm:px-6 lg:px-8 py-12",
+      footerStyle === "full" ? "w-full" : "max-w-7xl mx-auto",
+    ]}>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Site name / About -->
+        <div>
+          {
+            siteName && (
+              <h3 class="text-text font-display font-bold text-lg mb-4">
+                {siteName}
+              </h3>
+            )
+          }
+        </div>
+
+        <!-- Quick Links (driven by navigation config) -->
         {
-          siteName && (
-            <h3 class="text-text font-display font-bold text-lg mb-4">
-              {siteName}
-            </h3>
+          navItems.length > 0 && (
+            <div>
+              <h3 class="text-text font-display font-bold text-lg mb-4">
+                Quick Links
+              </h3>
+              <ul class="space-y-2 text-sm">
+                {navItems.map((item) => (
+                  <li>
+                    <a
+                      href={item.href}
+                      class="hover:text-primary transition-colors"
+                    >
+                      {item.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
           )
         }
+
+        <!-- Contact -->
+        <div>
+          <h3 class="text-text font-display font-bold text-lg mb-4">Contact</h3>
+          <p class="text-sm">
+            Questions? <a
+              href="/contact"
+              class="text-accent hover:text-primary transition-colors"
+              >Get in touch</a
+            >
+          </p>
+        </div>
       </div>
 
-      <!-- Quick Links (driven by navigation/default.json) -->
-      {
-        navItems.length > 0 && (
-          <div>
-            <h3 class="text-text font-display font-bold text-lg mb-4">
-              Quick Links
-            </h3>
-            <ul class="space-y-2 text-sm">
-              {navItems.map((item) => (
-                <li>
-                  <a
-                    href={item.href}
-                    class="hover:text-primary transition-colors"
-                  >
-                    {item.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )
-      }
-
-      <!-- Contact -->
-      <div>
-        <h3 class="text-text font-display font-bold text-lg mb-4">Contact</h3>
-        <p class="text-sm">
-          Questions? <a
-            href="/contact"
-            class="text-accent hover:text-primary transition-colors"
-            >Get in touch</a
-          >
+      <div class="border-t border-text/20 mt-8 pt-8 text-sm text-center">
+        <p>
+          &copy; {currentYear}{siteName ? ` ${siteName}` : ""}. All rights
+          reserved.
         </p>
       </div>
     </div>
-
-    <div class="border-t border-text/20 mt-8 pt-8 text-sm text-center">
-      <p>
-        &copy; {currentYear}{siteName ? ` ${siteName}` : ""}. All rights
-        reserved.
-      </p>
-    </div>
-  </div>
-</footer>
+  </footer>
+)}

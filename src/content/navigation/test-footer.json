@@ -1,0 +1,14 @@
+{
+  "id": "test-footer",
+  "name": "test footer",
+  "description": "",
+  "items": [
+    {
+      "id": "nav-1771790702996-1cofhknfq",
+      "label": "test nav",
+      "href": "/honors/300-games",
+      "order": 1
+    }
+  ],
+  "updatedAt": "2026-02-22T20:05:12.907Z"
+}

@@ -3,9 +3,10 @@ import type { NavigationItem, NavigationConfig } from "../../types/cms";
 
 interface Props {
   navigationId?: string;
+  navigationStyle?: "default" | "minimal" | "full";
 }
 
-const { navigationId = "default" } = Astro.props;
+const { navigationId = "default", navigationStyle = "default" } = Astro.props;
 
 // Try to load navigation config, fallback to default if not found
 let navItems: NavigationItem[] = [];
@@ -30,11 +31,35 @@ try {
 navItems.sort((a, b) => a.order - b.order);
 ---
 
-<nav class="bg-background shadow-md sticky top-0 z-50">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex justify-between items-center h-16">
+<!-- navigationStyle: default | minimal | full -->
+<nav
+  class:list={[
+    "sticky top-0 z-50",
+    navigationStyle === "minimal"
+      ? "bg-background/90 backdrop-blur-sm border-b border-text/10"
+      : "bg-background shadow-md",
+  ]}
+>
+  <div
+    class:list={[
+      "px-4 sm:px-6 lg:px-8",
+      navigationStyle === "full" ? "w-full" : "max-w-7xl mx-auto",
+    ]}
+  >
+    <div
+      class:list={[
+        "flex justify-between items-center",
+        navigationStyle === "minimal" ? "h-12" : "h-16",
+      ]}
+    >
       <div class="flex-shrink-0">
-        <a href="/" class="font-display font-bold text-xl text-primary">
+        <a
+          href="/"
+          class:list={[
+            "font-display font-bold text-primary",
+            navigationStyle === "minimal" ? "text-base" : "text-xl",
+          ]}
+        >
           {import.meta.env.PUBLIC_SITE_NAME || "Home"}
         </a>
       </div>
@@ -43,7 +68,15 @@ navItems.sort((a, b) => a.order - b.order);
       <div class="hidden md:flex md:space-x-1">
         {
           navItems.map((item) =>
-            item.children && item.children.length > 0 ? (
+            // Minimal style: flat links only, no dropdowns
+            navigationStyle === "minimal" ? (
+              <a
+                href={item.href}
+                class="px-3 py-1.5 rounded-md text-sm font-medium text-text hover:text-primary hover:bg-primary/10 transition-colors"
+              >
+                {item.label}
+              </a>
+            ) : item.children && item.children.length > 0 ? (
               <div class="relative group">
                 <button
                   class="px-3 py-2 rounded-md text-sm font-medium text-text hover:text-primary hover:bg-primary/10 transition-colors flex items-center gap-1"
@@ -123,7 +156,9 @@ navItems.sort((a, b) => a.order - b.order);
     <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
       {
         navItems.map((item) =>
-          item.children && item.children.length > 0 ? (
+          item.children &&
+          item.children.length > 0 &&
+          navigationStyle !== "minimal" ? (
             <div class="mobile-dropdown">
               <button
                 class="mobile-dropdown-button w-full flex items-center justify-between px-3 py-2 rounded-md text-base font-medium text-text-secondary hover:text-primary hover:bg-primary/10 transition-colors"

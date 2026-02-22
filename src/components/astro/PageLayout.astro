@@ -1,31 +1,46 @@
 ---
-import type { Layout } from '../../types/cms';
-import Navigation from './Navigation.astro';
-import Footer from './Footer.astro';
+import type { Layout } from "../../types/cms";
+import Navigation from "./Navigation.astro";
+import Footer from "./Footer.astro";
 
 interface Props {
   layout?: Layout;
 }
 
 const { layout } = Astro.props;
+
+const navigationId = layout?.navigationId;
+const footerNavId = layout?.footerNavigationId ?? navigationId;
+const navigationStyle = layout?.header.navigationStyle ?? "default";
+const footerStyle = layout?.footer.footerStyle ?? "default";
 ---
 
 <div class="page-layout">
-  {layout?.header.showNavigation && (
-    <header class="page-layout__header">
-      <Navigation {...(layout.navigationId ? { navigationId: layout.navigationId } : {})} />
-    </header>
-  )}
-  
+  {
+    layout?.header.showNavigation && (
+      <header class="page-layout__header">
+        <Navigation
+          {...(navigationId ? { navigationId } : {})}
+          navigationStyle={navigationStyle}
+        />
+      </header>
+    )
+  }
+
   <main class="page-layout__main">
     <slot />
   </main>
-  
-  {layout?.footer.showFooter && (
-    <footer class="page-layout__footer">
-      <Footer />
-    </footer>
-  )}
+
+  {
+    layout?.footer.showFooter && (
+      <footer class="page-layout__footer">
+        <Footer
+          {...(footerNavId ? { navigationId: footerNavId } : {})}
+          footerStyle={footerStyle}
+        />
+      </footer>
+    )
+  }
 </div>
 
 <style>

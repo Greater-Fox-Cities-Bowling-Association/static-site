@@ -63,7 +63,8 @@ const layoutSchema = z.object({
   id: z.string(),
   name: z.string(),
   description: z.string(),
-  navigationId: z.string().optional(), // which navigation menu this layout uses
+  navigationId: z.string().optional(),       // navigation menu used in the header
+  footerNavigationId: z.string().optional(), // navigation menu used in the footer (falls back to navigationId)
   header: z.object({
     showNavigation: z.boolean(),
     navigationStyle: z.enum(['default', 'minimal', 'full']),

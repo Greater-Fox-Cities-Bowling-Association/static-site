@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import type { NavigationConfig, NavigationItem } from "../../types/cms";
 import { useTheme } from "../../utils/useTheme";
-import { fetchPagesDirectory } from "../../utils/githubApi";
+import { fetchPagesDirectory, saveNavigationFile } from "../../utils/githubApi";
 
 interface NavigationEditorProps {
   navigationId?: string;
@@ -255,31 +255,20 @@ export default function NavigationEditor({
     setError(null);
 
     try {
-      // Update timestamp
-      const updatedNavigation = {
-        ...navigation,
-        updatedAt: new Date().toISOString(),
-      };
+      const updatedNavigation = { ...navigation };
 
-      // Save to GitHub
-      const filePath = `src/content/navigation/${navigation.id}.json`;
-      const content = JSON.stringify(updatedNavigation, null, 2);
+      // Save via githubApi helper (uses /api/save-page in dev, GitHub API in prod)
+      const result = await saveNavigationFile(
+        navigation.id,
+        updatedNavigation,
+        token,
+        undefined,
+        undefined,
+        useGitHubAPI,
+      );
 
-      const response = await fetch("/api/github/save-file", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          token,
-          filePath,
-          content,
-          message: `Update navigation: ${navigation.name}`,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to save navigation");
+      if (!result.success) {
+        throw new Error(result.error || "Failed to save navigation");
       }
 
       onSave();

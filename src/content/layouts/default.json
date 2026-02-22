@@ -9,5 +9,7 @@
   "footer": {
     "showFooter": true,
     "footerStyle": "default"
-  }
+  },
+  "footerNavigationId": "default",
+  "updatedAt": "2026-02-22T20:10:56.992Z"
 }
