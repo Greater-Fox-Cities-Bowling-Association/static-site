@@ -78,10 +78,9 @@ navItems.sort((a, b) => a.order - b.order);
               </a>
             ) : item.children && item.children.length > 0 ? (
               <div class="relative group">
-                <button
+                <a
+                  href={item.href}
                   class="px-3 py-2 rounded-md text-sm font-medium text-text hover:text-primary hover:bg-primary/10 transition-colors flex items-center gap-1"
-                  aria-haspopup="true"
-                  aria-expanded="false"
                 >
                   {item.label}
                   <svg
@@ -97,7 +96,7 @@ navItems.sort((a, b) => a.order - b.order);
                       d="M19.5 8.25l-7.5 7.5-7.5-7.5"
                     />
                   </svg>
-                </button>
+                </a>
                 <div class="absolute left-0 mt-0 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                   <div class="bg-background shadow-lg rounded-md border border-text/10 py-1">
                     {item.children.map((child) => (
@@ -160,25 +159,33 @@ navItems.sort((a, b) => a.order - b.order);
           item.children.length > 0 &&
           navigationStyle !== "minimal" ? (
             <div class="mobile-dropdown">
-              <button
-                class="mobile-dropdown-button w-full flex items-center justify-between px-3 py-2 rounded-md text-base font-medium text-text-secondary hover:text-primary hover:bg-primary/10 transition-colors"
-                data-dropdown-id={item.id}
-              >
-                {item.label}
-                <svg
-                  class="w-4 h-4 transition-transform mobile-dropdown-icon"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="1.5"
-                  stroke="currentColor"
+              <div class="flex items-center">
+                <a
+                  href={item.href}
+                  class="flex-1 px-3 py-2 rounded-md text-base font-medium text-text-secondary hover:text-primary hover:bg-primary/10 transition-colors"
                 >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M19.5 8.25l-7.5 7.5-7.5-7.5"
-                  />
-                </svg>
-              </button>
+                  {item.label}
+                </a>
+                <button
+                  class="mobile-dropdown-button px-3 py-2 rounded-md text-text-secondary hover:text-primary hover:bg-primary/10 transition-colors"
+                  data-dropdown-id={item.id}
+                  aria-label={`Toggle ${item.label} submenu`}
+                >
+                  <svg
+                    class="w-4 h-4 transition-transform mobile-dropdown-icon"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+                    />
+                  </svg>
+                </button>
+              </div>
               <div class="mobile-dropdown-content hidden pl-4">
                 {item.children.map((child) => (
                   <a
@@ -220,8 +227,7 @@ navItems.sort((a, b) => a.order - b.order);
       ".mobile-dropdown-button",
     );
     dropdownButtons.forEach((btn) => {
-      btn.addEventListener("click", (e) => {
-        e.preventDefault();
+      btn.addEventListener("click", () => {
         const dropdown = btn.closest(".mobile-dropdown");
         const content = dropdown?.querySelector(".mobile-dropdown-content");
         const icon = dropdown?.querySelector(".mobile-dropdown-icon");
