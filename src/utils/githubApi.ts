@@ -1817,9 +1817,9 @@ export async function fetchPrimitiveComponents(
     if (import.meta.env.DEV && !forceGitHubAPI) {
       // Use fetch to load JSON files locally
       const primitiveIds = [
-        'text', 'image', 'button', 'list', 'table', 
-        'section', 'checkbox', 'radiobutton', 'link', 
-        'spacer', 'divider'
+        'text', 'image', 'button', 'list', 'table',
+        'section', 'checkbox', 'radiobutton', 'link',
+        'spacer', 'divider', 'cards', 'collection'
       ];
       
       const components = await Promise.all(
@@ -2039,4 +2039,102 @@ export async function saveComponent(
   }
 
   return result;
+}
+
+export async function deleteCompositeComponent(
+  componentId: string,
+  token: string,
+  owner: string = DEFAULT_OWNER,
+  repo: string = DEFAULT_REPO,
+  forceGitHubAPI: boolean = false
+): Promise<{ success: boolean; error?: string }> {
+  const path = `${COMPOSITES_PATH}/${componentId}.json`;
+
+  logAPICall({
+    function: 'deleteCompositeComponent',
+    mode: forceGitHubAPI ? 'GITHUB_API' : 'LOCAL',
+    params: { componentId, path },
+  });
+
+  // DEV MODE: Delete from local filesystem via API endpoint
+  if (import.meta.env.DEV && !forceGitHubAPI) {
+    try {
+      const response = await fetch('/api/delete-page', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path })
+      });
+
+      let result;
+      try {
+        result = await response.json();
+      } catch {
+        return { success: false, error: `Server error: ${response.status}` };
+      }
+
+      if (!response.ok) {
+        return { success: false, error: result.error || 'Failed to delete component locally' };
+      }
+
+      logAPIResponse('deleteCompositeComponent', 'LOCAL', { path, deleted: true });
+      return { success: true };
+    } catch (error) {
+      logAPIResponse('deleteCompositeComponent', 'LOCAL', null, error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to delete component'
+      };
+    }
+  }
+
+  // PRODUCTION MODE: Delete from GitHub
+  const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+
+  try {
+    // Get the file SHA (required for deletion)
+    const getResponse = await fetch(`${apiUrl}?ref=main`, {
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+
+    if (!getResponse.ok) {
+      if (getResponse.status === 404) {
+        return { success: false, error: 'Component not found' };
+      }
+      const err = await getResponse.json();
+      throw new Error(err.message || 'Failed to get component for deletion');
+    }
+
+    const fileData: GitHubFileResponse = await getResponse.json();
+
+    const deleteResponse = await fetch(apiUrl, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message: `Delete component: ${componentId}`,
+        sha: fileData.sha,
+        branch: 'main'
+      })
+    });
+
+    if (!deleteResponse.ok) {
+      const err = await deleteResponse.json();
+      throw new Error(err.message || 'Failed to delete component');
+    }
+
+    logAPIResponse('deleteCompositeComponent', 'GITHUB_API', { path, deleted: true });
+    return { success: true };
+  } catch (error) {
+    logAPIResponse('deleteCompositeComponent', 'GITHUB_API', null, error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to delete component'
+    };
+  }
 }

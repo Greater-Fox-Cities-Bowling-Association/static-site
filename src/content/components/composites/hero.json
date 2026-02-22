@@ -6,7 +6,38 @@
   "icon": "🦸",
   "minColumns": 12,
   "defaultColumns": 12,
-  "components": [],
+  "components": [
+    {
+      "id": "hero-section",
+      "primitive": "section",
+      "props": { "padding": "large" }
+    },
+    {
+      "id": "hero-bg-image",
+      "primitive": "image",
+      "props": { "src": "{{backgroundImage}}", "alt": "", "width": "100%" }
+    },
+    {
+      "id": "hero-title",
+      "primitive": "text",
+      "props": { "heading": "{{title}}", "alignment": "center" }
+    },
+    {
+      "id": "hero-subtitle",
+      "primitive": "text",
+      "props": { "content": "{{subtitle}}", "alignment": "center" }
+    },
+    {
+      "id": "hero-spacer",
+      "primitive": "spacer",
+      "props": { "size": "small" }
+    },
+    {
+      "id": "hero-cta",
+      "primitive": "button",
+      "props": { "text": "{{ctaText}}", "link": "{{ctaLink}}", "style": "secondary", "size": "large" }
+    }
+  ],
   "dataSchema": [
     { "name": "title", "label": "Title", "type": "string", "required": true },
     { "name": "subtitle", "label": "Subtitle", "type": "string", "required": false },

@@ -1,0 +1,39 @@
+{
+  "id": "collection",
+  "name": "Collection Display",
+  "description": "Display items fetched from a CMS collection with configurable layout",
+  "type": "primitive",
+  "icon": "📚",
+  "fields": [
+    {
+      "name": "source",
+      "label": "Collection Name",
+      "type": "string",
+      "required": true,
+      "description": "Name of the collection to display (e.g. centers, news, tournaments, honors)"
+    },
+    {
+      "name": "displayMode",
+      "label": "Display Mode",
+      "type": "enum",
+      "required": false,
+      "defaultValue": "cards",
+      "values": ["cards", "table", "list"]
+    },
+    {
+      "name": "columns",
+      "label": "Card Columns",
+      "type": "enum",
+      "required": false,
+      "defaultValue": "3",
+      "values": ["2", "3", "4"]
+    },
+    {
+      "name": "limit",
+      "label": "Max Items",
+      "type": "number",
+      "required": false,
+      "description": "Leave blank to show all items"
+    }
+  ]
+}

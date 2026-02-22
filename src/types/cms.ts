@@ -44,8 +44,10 @@ export interface PrimitiveComponent {
 
 export interface CompositeComponentInstance {
   id: string; // Unique ID for this instance within the composite
-  primitive: string; // ID of the primitive component to use
-  props: Record<string, any>; // Props to pass to the primitive (can include {{template}} variables)
+  kind?: 'primitive' | 'composite'; // defaults to 'primitive' for backward compat
+  primitive?: string; // ID of the primitive component (when kind === 'primitive' or undefined)
+  composite?: string; // ID of the composite component (when kind === 'composite')
+  props: Record<string, any>; // Props to pass to the component (can include {{template}} variables)
 }
 
 export interface CompositeComponent {

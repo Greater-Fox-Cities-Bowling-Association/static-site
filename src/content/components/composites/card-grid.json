@@ -6,7 +6,23 @@
   "icon": "🗃️",
   "minColumns": 4,
   "defaultColumns": 12,
-  "components": [],
+  "components": [
+    {
+      "id": "card-grid-section",
+      "primitive": "section",
+      "props": { "padding": "large" }
+    },
+    {
+      "id": "card-grid-heading",
+      "primitive": "text",
+      "props": { "heading": "{{heading}}", "alignment": "center" }
+    },
+    {
+      "id": "card-grid-cards",
+      "primitive": "cards",
+      "props": { "items": "{{cards}}", "columns": "{{columns}}" }
+    }
+  ],
   "dataSchema": [
     { "name": "heading", "label": "Heading", "type": "string", "required": false },
     {

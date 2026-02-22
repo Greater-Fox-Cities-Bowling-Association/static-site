@@ -1,0 +1,25 @@
+{
+  "id": "cards",
+  "name": "Cards Grid",
+  "description": "Display a responsive grid of cards from pipe-separated data (Title | Description | ImageURL | Link)",
+  "type": "primitive",
+  "icon": "🗃️",
+  "fields": [
+    {
+      "name": "items",
+      "label": "Card Items",
+      "type": "array",
+      "required": true,
+      "itemType": "string",
+      "description": "One card per line: Title | Description | ImageURL | Link"
+    },
+    {
+      "name": "columns",
+      "label": "Columns",
+      "type": "enum",
+      "required": false,
+      "defaultValue": "3",
+      "values": ["1", "2", "3", "4"]
+    }
+  ]
+}

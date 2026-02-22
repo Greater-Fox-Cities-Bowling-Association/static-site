@@ -7,14 +7,28 @@
   "layoutId": "default",
   "sections": [
     {
-      "id": "centers-list-1",
-      "type": "contentList",
-      "order": 1,
-      "heading": "Our Bowling Centers",
-      "collection": "centers",
-      "displayMode": "cards",
-      "columns": 3,
-      "styleOverrides": {}
+      "id": "section-1771744571643-zh13l3k1g",
+      "type": "component",
+      "order": 0,
+      "componentId": "section",
+      "componentType": "primitive",
+      "columns": 12,
+      "data": {},
+      "label": "Section",
+      "children": [
+        {
+          "id": "centers-list-1",
+          "type": "contentList",
+          "order": 0,
+          "heading": "Our Bowling Centers",
+          "collection": "centers",
+          "displayMode": "cards",
+          "columns": 2,
+          "styleOverrides": {
+            "backgroundColor": "#f2d31b"
+          }
+        }
+      ]
     }
   ],
   "data": [
@@ -124,5 +138,5 @@
     }
   ],
   "createdAt": "2026-02-15T00:00:00.000Z",
-  "updatedAt": "2026-02-22T06:40:06.309Z"
+  "updatedAt": "2026-02-22T08:54:42.204Z"
 }

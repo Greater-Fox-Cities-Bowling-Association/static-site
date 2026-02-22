@@ -6,7 +6,28 @@
   "icon": "📣",
   "minColumns": 6,
   "defaultColumns": 12,
-  "components": [],
+  "components": [
+    {
+      "id": "cta-section",
+      "primitive": "section",
+      "props": { "padding": "large" }
+    },
+    {
+      "id": "cta-heading",
+      "primitive": "text",
+      "props": { "heading": "{{heading}}", "alignment": "center" }
+    },
+    {
+      "id": "cta-spacer",
+      "primitive": "spacer",
+      "props": { "size": "small" }
+    },
+    {
+      "id": "cta-button",
+      "primitive": "button",
+      "props": { "text": "{{buttonText}}", "link": "{{buttonLink}}", "style": "{{style}}", "size": "large" }
+    }
+  ],
   "dataSchema": [
     { "name": "heading", "label": "Heading", "type": "string", "required": true },
     { "name": "buttonText", "label": "Button Text", "type": "string", "required": true },

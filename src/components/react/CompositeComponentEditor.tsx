@@ -30,7 +30,9 @@ export default function CompositeComponentEditor({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [primitives, setPrimitives] = useState<PrimitiveComponent[]>([]);
+  const [composites, setComposites] = useState<CompositeComponent[]>([]);
   const [showPrimitiveSelector, setShowPrimitiveSelector] = useState(false);
+  const [showCompositeSelector, setShowCompositeSelector] = useState(false);
   const [selectedInstanceId, setSelectedInstanceId] = useState<string | null>(
     null,
   );
@@ -56,15 +58,15 @@ export default function CompositeComponentEditor({
 
   const loadPrimitives = async () => {
     try {
-      const primitivesData = await fetchPrimitiveComponents(
-        token,
-        undefined,
-        undefined,
-        useGitHubAPI,
-      );
+      const [primitivesData, compositesData] = await Promise.all([
+        fetchPrimitiveComponents(token, undefined, undefined, useGitHubAPI),
+        fetchCompositeComponents(token, undefined, undefined, useGitHubAPI),
+      ]);
       setPrimitives(primitivesData);
+      // Exclude self to avoid circular references
+      setComposites(compositesData.filter((c) => c.id !== componentId));
     } catch (err) {
-      console.error("Error loading primitives:", err);
+      console.error("Error loading primitives/composites:", err);
     }
   };
 
@@ -100,6 +102,7 @@ export default function CompositeComponentEditor({
 
     const newInstance: CompositeComponentInstance = {
       id: `${primitiveId}-${Date.now()}`,
+      kind: "primitive",
       primitive: primitiveId,
       props: {},
     };
@@ -109,6 +112,24 @@ export default function CompositeComponentEditor({
       components: [...component.components, newInstance],
     });
     setShowPrimitiveSelector(false);
+  };
+
+  const handleAddComposite = (compositeId: string) => {
+    const composite = composites.find((c) => c.id === compositeId);
+    if (!composite) return;
+
+    const newInstance: CompositeComponentInstance = {
+      id: `${compositeId}-${Date.now()}`,
+      kind: "composite",
+      composite: compositeId,
+      props: {},
+    };
+
+    setComponent({
+      ...component,
+      components: [...component.components, newInstance],
+    });
+    setShowCompositeSelector(false);
   };
 
   const handleRemoveComponent = (instanceId: string) => {
@@ -196,7 +217,7 @@ export default function CompositeComponentEditor({
     }
 
     if (component.components.length === 0) {
-      alert("Add at least one primitive component");
+      alert("Add at least one primitive or composite component");
       return;
     }
 
@@ -581,15 +602,29 @@ export default function CompositeComponentEditor({
               <label className="text-sm font-medium text-gray-700">
                 Build Your Component *
                 <span className="text-xs text-gray-500 ml-2">
-                  Add primitives in order
+                  Add primitives or composites in order
                 </span>
               </label>
-              <button
-                onClick={() => setShowPrimitiveSelector(!showPrimitiveSelector)}
-                className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
-              >
-                + Add Primitive
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    setShowPrimitiveSelector(!showPrimitiveSelector);
+                    setShowCompositeSelector(false);
+                  }}
+                  className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
+                  + Add Primitive
+                </button>
+                <button
+                  onClick={() => {
+                    setShowCompositeSelector(!showCompositeSelector);
+                    setShowPrimitiveSelector(false);
+                  }}
+                  className="px-3 py-1 text-sm bg-purple-600 text-white rounded hover:bg-purple-700"
+                >
+                  + Add Composite
+                </button>
+              </div>
             </div>
 
             {/* Primitive Selector */}
@@ -619,23 +654,77 @@ export default function CompositeComponentEditor({
               </div>
             )}
 
+            {/* Composite Selector */}
+            {showCompositeSelector && (
+              <div className="mb-4 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                <p className="text-sm font-medium text-gray-700 mb-2">
+                  Select a composite to embed:
+                </p>
+                {composites.length === 0 ? (
+                  <p className="text-sm text-gray-500 italic">
+                    No other composites available.
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    {composites.map((c) => (
+                      <button
+                        key={c.id}
+                        onClick={() => handleAddComposite(c.id)}
+                        className="px-3 py-2 bg-white border border-purple-200 rounded hover:bg-purple-50 text-left"
+                      >
+                        <span className="mr-2">{c.icon || "🧩"}</span>
+                        <span className="text-sm">{c.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <button
+                  onClick={() => setShowCompositeSelector(false)}
+                  className="mt-2 text-sm text-gray-600 hover:text-gray-800"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+
             {/* Component List */}
             <div className="space-y-3">
               {component.components.map((comp, index) => {
-                const primitive = primitives.find(
-                  (p) => p.id === comp.primitive,
-                );
+                const isCompInst = comp.kind === "composite";
+                const primitive = !isCompInst
+                  ? primitives.find(
+                      (p) => p.id === (comp.primitive ?? comp.composite),
+                    )
+                  : null;
+                const compositeRef = isCompInst
+                  ? composites.find((c) => c.id === comp.composite)
+                  : null;
+                const displayName = isCompInst
+                  ? (compositeRef?.name ?? comp.composite ?? "Composite")
+                  : (primitive?.name ?? comp.primitive ?? "Primitive");
+                const displayIcon = isCompInst
+                  ? (compositeRef?.icon ?? "🧩")
+                  : (primitive?.icon ?? "");
                 return (
                   <div
                     key={comp.id}
-                    className="p-4 border border-gray-200 rounded-lg"
+                    className={`p-4 border rounded-lg ${
+                      isCompInst
+                        ? "border-purple-200 bg-purple-50/30"
+                        : "border-gray-200"
+                    }`}
                   >
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
-                        <span className="text-xl">{primitive?.icon}</span>
+                        <span className="text-xl">{displayIcon}</span>
                         <span className="font-medium text-gray-900">
-                          {primitive?.name}
+                          {displayName}
                         </span>
+                        {isCompInst && (
+                          <span className="text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded font-mono">
+                            composite
+                          </span>
+                        )}
                         <span className="text-xs text-gray-500">
                           ({comp.id})
                         </span>
@@ -669,74 +758,106 @@ export default function CompositeComponentEditor({
                       <p className="text-xs font-medium text-gray-600 mb-2">
                         Props (use {`{{fieldName}}`} to reference data fields):
                       </p>
-                      {primitive?.fields.map((field) => (
-                        <div
-                          key={field.name}
-                          className="flex items-center gap-2"
-                        >
-                          <label className="text-xs text-gray-600 w-28">
-                            {field.label}:
-                          </label>
-                          {field.type === "enum" && field.values ? (
-                            <select
-                              value={
-                                comp.props[field.name] ||
-                                field.defaultValue ||
-                                ""
-                              }
-                              onChange={(e) =>
-                                handleUpdateComponentProp(
-                                  comp.id,
-                                  field.name,
-                                  e.target.value,
-                                )
-                              }
-                              className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
+                      {isCompInst
+                        ? /* Composite instance: show nested composite's dataSchema fields */
+                          (compositeRef?.dataSchema.map((field) => (
+                            <div
+                              key={field.name}
+                              className="flex items-center gap-2"
                             >
-                              <option value="">Default</option>
-                              {field.values.map((v) => (
-                                <option key={v} value={v}>
-                                  {v}
-                                </option>
-                              ))}
-                            </select>
-                          ) : field.type === "boolean" ? (
-                            <input
-                              type="checkbox"
-                              checked={
-                                comp.props[field.name] ||
-                                field.defaultValue ||
-                                false
-                              }
-                              onChange={(e) =>
-                                handleUpdateComponentProp(
-                                  comp.id,
-                                  field.name,
-                                  e.target.checked,
-                                )
-                              }
-                              className="rounded"
-                            />
-                          ) : (
-                            <input
-                              type="text"
-                              value={comp.props[field.name] || ""}
-                              onChange={(e) =>
-                                handleUpdateComponentProp(
-                                  comp.id,
-                                  field.name,
-                                  e.target.value,
-                                )
-                              }
-                              placeholder={
-                                field.defaultValue ||
-                                `e.g., {{${component.dataSchema[0]?.name || "fieldName"}}}`
-                              }
-                              className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm font-mono"
-                            />
-                          )}
-                        </div>
-                      ))}
+                              <label className="text-xs text-gray-600 w-28">
+                                {field.label}:
+                              </label>
+                              <input
+                                type="text"
+                                value={comp.props[field.name] || ""}
+                                onChange={(e) =>
+                                  handleUpdateComponentProp(
+                                    comp.id,
+                                    field.name,
+                                    e.target.value,
+                                  )
+                                }
+                                placeholder={`e.g., {{${component.dataSchema[0]?.name || field.name}}}`}
+                                className="flex-1 px-2 py-1 border border-purple-200 rounded text-sm font-mono"
+                              />
+                            </div>
+                          )) ?? (
+                            <p className="text-xs text-gray-400 italic">
+                              Composite definition not loaded.
+                            </p>
+                          ))
+                        : primitive?.fields.map((field) => (
+                            <div
+                              key={field.name}
+                              className="flex items-center gap-2"
+                            >
+                              <label className="text-xs text-gray-600 w-28">
+                                {field.label}:
+                              </label>
+                              {field.type === "enum" && field.values ? (
+                                <select
+                                  value={
+                                    comp.props[field.name] ||
+                                    field.defaultValue ||
+                                    ""
+                                  }
+                                  onChange={(e) =>
+                                    handleUpdateComponentProp(
+                                      comp.id,
+                                      field.name,
+                                      e.target.value,
+                                    )
+                                  }
+                                  className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
+                                >
+                                  <option value="">Default</option>
+                                  {field.values.map((v) => (
+                                    <option key={v} value={v}>
+                                      {v}
+                                    </option>
+                                  ))}
+                                </select>
+                              ) : field.type === "boolean" ? (
+                                <input
+                                  type="checkbox"
+                                  checked={
+                                    comp.props[field.name] ||
+                                    field.defaultValue ||
+                                    false
+                                  }
+                                  onChange={(e) =>
+                                    handleUpdateComponentProp(
+                                      comp.id,
+                                      field.name,
+                                      e.target.checked,
+                                    )
+                                  }
+                                  className="rounded"
+                                />
+                              ) : (
+                                <input
+                                  type="text"
+                                  value={comp.props[field.name] || ""}
+                                  onChange={(e) =>
+                                    handleUpdateComponentProp(
+                                      comp.id,
+                                      field.name,
+                                      e.target.value,
+                                    )
+                                  }
+                                  placeholder={
+                                    field.defaultValue ||
+                                    `e.g., {{${
+                                      component.dataSchema[0]?.name ||
+                                      "fieldName"
+                                    }}}`
+                                  }
+                                  className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm font-mono"
+                                />
+                              )}
+                            </div>
+                          ))}
                     </div>
                   </div>
                 );
@@ -744,13 +865,22 @@ export default function CompositeComponentEditor({
 
               {component.components.length === 0 && (
                 <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
-                  <p className="text-gray-500 mb-2">No primitives added yet</p>
-                  <button
-                    onClick={() => setShowPrimitiveSelector(true)}
-                    className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-                  >
-                    Add your first primitive
-                  </button>
+                  <p className="text-gray-500 mb-2">No components added yet</p>
+                  <div className="flex justify-center gap-3">
+                    <button
+                      onClick={() => setShowPrimitiveSelector(true)}
+                      className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                    >
+                      Add a primitive
+                    </button>
+                    <span className="text-gray-300">|</span>
+                    <button
+                      onClick={() => setShowCompositeSelector(true)}
+                      className="text-purple-600 hover:text-purple-700 text-sm font-medium"
+                    >
+                      Embed a composite
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -796,9 +926,15 @@ export default function CompositeComponentEditor({
                 {/* Rendered component */}
                 <div className="p-6">
                   {component.components.map((comp) => {
-                    const primitive = primitives.find(
-                      (p) => p.id === comp.primitive,
-                    );
+                    const isCompInst = comp.kind === "composite";
+                    const primitive = !isCompInst
+                      ? primitives.find(
+                          (p) => p.id === (comp.primitive ?? comp.composite),
+                        )
+                      : null;
+                    const compositeRef = isCompInst
+                      ? composites.find((c) => c.id === comp.composite)
+                      : null;
                     const isSelected = selectedInstanceId === comp.id;
                     return (
                       <div
@@ -806,7 +942,9 @@ export default function CompositeComponentEditor({
                         onClick={() =>
                           setSelectedInstanceId(isSelected ? null : comp.id)
                         }
-                        title={`${primitive?.name} — click to select`}
+                        title={`${
+                          isCompInst ? compositeRef?.name : primitive?.name
+                        } — click to select`}
                         className={`relative cursor-pointer transition-all group ${
                           isSelected
                             ? "outline outline-2 outline-blue-500 outline-offset-2 rounded"
@@ -816,12 +954,30 @@ export default function CompositeComponentEditor({
                         {/* Selection tooltip */}
                         {isSelected && (
                           <span className="absolute -top-5 left-0 text-xs bg-blue-500 text-white px-2 py-0.5 rounded z-10">
-                            {primitive?.icon} {primitive?.name}
+                            {isCompInst
+                              ? (compositeRef?.icon ?? "🧩")
+                              : primitive?.icon}{" "}
+                            {isCompInst ? compositeRef?.name : primitive?.name}
                           </span>
                         )}
                         {/* Hover ring */}
                         {!isSelected && (
                           <span className="absolute inset-0 rounded group-hover:ring-2 group-hover:ring-blue-300 group-hover:ring-offset-1 pointer-events-none" />
+                        )}
+
+                        {/* ── composite instance placeholder ── */}
+                        {isCompInst && (
+                          <div className="my-2 p-4 bg-purple-50 border-2 border-dashed border-purple-300 rounded-lg text-center">
+                            <span className="text-2xl">
+                              {compositeRef?.icon ?? "🧩"}
+                            </span>
+                            <p className="text-sm font-semibold text-purple-800 mt-1">
+                              {compositeRef?.name ?? comp.composite}
+                            </p>
+                            <p className="text-xs text-purple-500">
+                              Embedded composite
+                            </p>
+                          </div>
                         )}
 
                         {/* ── text ── */}
@@ -1104,24 +1260,25 @@ export default function CompositeComponentEditor({
                           </div>
                         )}
 
-                        {/* ── fallback ── */}
-                        {![
-                          "text",
-                          "image",
-                          "button",
-                          "list",
-                          "table",
-                          "divider",
-                          "link",
-                          "spacer",
-                          "section",
-                          "checkbox",
-                          "radiobutton",
-                        ].includes(primitive?.id || "") && (
-                          <div className="my-2 p-3 bg-gray-100 rounded text-sm text-gray-600">
-                            {primitive?.icon} {primitive?.name}
-                          </div>
-                        )}
+                        {/* ── fallback (unknown primitive) ── */}
+                        {!isCompInst &&
+                          ![
+                            "text",
+                            "image",
+                            "button",
+                            "list",
+                            "table",
+                            "divider",
+                            "link",
+                            "spacer",
+                            "section",
+                            "checkbox",
+                            "radiobutton",
+                          ].includes(primitive?.id || "") && (
+                            <div className="my-2 p-3 bg-gray-100 rounded text-sm text-gray-600">
+                              {primitive?.icon} {primitive?.name}
+                            </div>
+                          )}
                       </div>
                     );
                   })}
