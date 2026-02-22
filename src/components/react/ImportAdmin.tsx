@@ -24,8 +24,34 @@ export default function ImportAdmin() {
   const { isLoading, error, isAuthenticated, user, logout, getIdTokenClaims } =
     useAuth0();
 
-  const [mode, setMode] = useState<Mode>("pages");
-  const [editingSlug, setEditingSlug] = useState<string | undefined>(undefined);
+  const [mode, setMode] = useState<Mode>(() => {
+    try {
+      return (sessionStorage.getItem("admin-mode") as Mode) || "pages";
+    } catch {
+      return "pages";
+    }
+  });
+  const [editingSlug, setEditingSlug] = useState<string | undefined>(() => {
+    try {
+      return sessionStorage.getItem("admin-editing-slug") || undefined;
+    } catch {
+      return undefined;
+    }
+  });
+
+  // Persist navigation state so HMR reloads (triggered by file saves) restore the correct view
+  useEffect(() => {
+    try {
+      sessionStorage.setItem("admin-mode", mode);
+    } catch {}
+  }, [mode]);
+  useEffect(() => {
+    try {
+      if (editingSlug)
+        sessionStorage.setItem("admin-editing-slug", editingSlug);
+      else sessionStorage.removeItem("admin-editing-slug");
+    } catch {}
+  }, [editingSlug]);
   const [editingLayoutId, setEditingLayoutId] = useState<string | undefined>(
     undefined,
   );
@@ -443,7 +469,9 @@ export default function ImportAdmin() {
 
           {mode === "composite-editor" && (
             <CompositeComponentEditor
-              componentId={editingCompositeId}
+              {...(editingCompositeId
+                ? { componentId: editingCompositeId }
+                : {})}
               token={githubToken}
               onSave={handleCompositeSaved}
               onCancel={handleCancelCompositeEdit}

@@ -1784,19 +1784,21 @@ function StyleOverridePanel({ overrides, onChange }: StyleOverridePanelProps) {
   }: {
     field: "backgroundColor" | "textColor";
   }) => (
-    <div className="flex flex-wrap gap-1.5">
+    <div className="flex flex-wrap gap-1.5 items-center">
       {THEME_COLOR_KEYS.map((key) => {
-        const hex = colors[key] || "#888";
-        const active = overrides[field] === key;
+        const hex = (colors[key] || "").trim();
+        if (!hex) return null;
+        // Active when the stored value matches this swatch's hex
+        const active = overrides[field] === hex;
         return (
           <button
             key={key}
-            title={key}
-            onClick={() => set(field, active ? "" : key)}
+            title={`${key}: ${hex}`}
+            onClick={() => set(field, active ? "" : hex)}
             className="w-8 h-8 rounded border-2 transition-all"
             style={{
               backgroundColor: hex,
-              borderColor: active ? colors.text : "transparent",
+              borderColor: active ? colors.text : "#00000033",
               outline: active ? `2px solid ${hex}` : "none",
               outlineOffset: "2px",
             }}
@@ -1804,14 +1806,22 @@ function StyleOverridePanel({ overrides, onChange }: StyleOverridePanelProps) {
         );
       })}
       {overrides[field] && (
-        <button
-          onClick={() => set(field, "")}
-          className="text-xs px-1.5 rounded self-center hover:opacity-80"
-          style={{ color: colors.textSecondary }}
-          title="Clear"
-        >
-          ✕
-        </button>
+        <>
+          <span
+            className="text-xs font-mono"
+            style={{ color: colors.textSecondary }}
+          >
+            {overrides[field]}
+          </span>
+          <button
+            onClick={() => set(field, "")}
+            className="text-xs px-1.5 rounded hover:opacity-80"
+            style={{ color: colors.textSecondary }}
+            title="Clear"
+          >
+            ✕
+          </button>
+        </>
       )}
     </div>
   );
@@ -1884,27 +1894,25 @@ function StyleOverridePanel({ overrides, onChange }: StyleOverridePanelProps) {
             <ColorSwatches field="textColor" />
           </Row>
           <Row label="Font family">
-            <div className="flex gap-1">
-              {THEME_FONT_KEYS.map((k) => (
-                <button
-                  key={k}
-                  onClick={() =>
-                    set("fontFamily", overrides.fontFamily === k ? "" : k)
-                  }
-                  className="px-3 py-1 text-xs rounded border"
-                  style={{
-                    borderColor:
-                      overrides.fontFamily === k
-                        ? colors.primary
-                        : colors.secondary,
-                    color:
-                      overrides.fontFamily === k ? colors.primary : colors.text,
-                    fontFamily: fonts[k],
-                  }}
-                >
-                  {k}
-                </button>
-              ))}
+            <div className="flex gap-1 flex-wrap">
+              {THEME_FONT_KEYS.map((k) => {
+                const fontValue = fonts[k];
+                const active = overrides.fontFamily === fontValue;
+                return (
+                  <button
+                    key={k}
+                    onClick={() => set("fontFamily", active ? "" : fontValue)}
+                    className="px-3 py-1 text-xs rounded border"
+                    style={{
+                      borderColor: active ? colors.primary : colors.secondary,
+                      color: active ? colors.primary : colors.text,
+                      fontFamily: fontValue,
+                    }}
+                  >
+                    {k}
+                  </button>
+                );
+              })}
               {overrides.fontFamily && (
                 <button
                   onClick={() => set("fontFamily", "")}
@@ -1921,65 +1929,62 @@ function StyleOverridePanel({ overrides, onChange }: StyleOverridePanelProps) {
             <>
               <Row label="Padding top">
                 <div className="flex flex-wrap gap-1">
-                  {spacingKeys.map((k) => (
-                    <button
-                      key={k}
-                      onClick={() =>
-                        set("paddingTop", overrides.paddingTop === k ? "" : k)
-                      }
-                      className="px-2 py-1 text-xs rounded border"
-                      style={{
-                        borderColor:
-                          overrides.paddingTop === k
+                  {spacingKeys.map((k) => {
+                    const cssVal = spacing[k];
+                    const active = overrides.paddingTop === cssVal;
+                    return (
+                      <button
+                        key={k}
+                        title={`${k}: ${cssVal}`}
+                        onClick={() => set("paddingTop", active ? "" : cssVal)}
+                        className="px-2 py-1 text-xs rounded border"
+                        style={{
+                          borderColor: active
                             ? colors.primary
                             : colors.secondary,
-                        color:
-                          overrides.paddingTop === k
-                            ? colors.primary
-                            : colors.text,
-                      }}
-                    >
-                      {k}
-                    </button>
-                  ))}
+                          color: active ? colors.primary : colors.text,
+                        }}
+                      >
+                        {k}
+                      </button>
+                    );
+                  })}
                 </div>
               </Row>
               <Row label="Padding bottom">
                 <div className="flex flex-wrap gap-1">
-                  {spacingKeys.map((k) => (
-                    <button
-                      key={k}
-                      onClick={() =>
-                        set(
-                          "paddingBottom",
-                          overrides.paddingBottom === k ? "" : k,
-                        )
-                      }
-                      className="px-2 py-1 text-xs rounded border"
-                      style={{
-                        borderColor:
-                          overrides.paddingBottom === k
+                  {spacingKeys.map((k) => {
+                    const cssVal = spacing[k];
+                    const active = overrides.paddingBottom === cssVal;
+                    return (
+                      <button
+                        key={k}
+                        title={`${k}: ${cssVal}`}
+                        onClick={() =>
+                          set("paddingBottom", active ? "" : cssVal)
+                        }
+                        className="px-2 py-1 text-xs rounded border"
+                        style={{
+                          borderColor: active
                             ? colors.primary
                             : colors.secondary,
-                        color:
-                          overrides.paddingBottom === k
-                            ? colors.primary
-                            : colors.text,
-                      }}
-                    >
-                      {k}
-                    </button>
-                  ))}
+                          color: active ? colors.primary : colors.text,
+                        }}
+                      >
+                        {k}
+                      </button>
+                    );
+                  })}
                 </div>
               </Row>
             </>
           ) : (
             <>
               <Row label="Padding top">
-                {textInput("paddingTop", "spacing token key")}
+                {textInput("paddingTop", "e.g. 2rem")}
               </Row>
               <Row label="Padding bottom">
-                {textInput("paddingBottom", "spacing token key")}
+                {textInput("paddingBottom", "e.g. 4rem")}
               </Row>
             </>
           )}

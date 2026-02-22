@@ -106,20 +106,20 @@ export type ThemeFontKey = 'heading' | 'body';
 
 /**
  * Per-section style overrides.
- * Values are theme token KEYS (e.g. "primary", "md"), not raw CSS values.
- * The renderer resolves them to CSS custom properties (var(--color-primary) etc.)
- * so they automatically track theme changes.
+ * All values are concrete CSS values (hex colors, rem values, font-family strings).
+ * The theme picker UI provides the options, but the stored value is always resolved
+ * so each component is fully isolated — changing the theme won't alter existing overrides.
  */
 export interface SectionStyleOverrides {
-  backgroundColor?: ThemeColorKey;   // e.g. "primary" → var(--color-primary)
-  backgroundImage?: string;          // URL — free-form
+  backgroundColor?: string;   // hex e.g. "#2563eb" — picked from theme swatches
+  backgroundImage?: string;   // URL — free-form
   backgroundSize?: 'cover' | 'contain' | 'auto';
   backgroundPosition?: string;
-  textColor?: ThemeColorKey;         // e.g. "text" → var(--color-text)
-  fontFamily?: ThemeFontKey;         // e.g. "heading" → var(--font-heading)
-  paddingTop?: string;               // spacing token key → var(--spacing-key)
-  paddingBottom?: string;            // spacing token key → var(--spacing-key)
-  customClasses?: string;            // extra Tailwind / CSS classes
+  textColor?: string;         // hex e.g. "#1f2937" — picked from theme swatches
+  fontFamily?: string;        // CSS font-family e.g. "Outfit, sans-serif"
+  paddingTop?: string;        // CSS value e.g. "2rem" — picked from theme spacing tokens
+  paddingBottom?: string;     // CSS value e.g. "4rem"
+  customClasses?: string;     // extra Tailwind / CSS classes
 }
 
 // =============================================================================
