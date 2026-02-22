@@ -1,0 +1,60 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PageLayout from "../components/astro/PageLayout.astro";
+import SectionRenderer from "../components/astro/SectionRenderer.astro";
+import type { Layout } from "../types/cms";
+
+// Generate static paths for all published pages, including nested slugs like "honors/hall-of-fame"
+export async function getStaticPaths() {
+  const pages = await getCollection("pages");
+
+  return pages
+    .filter((page) => {
+      return import.meta.env.DEV || page.data.status === "published";
+    })
+    .map((page) => ({
+      // Split slug so Astro's rest param [...slug] matches both "honors" and "honors/hall-of-fame"
+      params: { slug: page.data.slug },
+      props: { page: page.data },
+    }));
+}
+
+const { page } = Astro.props;
+
+if (!page) {
+  return Astro.redirect("/404");
+}
+
+const { title, metaDescription, sections, layoutId, useLayout = true } = page;
+
+let selectedLayout: Layout | null = null;
+if (useLayout) {
+  const { getEntry } = await import("astro:content");
+  const layoutEntry = await getEntry("layouts", layoutId ?? "default");
+  if (layoutEntry?.data) selectedLayout = layoutEntry.data as Layout;
+}
+
+const sortedSections = [...sections].sort((a, b) => a.order - b.order);
+---
+
+<BaseLayout
+  title={title}
+  description={metaDescription || "Greater Fox Cities Bowling Association"}
+>
+  {
+    selectedLayout ? (
+      <PageLayout layout={selectedLayout}>
+        {sortedSections.map((section) => (
+          <SectionRenderer section={section as any} />
+        ))}
+      </PageLayout>
+    ) : (
+      <>
+        {sortedSections.map((section) => (
+          <SectionRenderer section={section as any} />
+        ))}
+      </>
+    )
+  }
+</BaseLayout>
