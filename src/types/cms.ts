@@ -94,11 +94,32 @@ export interface NavigationConfig {
 // Section Type Definitions
 // =============================================================================
 
+// =============================================================================
+// Section Style Overrides
+// =============================================================================
+
+/** Per-section style overrides that can be set in the page editor. */
+export interface SectionStyleOverrides {
+  backgroundColor?: string;  // CSS color, e.g. "#1e293b"
+  backgroundImage?: string;  // URL
+  backgroundSize?: 'cover' | 'contain' | 'auto';
+  backgroundPosition?: string; // e.g. "center", "top"
+  textColor?: string;         // CSS color for text cascade
+  paddingTop?: string;        // CSS value e.g. "2rem"
+  paddingBottom?: string;
+  customClasses?: string;     // Extra Tailwind / CSS class names
+}
+
+// =============================================================================
+// Section Base
+// =============================================================================
+
 export interface BaseSection {
   id: string;
   type: SectionType;
   order: number;
   children?: Section[]; // Nested child blocks
+  styleOverrides?: SectionStyleOverrides;
 }
 
 export interface HeroSection extends BaseSection {

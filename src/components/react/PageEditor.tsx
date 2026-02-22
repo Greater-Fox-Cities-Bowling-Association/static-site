@@ -6,6 +6,7 @@ import type {
   Layout,
   ComponentSection,
   CompositeComponent,
+  SectionStyleOverrides,
 } from "../../types/cms";
 import {
   fetchPageContent,
@@ -612,16 +613,37 @@ export default function PageEditor({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSaveDraft = () => {
+  const handleSaveDraft = async () => {
     if (!page.slug) {
       alert("Please enter a slug before saving draft");
       return;
     }
-    const success = saveDraftToStore(page);
-    if (success) {
-      setHasUnsavedChanges(false);
-    } else {
-      alert("Failed to save draft");
+    // Always persist to localStorage for recovery
+    saveDraftToStore(page);
+    // In dev mode also write to disk so the preview iframe (and dev server) picks it up
+    setSaving(true);
+    try {
+      const result = await savePageFile(
+        page.slug,
+        page,
+        token,
+        undefined,
+        undefined,
+        useGitHubAPI,
+      );
+      if (result.success) {
+        setHasUnsavedChanges(false);
+        // Bump the preview iframe if it's open
+        setPreviewKey((k) => k + 1);
+      } else {
+        alert(`Failed to save draft: ${result.error || "Unknown error"}`);
+      }
+    } catch (err) {
+      alert(
+        `Error saving draft: ${err instanceof Error ? err.message : "Unknown error"}`,
+      );
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -642,6 +664,7 @@ export default function PageEditor({
         if (page.slug) deleteDraft(page.slug);
         setPage(publishedPage);
         setHasUnsavedChanges(false);
+        setPreviewKey((k) => k + 1);
         onSave();
       } else {
         alert(`Failed to publish: ${result.error || "Unknown error"}`);
@@ -1093,8 +1116,8 @@ export default function PageEditor({
             <button
               key={mode}
               onClick={() => {
-                setCanvasMode(mode);
                 if (mode === "preview") setPreviewKey((k) => k + 1);
+                setCanvasMode(mode);
               }}
               className="px-3 py-1 text-xs font-medium capitalize transition-colors"
               style={{
@@ -1110,11 +1133,11 @@ export default function PageEditor({
 
         <button
           onClick={handleSaveDraft}
-          disabled={!page.slug}
+          disabled={!page.slug || saving}
           className="px-3 py-1.5 text-sm border rounded hover:opacity-75 shrink-0 disabled:opacity-40"
           style={{ borderColor: colors.secondary, color: colors.text }}
         >
-          Save Draft
+          {saving ? "Saving..." : "Save Draft"}
         </button>
 
         <button
@@ -1456,9 +1479,17 @@ export default function PageEditor({
                 </span>
                 {hasUnsavedChanges && (
                   <span className="text-yellow-600 shrink-0">
-                    Unsaved changes — save draft first to see them here
+                    Unsaved changes
                   </span>
                 )}
+                <button
+                  onClick={handleSaveDraft}
+                  disabled={saving || !page.slug}
+                  className="shrink-0 px-2 py-1 rounded border hover:opacity-75 disabled:opacity-40"
+                  style={{ borderColor: colors.primary, color: colors.primary }}
+                >
+                  {saving ? "Saving..." : "Save Draft"}
+                </button>
                 <button
                   onClick={() => setPreviewKey((k) => k + 1)}
                   className="shrink-0 px-2 py-1 rounded border hover:opacity-75"
@@ -1467,7 +1498,7 @@ export default function PageEditor({
                     color: colors.textSecondary,
                   }}
                 >
-                  Refresh
+                  Reload
                 </button>
               </div>
               {/* Scaled iframe */}
@@ -1668,9 +1699,180 @@ export default function PageEditor({
                 />
               )}
             </SectionEditorContext.Provider>
+
+            {/* ── Style Overrides panel ── */}
+            <StyleOverridePanel
+              overrides={(activeSection as any).styleOverrides ?? {}}
+              onChange={(ov: SectionStyleOverrides) =>
+                updateSectionInPage(activeSection.id, {
+                  ...activeSection,
+                  styleOverrides: ov,
+                } as Section)
+              }
+              colors={colors}
+            />
           </aside>
         )}
       </div>
+    </div>
+  );
+}
+
+// ── Style Override Panel ──────────────────────────────────────────────────────
+
+interface StyleOverridePanelProps {
+  overrides: SectionStyleOverrides;
+  onChange: (ov: SectionStyleOverrides) => void;
+  colors: ReturnType<typeof useTheme>["colors"];
+}
+
+function StyleOverridePanel({
+  overrides,
+  onChange,
+  colors,
+}: StyleOverridePanelProps) {
+  const [open, setOpen] = useState(false);
+  const hasAny = Object.values(overrides).some(Boolean);
+
+  const set = (key: keyof SectionStyleOverrides, value: string) =>
+    onChange({ ...overrides, [key]: value || undefined });
+
+  const clear = () => onChange({});
+
+  const Row = ({
+    label,
+    children,
+  }: {
+    label: string;
+    children: React.ReactNode;
+  }) => (
+    <div className="flex items-center gap-2 py-1.5">
+      <span
+        className="w-28 shrink-0 text-xs"
+        style={{ color: colors.textSecondary }}
+      >
+        {label}
+      </span>
+      <div className="flex-1 min-w-0">{children}</div>
+    </div>
+  );
+
+  const textInput = (key: keyof SectionStyleOverrides, placeholder: string) => (
+    <input
+      type="text"
+      value={(overrides[key] as string) ?? ""}
+      onChange={(e) => set(key, e.target.value)}
+      placeholder={placeholder}
+      className="w-full px-2 py-1 text-xs rounded border"
+      style={{
+        borderColor: colors.secondary,
+        backgroundColor: colors.background,
+        color: colors.text,
+      }}
+    />
+  );
+
+  const colorInput = (key: keyof SectionStyleOverrides) => (
+    <div className="flex items-center gap-1.5">
+      <input
+        type="color"
+        value={(overrides[key] as string) || "#ffffff"}
+        onChange={(e) => set(key, e.target.value)}
+        className="w-8 h-7 rounded border cursor-pointer p-0.5"
+        style={{ borderColor: colors.secondary }}
+      />
+      <input
+        type="text"
+        value={(overrides[key] as string) ?? ""}
+        onChange={(e) => set(key, e.target.value)}
+        placeholder="e.g. #1e293b"
+        className="flex-1 px-2 py-1 text-xs rounded border font-mono"
+        style={{
+          borderColor: colors.secondary,
+          backgroundColor: colors.background,
+          color: colors.text,
+        }}
+      />
+      {overrides[key] && (
+        <button
+          onClick={() => set(key, "")}
+          className="text-xs text-gray-400 hover:text-red-500 shrink-0"
+          title="Clear"
+        >
+          x
+        </button>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="border-t" style={{ borderColor: colors.secondary }}>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center justify-between px-4 py-2.5 text-xs font-semibold hover:opacity-80"
+        style={{ color: colors.text }}
+      >
+        <div className="flex items-center gap-2">
+          <span>[S] Styles</span>
+          {hasAny && (
+            <span
+              className="px-1.5 py-0.5 rounded text-xs"
+              style={{
+                backgroundColor: colors.primary + "22",
+                color: colors.primary,
+              }}
+            >
+              overrides active
+            </span>
+          )}
+        </div>
+        <span style={{ color: colors.textSecondary }}>{open ? "▲" : "▼"}</span>
+      </button>
+
+      {open && (
+        <div className="px-4 pb-4 space-y-0.5">
+          <Row label="Background">{colorInput("backgroundColor")}</Row>
+          <Row label="Background img">
+            {textInput("backgroundImage", "https://...")}
+          </Row>
+          <Row label="Bg size">
+            <select
+              value={overrides.backgroundSize ?? "cover"}
+              onChange={(e) => set("backgroundSize", e.target.value)}
+              className="w-full px-2 py-1 text-xs rounded border"
+              style={{
+                borderColor: colors.secondary,
+                backgroundColor: colors.background,
+                color: colors.text,
+              }}
+            >
+              <option value="cover">cover</option>
+              <option value="contain">contain</option>
+              <option value="auto">auto</option>
+            </select>
+          </Row>
+          <Row label="Bg position">
+            {textInput("backgroundPosition", "center")}
+          </Row>
+          <Row label="Text color">{colorInput("textColor")}</Row>
+          <Row label="Padding top">{textInput("paddingTop", "e.g. 4rem")}</Row>
+          <Row label="Padding bottom">
+            {textInput("paddingBottom", "e.g. 4rem")}
+          </Row>
+          <Row label="Extra classes">
+            {textInput("customClasses", "e.g. rounded-xl shadow-lg")}
+          </Row>
+          {hasAny && (
+            <button
+              onClick={clear}
+              className="mt-2 w-full py-1 text-xs rounded border hover:opacity-80"
+              style={{ borderColor: "#ef4444", color: "#ef4444" }}
+            >
+              Clear all style overrides
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

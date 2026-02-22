@@ -177,6 +177,18 @@ const cardSchema = z.object({
 const baseSectionSchema = z.object({
   id: z.string(),
   order: z.number(),
+  // Children allow any depth of nesting; validated loosely to avoid circular-type issues
+  children: z.array(z.any()).optional(),
+  styleOverrides: z.object({
+    backgroundColor: z.string().optional(),
+    backgroundImage: z.string().optional(),
+    backgroundSize: z.enum(['cover', 'contain', 'auto']).optional(),
+    backgroundPosition: z.string().optional(),
+    textColor: z.string().optional(),
+    paddingTop: z.string().optional(),
+    paddingBottom: z.string().optional(),
+    customClasses: z.string().optional(),
+  }).optional(),
 });
 
 const heroSectionSchema = baseSectionSchema.extend({
@@ -220,12 +232,21 @@ const contentListSectionSchema = baseSectionSchema.extend({
   showFilters: z.boolean().optional(),
 });
 
+// Composite component section — rendered by looking up the composite definition
+const componentSectionSchema = baseSectionSchema.extend({
+  type: z.literal('component'),
+  componentId: z.string(),
+  defaultColumns: z.number().optional(),
+  props: z.record(z.any()).optional(),
+});
+
 const sectionSchema = z.discriminatedUnion('type', [
   heroSectionSchema,
   textSectionSchema,
   cardGridSectionSchema,
   ctaSectionSchema,
   contentListSectionSchema,
+  componentSectionSchema,
 ]);
 
 const pagesCollection = defineCollection({

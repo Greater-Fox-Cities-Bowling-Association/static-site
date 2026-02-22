@@ -1,0 +1,104 @@
+---
+/**
+ * Recursive section renderer. Handles all section types including nested children.
+ * Uses Astro.self for recursion so any depth of nesting works.
+ * Applies per-section styleOverrides as a scoped style block + wrapper div.
+ */
+import type { Section, SectionStyleOverrides } from "../../types/cms";
+import HeroSection from "./sections/HeroSection.astro";
+import TextSection from "./sections/TextSection.astro";
+import CardGridSection from "./sections/CardGridSection.astro";
+import CtaSection from "./sections/CtaSection.astro";
+import ContentListSection from "./sections/ContentListSection.astro";
+
+interface Props {
+  section: Section;
+}
+
+const { section } = Astro.props;
+const children: Section[] = (section as any).children ?? [];
+const ov: SectionStyleOverrides | undefined = (section as any).styleOverrides;
+const hasOverrides = ov && Object.values(ov).some(Boolean);
+
+// Build inline style string for wrapper
+const ws: string[] = [];
+if (ov?.backgroundColor) ws.push(`background-color:${ov.backgroundColor}`);
+if (ov?.backgroundImage) {
+  ws.push(`background-image:url('${ov.backgroundImage}')`);
+  ws.push(`background-size:${ov.backgroundSize ?? "cover"}`);
+  ws.push(`background-position:${ov.backgroundPosition ?? "center"}`);
+}
+if (ov?.textColor) ws.push(`color:${ov.textColor}`);
+if (ov?.paddingTop) ws.push(`padding-top:${ov.paddingTop}`);
+if (ov?.paddingBottom) ws.push(`padding-bottom:${ov.paddingBottom}`);
+const wrapperStyle = ws.join(";");
+
+// Scoped CSS: when a bg override is set, remove the inner <section>'s own background
+const wrapperId = `sr-${section.id}`;
+const scopedCss = hasOverrides
+  ? [
+      ov?.backgroundColor || ov?.backgroundImage
+        ? `#${wrapperId}>section{background:transparent!important;background-image:none!important;}`
+        : "",
+    ]
+      .filter(Boolean)
+      .join("\n")
+  : "";
+---
+
+{
+  hasOverrides ? (
+    <>
+      {scopedCss && <style set:html={scopedCss} />}
+      <div id={wrapperId} class:list={[ov?.customClasses]} style={wrapperStyle}>
+        {section.type === "hero" && <HeroSection section={section as any} />}
+        {section.type === "text" && <TextSection section={section as any} />}
+        {section.type === "cardGrid" && (
+          <CardGridSection section={section as any} />
+        )}
+        {section.type === "cta" && <CtaSection section={section as any} />}
+        {section.type === "contentList" && (
+          <ContentListSection section={section as any} />
+        )}
+        {section.type === "component" && children.length === 0 && (
+          <div
+            data-component-id={(section as any).componentId}
+            style="display:none"
+          />
+        )}
+        {children.length > 0 && (
+          <div class="section-children" data-parent-id={section.id}>
+            {children.map((child) => (
+              <Astro.self section={child} />
+            ))}
+          </div>
+        )}
+      </div>
+    </>
+  ) : (
+    <>
+      {section.type === "hero" && <HeroSection section={section as any} />}
+      {section.type === "text" && <TextSection section={section as any} />}
+      {section.type === "cardGrid" && (
+        <CardGridSection section={section as any} />
+      )}
+      {section.type === "cta" && <CtaSection section={section as any} />}
+      {section.type === "contentList" && (
+        <ContentListSection section={section as any} />
+      )}
+      {section.type === "component" && children.length === 0 && (
+        <div
+          data-component-id={(section as any).componentId}
+          style="display:none"
+        />
+      )}
+      {children.length > 0 && (
+        <div class="section-children" data-parent-id={section.id}>
+          {children.map((child) => (
+            <Astro.self section={child} />
+          ))}
+        </div>
+      )}
+    </>
+  )
+}

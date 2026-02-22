@@ -2,11 +2,7 @@
 import { getCollection, getEntry } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PageLayout from "../components/astro/PageLayout.astro";
-import HeroSection from "../components/astro/sections/HeroSection.astro";
-import TextSection from "../components/astro/sections/TextSection.astro";
-import CardGridSection from "../components/astro/sections/CardGridSection.astro";
-import CtaSection from "../components/astro/sections/CtaSection.astro";
-import ContentListSection from "../components/astro/sections/ContentListSection.astro";
+import SectionRenderer from "../components/astro/SectionRenderer.astro";
 import type { Layout } from "../types/cms";
 
 // Generate static paths for all published pages
@@ -71,41 +67,15 @@ const sortedSections = [...sections].sort((a, b) => a.order - b.order);
   {
     selectedLayout ? (
       <PageLayout layout={selectedLayout}>
-        {sortedSections.map((section) => {
-          switch (section.type) {
-            case "hero":
-              return <HeroSection section={section} />;
-            case "text":
-              return <TextSection section={section} />;
-            case "cardGrid":
-              return <CardGridSection section={section} />;
-            case "cta":
-              return <CtaSection section={section} />;
-            case "contentList":
-              return <ContentListSection section={section as any} />;
-            default:
-              return null;
-          }
-        })}
+        {sortedSections.map((section) => (
+          <SectionRenderer section={section as any} />
+        ))}
       </PageLayout>
     ) : (
       <>
-        {sortedSections.map((section) => {
-          switch (section.type) {
-            case "hero":
-              return <HeroSection section={section} />;
-            case "text":
-              return <TextSection section={section} />;
-            case "cardGrid":
-              return <CardGridSection section={section} />;
-            case "cta":
-              return <CtaSection section={section} />;
-            case "contentList":
-              return <ContentListSection section={section as any} />;
-            default:
-              return null;
-          }
-        })}
+        {sortedSections.map((section) => (
+          <SectionRenderer section={section as any} />
+        ))}
       </>
     )
   }
