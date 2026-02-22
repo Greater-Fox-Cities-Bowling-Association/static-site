@@ -164,6 +164,28 @@ npx astro check   # TypeScript / template type-check
 
 ---
 
+## Build & Deploy Pipeline
+
+```
+Push to main
+    └── GitHub Actions: deploy.yml
+            ├── Checkout code
+            ├── Setup Node.js 20
+            ├── npm ci
+            ├── npm run build  (astro check && astro build → outputs to dist/)
+            └── npx @staticapp/cli deploy --dir=dist --token=<STATIC_APP_API_KEY>
+                    └── Static.app serves the dist/ output as the live site
+```
+
+- Workflow file: `.github/workflows/deploy.yml`
+- Trigger: any push to `main` (no manual step required)
+- Build output directory: `dist/`
+- The `STATIC_APP_API_KEY` secret is set in GitHub repo settings → Secrets; it is never in the codebase
+- `astro check` runs as part of `npm run build` — TypeScript errors will fail the build and abort the deploy
+- There is no staging environment; `main` is always the live site
+
+---
+
 ## Known Conventions
 
 - TypeScript strict mode is on (`tsconfig.json`)
