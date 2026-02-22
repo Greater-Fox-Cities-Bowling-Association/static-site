@@ -25,10 +25,11 @@ export default function DataPreview({
   } | null>(null);
 
   const jsonContent = JSON.stringify(data, null, 2);
-  const generatedFilename =
-    collectionType !== "centers" && collectionType !== "tournaments"
-      ? generateFilename(collectionType, data, filename)
-      : "";
+  // For array payloads each item gets its own file (resolved per-item in handlePublish);
+  // for single-object payloads derive the filename generically from the data fields.
+  const generatedFilename = !Array.isArray(data)
+    ? generateFilename(collectionType, data, filename)
+    : "";
 
   const handlePublish = async () => {
     setPublishing(true);
@@ -47,11 +48,11 @@ export default function DataPreview({
       }
 
       if (Array.isArray(data)) {
-        // Multiple items (centers, tournaments) - create multiple files
+        // Array payload — create one file per item
         let successCount = 0;
         for (const item of data) {
           const itemFilename = generateFilename(collectionType, item, filename);
-          const path = `src/content/${collectionType}/${itemFilename}`;
+          const path = `src/content/collections/${collectionType}/${itemFilename}`;
           const content = JSON.stringify(item, null, 2);
 
           const response = await commitToGitHub({
@@ -71,8 +72,8 @@ export default function DataPreview({
           message: `Successfully published ${successCount} of ${data.length} items!`,
         });
       } else {
-        // Single file (honors, complex data)
-        const path = `src/content/${collectionType}/${generatedFilename}`;
+        // Single-object payload — create one file
+        const path = `src/content/collections/${collectionType}/${generatedFilename}`;
         const response = await commitToGitHub({
           token,
           owner,
@@ -108,7 +109,6 @@ export default function DataPreview({
 
   const getItemCount = () => {
     if (Array.isArray(data)) return data.length;
-    if (data.recipients) return data.recipients.length;
     return 1;
   };
 

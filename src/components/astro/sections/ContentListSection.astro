@@ -17,14 +17,13 @@ const {
 } = section;
 
 // ── Load all items from the collection folder via glob ────────────────────────
-// Items are NOT registered as Astro collections — they live in src/content/{name}/
-// and are read generically so any user-defined collection works without code changes.
+// Items live in src/content/collections/{name}/ and are read generically.
 const allFiles = import.meta.glob<{ default: Record<string, any> }>(
-  "/src/content/**/*.json",
+  "/src/content/collections/**/*.json",
   { eager: true },
 );
 
-const prefix = `/src/content/${collection}/`;
+const prefix = `/src/content/collections/${collection}/`;
 let allItems = Object.entries(allFiles)
   .filter(([path]) => path.startsWith(prefix) && path.endsWith(".json"))
   .map(([path, mod]) => ({

@@ -131,9 +131,12 @@ export default function CollectionList({
               file.download_url &&
               file.download_url.startsWith("/src/content")
             ) {
-              const modules = import.meta.glob("/src/content/**/*.json", {
-                eager: false,
-              });
+              const modules = import.meta.glob(
+                "/src/content/collections/**/*.json",
+                {
+                  eager: false,
+                },
+              );
               const loader = modules[file.download_url];
               if (loader) {
                 const mod = await (loader as () => Promise<unknown>)();

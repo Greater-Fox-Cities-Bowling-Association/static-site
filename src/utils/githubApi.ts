@@ -1738,8 +1738,8 @@ export async function getCollections(
       for (const [name, _collection] of Object.entries(collections.collections)) {
         try {
           // Try to get items from each collection
-          const items = await import.meta.glob('../content/**/*.json');
-          const collectionPath = `../content/${name}/`;
+          const items = await import.meta.glob('../content/collections/**/*.json');
+          const collectionPath = `../content/collections/${name}/`;
           const collectionFiles = Object.keys(items).filter(path => path.includes(collectionPath));
           
           collectionInfo.push({
@@ -1980,10 +1980,10 @@ export async function saveCollectionDef(
 
   if (import.meta.env.DEV && !forceGitHubAPI) {
     try {
-      const response = await fetch('/api/save-file', {
+      const response = await fetch('/api/save-page', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ path: filePath, content: JSON.stringify(def, null, 2) }),
+        body: JSON.stringify({ path: filePath, content: def }),
       });
       if (!response.ok) {
         const text = await response.text();
@@ -2019,8 +2019,8 @@ export async function deleteCollectionDef(
 
   if (import.meta.env.DEV && !forceGitHubAPI) {
     try {
-      const response = await fetch('/api/delete-file', {
-        method: 'DELETE',
+      const response = await fetch('/api/delete-page', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ path: filePath }),
       });
@@ -2072,11 +2072,11 @@ export async function fetchCollectionDirectory(
   repo: string = DEFAULT_REPO,
   forceGitHubAPI: boolean = false
 ): Promise<{ success: boolean; files?: GitHubFileResponse[]; error?: string }> {
-  const collectionPath = `src/content/${collectionName}`;
+  const collectionPath = `src/content/collections/${collectionName}`;
   try {
     if (import.meta.env.DEV && !forceGitHubAPI) {
-      const modules = import.meta.glob('/src/content/**/*.json', { eager: false });
-      const prefix = `/src/content/${collectionName}/`;
+      const modules = import.meta.glob('/src/content/collections/**/*.json', { eager: false });
+      const prefix = `/src/content/collections/${collectionName}/`;
       const files: GitHubFileResponse[] = Object.keys(modules)
         .filter(p => p.startsWith(prefix) && p.endsWith('.json'))
         .map(p => {
@@ -2129,14 +2129,14 @@ export async function fetchCollectionItem(
 ): Promise<any> {
   try {
     if (import.meta.env.DEV && !forceGitHubAPI) {
-      const modules = import.meta.glob('/src/content/**/*.json', { eager: false });
-      const key = `/src/content/${collectionName}/${filename}`;
+      const modules = import.meta.glob('/src/content/collections/**/*.json', { eager: false });
+      const key = `/src/content/collections/${collectionName}/${filename}`;
       const loader = modules[key];
       if (!loader) throw new Error(`File not found: ${key}`);
       const mod = await (loader as () => Promise<any>)();
       return mod.default ?? mod;
     }
-    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/src/content/${collectionName}/${filename}?ref=main`;
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/src/content/collections/${collectionName}/${filename}?ref=main`;
     const response = await fetch(apiUrl, {
       headers: {
         Authorization: `token ${token}`,
@@ -2164,15 +2164,15 @@ export async function saveCollectionItem(
   repo: string = DEFAULT_REPO,
   forceGitHubAPI: boolean = false
 ): Promise<{ success: boolean; error?: string }> {
-  const filePath = `src/content/${collectionName}/${filename}`;
+  const filePath = `src/content/collections/${collectionName}/${filename}`;
 
   if (import.meta.env.DEV && !forceGitHubAPI) {
     // Write via local API endpoint
     try {
-      const response = await fetch('/api/save-file', {
+      const response = await fetch('/api/save-page', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ path: filePath, content: JSON.stringify(data, null, 2) }),
+        body: JSON.stringify({ path: filePath, content: data }),
       });
       if (!response.ok) {
         const text = await response.text();
@@ -2208,12 +2208,12 @@ export async function deleteCollectionItem(
   repo: string = DEFAULT_REPO,
   forceGitHubAPI: boolean = false
 ): Promise<{ success: boolean; error?: string }> {
-  const filePath = `src/content/${collectionName}/${filename}`;
+  const filePath = `src/content/collections/${collectionName}/${filename}`;
 
   if (import.meta.env.DEV && !forceGitHubAPI) {
     try {
-      const response = await fetch('/api/delete-file', {
-        method: 'DELETE',
+      const response = await fetch('/api/delete-page', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ path: filePath }),
       });
