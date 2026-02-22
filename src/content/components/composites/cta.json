@@ -1,0 +1,23 @@
+{
+  "id": "cta",
+  "name": "Call to Action",
+  "description": "Prominent call-to-action section with heading and button",
+  "type": "composite",
+  "icon": "📣",
+  "minColumns": 6,
+  "defaultColumns": 12,
+  "components": [],
+  "dataSchema": [
+    { "name": "heading", "label": "Heading", "type": "string", "required": true },
+    { "name": "buttonText", "label": "Button Text", "type": "string", "required": true },
+    { "name": "buttonLink", "label": "Button Link URL", "type": "string", "required": true },
+    {
+      "name": "style",
+      "label": "Style",
+      "type": "enum",
+      "required": false,
+      "defaultValue": "primary",
+      "values": ["primary", "secondary"]
+    }
+  ]
+}

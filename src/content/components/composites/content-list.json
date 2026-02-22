@@ -1,0 +1,44 @@
+{
+  "id": "content-list",
+  "name": "Content List",
+  "description": "List of items from a collection with configurable display",
+  "type": "composite",
+  "icon": "📋",
+  "minColumns": 4,
+  "defaultColumns": 12,
+  "components": [],
+  "dataSchema": [
+    { "name": "heading", "label": "Heading", "type": "string", "required": false },
+    {
+      "name": "collection",
+      "label": "Collection",
+      "type": "string",
+      "required": true,
+      "description": "e.g. centers, news, tournaments, honors"
+    },
+    {
+      "name": "displayMode",
+      "label": "Display Mode",
+      "type": "enum",
+      "required": true,
+      "defaultValue": "cards",
+      "values": ["cards", "table", "list"]
+    },
+    {
+      "name": "columns",
+      "label": "Card Columns",
+      "type": "enum",
+      "required": false,
+      "defaultValue": "3",
+      "values": ["2", "3", "4"]
+    },
+    {
+      "name": "limit",
+      "label": "Max Items",
+      "type": "number",
+      "required": false,
+      "description": "Leave blank to show all"
+    },
+    { "name": "showFilters", "label": "Show Filters", "type": "boolean", "required": false }
+  ]
+}

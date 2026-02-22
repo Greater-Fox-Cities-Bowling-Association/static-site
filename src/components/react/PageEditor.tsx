@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, type ReactNode } from "react";
 import type {
   PageContent,
   Section,
-  SectionType,
   Layout,
   ComponentSection,
   CompositeComponent,
@@ -43,49 +42,9 @@ interface PageEditorProps {
   useGitHubAPI?: boolean;
 }
 
-// Metadata for the legacy section palette tiles (ASCII icons only)
-const SECTION_META = {
-  hero: {
-    label: "Hero",
-    icon: "[H]",
-    description: "Large banner with title and CTA",
-    color: "#6366f1",
-  },
-  text: {
-    label: "Text Block",
-    icon: "[T]",
-    description: "Paragraph content with heading",
-    color: "#0ea5e9",
-  },
-  cardGrid: {
-    label: "Card Grid",
-    icon: "[G]",
-    description: "Multiple cards in a grid",
-    color: "#f59e0b",
-  },
-  cta: {
-    label: "Call to Action",
-    icon: "[!]",
-    description: "Prominent button with heading",
-    color: "#ef4444",
-  },
-  contentList: {
-    label: "Content List",
-    icon: "[L]",
-    description: "Items from a collection",
-    color: "#10b981",
-  },
-} satisfies Partial<
-  Record<
-    SectionType,
-    { label: string; icon: string; description: string; color: string }
-  >
->;
-
 type PaletteTab = "settings" | "blocks";
 
 type DragSource =
-  | { kind: "palette"; sectionType: SectionType }
   | { kind: "composite"; composite: CompositeComponent }
   | { kind: "primitive"; primitive: PrimitiveComponent }
   | {
@@ -120,8 +79,18 @@ function getCanvasCardMeta(
       color: "#8b5cf6",
     };
   }
+  const legacyLabels: Record<
+    string,
+    { label: string; icon: string; color: string }
+  > = {
+    hero: { label: "Hero", icon: "[H]", color: "#6366f1" },
+    text: { label: "Text Block", icon: "[T]", color: "#0ea5e9" },
+    cardGrid: { label: "Card Grid", icon: "[G]", color: "#f59e0b" },
+    cta: { label: "Call to Action", icon: "[!]", color: "#ef4444" },
+    contentList: { label: "Content List", icon: "[L]", color: "#10b981" },
+  };
   return (
-    SECTION_META[section.type as keyof typeof SECTION_META] ?? {
+    legacyLabels[section.type] ?? {
       label: section.type,
       icon: "[ ]",
       color: "#6b7280",
@@ -295,49 +264,6 @@ function createEmptyPage(): PageContent {
     useLayout: true,
     sections: [],
   };
-}
-
-function createSection(type: SectionType, order: number): Section {
-  const baseSection = {
-    id: generateSectionId(),
-    type,
-    order,
-  };
-
-  switch (type) {
-    case "hero":
-      return { ...baseSection, type: "hero", title: "", subtitle: "" };
-    case "text":
-      return { ...baseSection, type: "text", content: "" };
-    case "cardGrid":
-      return { ...baseSection, type: "cardGrid", cards: [], columns: 3 };
-    case "cta":
-      return {
-        ...baseSection,
-        type: "cta",
-        heading: "",
-        buttonText: "",
-        buttonLink: "",
-        style: "primary",
-      };
-    case "contentList":
-      return {
-        ...baseSection,
-        type: "contentList",
-        collection: "centers",
-        displayMode: "cards",
-        columns: 3,
-      };
-    case "component":
-      return {
-        ...baseSection,
-        type: "component",
-        componentId: "",
-        componentType: "composite",
-        columns: 12,
-        data: {},
-      };
-  }
 }
 
 /** One-line preview text shown inside each canvas card */
@@ -521,7 +447,7 @@ export default function PageEditor({
       setCompositeComponents(composites);
       setPrimitiveComponents(primitives);
     } catch (err) {
-      console.error("Error loading components:", err);
+      console.error("Error loading composite components:", err);
     } finally {
       setLoadingComposites(false);
     }
@@ -570,19 +496,6 @@ export default function PageEditor({
 
   const moveSectionInPage = (id: string, dir: "up" | "down") => {
     updatePage({ sections: moveSectionById(page.sections, id, dir) });
-  };
-
-  const addSection = (
-    type: SectionType,
-    parentId: string | null = null,
-    atIndex?: number,
-  ) => {
-    const newSection = createSection(type, 0);
-    updatePage({
-      sections: addSectionToList(page.sections, parentId, newSection, atIndex),
-    });
-    setActiveSectionId(newSection.id);
-    if (parentId) setExpandedSectionIds((prev) => new Set([...prev, parentId]));
   };
 
   const addCompositeSection = (
@@ -719,12 +632,12 @@ export default function PageEditor({
 
   // ── Drag and drop ─────────────────────────────────────────────────────────
 
-  const handlePaletteDragStart = (type: SectionType) => {
-    dragSourceRef.current = { kind: "palette", sectionType: type };
-  };
-
   const handleCompositeDragStart = (composite: CompositeComponent) => {
     dragSourceRef.current = { kind: "composite", composite };
+  };
+
+  const handlePrimitiveDragStart = (primitive: PrimitiveComponent) => {
+    dragSourceRef.current = { kind: "primitive", primitive };
   };
 
   const handleCanvasDragStart = (
@@ -744,9 +657,7 @@ export default function PageEditor({
     setDropTarget(null);
     const src = dragSourceRef.current;
     if (!src) return;
-    if (src.kind === "palette") {
-      addSection(src.sectionType, parentId, insertBefore);
-    } else if (src.kind === "composite") {
+    if (src.kind === "composite") {
       addCompositeSection(src.composite, parentId, insertBefore);
     } else if (src.kind === "primitive") {
       addPrimitiveSection(src.primitive, parentId, insertBefore);
@@ -1370,52 +1281,6 @@ export default function PageEditor({
                 className="text-xs px-1 pt-1 font-semibold uppercase tracking-wide"
                 style={{ color: colors.textSecondary }}
               >
-                Built-in
-              </p>
-              {(
-                Object.keys(SECTION_META) as Array<keyof typeof SECTION_META>
-              ).map((type) => {
-                const meta = SECTION_META[type];
-                return (
-                  <div
-                    key={type}
-                    draggable
-                    onDragStart={() => handlePaletteDragStart(type)}
-                    onDragEnd={handleDragEnd}
-                    onClick={() => addSection(type, activeSectionId)}
-                    className="flex items-start gap-2 px-2 py-2 rounded cursor-grab active:cursor-grabbing hover:opacity-80 select-none"
-                    style={{
-                      backgroundColor: meta.color + "18",
-                      border: `1px solid ${meta.color}55`,
-                    }}
-                  >
-                    <span
-                      className="text-xs font-mono font-bold shrink-0 mt-0.5 w-8 text-center"
-                      style={{ color: meta.color }}
-                    >
-                      {meta.icon}
-                    </span>
-                    <div className="min-w-0">
-                      <div
-                        className="text-xs font-semibold"
-                        style={{ color: colors.text }}
-                      >
-                        {meta.label}
-                      </div>
-                      <div
-                        className="text-xs leading-tight"
-                        style={{ color: colors.textSecondary }}
-                      >
-                        {meta.description}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-              <p
-                className="text-xs px-1 pt-2 font-semibold uppercase tracking-wide"
-                style={{ color: colors.textSecondary }}
-              >
                 Composites
               </p>
               {loadingComposites ? (
@@ -1485,12 +1350,7 @@ export default function PageEditor({
                   <div
                     key={prim.id}
                     draggable
-                    onDragStart={() => {
-                      dragSourceRef.current = {
-                        kind: "primitive",
-                        primitive: prim,
-                      };
-                    }}
+                    onDragStart={() => handlePrimitiveDragStart(prim)}
                     onDragEnd={handleDragEnd}
                     onClick={() => addPrimitiveSection(prim, activeSectionId)}
                     className="flex items-start gap-2 px-2 py-2 rounded cursor-grab active:cursor-grabbing hover:opacity-80 select-none"

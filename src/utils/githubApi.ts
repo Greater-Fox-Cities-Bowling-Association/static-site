@@ -1904,7 +1904,10 @@ export async function fetchCompositeComponents(
     // DEV MODE: Load from local filesystem (unless forced to use GitHub API)
     if (import.meta.env.DEV && !forceGitHubAPI) {
       // Use fetch to load JSON files locally
-      const compositeIds = ['tournament-card', 'location-card'];
+      const compositeIds = [
+        'hero', 'text-block', 'card-grid', 'cta', 'content-list',
+        'location-card', 'tournament-card'
+      ];
       
       const components = await Promise.all(
         compositeIds.map(async (id) => {

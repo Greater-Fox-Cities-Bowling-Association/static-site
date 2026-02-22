@@ -1,0 +1,17 @@
+{
+  "id": "hero",
+  "name": "Hero Banner",
+  "description": "Large banner with title, subtitle, and call-to-action button",
+  "type": "composite",
+  "icon": "🦸",
+  "minColumns": 12,
+  "defaultColumns": 12,
+  "components": [],
+  "dataSchema": [
+    { "name": "title", "label": "Title", "type": "string", "required": true },
+    { "name": "subtitle", "label": "Subtitle", "type": "string", "required": false },
+    { "name": "backgroundImage", "label": "Background Image URL", "type": "string", "required": false },
+    { "name": "ctaText", "label": "Button Text", "type": "string", "required": false },
+    { "name": "ctaLink", "label": "Button Link URL", "type": "string", "required": false }
+  ]
+}

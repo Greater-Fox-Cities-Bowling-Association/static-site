@@ -1,0 +1,14 @@
+{
+  "id": "text-block",
+  "name": "Text Block",
+  "description": "Paragraph content with optional heading",
+  "type": "composite",
+  "icon": "📄",
+  "minColumns": 4,
+  "defaultColumns": 12,
+  "components": [],
+  "dataSchema": [
+    { "name": "heading", "label": "Heading", "type": "string", "required": false },
+    { "name": "content", "label": "Content", "type": "string", "required": true, "multiline": true }
+  ]
+}

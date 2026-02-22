@@ -1,0 +1,29 @@
+{
+  "id": "card-grid",
+  "name": "Card Grid",
+  "description": "Multiple cards in a responsive grid layout",
+  "type": "composite",
+  "icon": "🗃️",
+  "minColumns": 4,
+  "defaultColumns": 12,
+  "components": [],
+  "dataSchema": [
+    { "name": "heading", "label": "Heading", "type": "string", "required": false },
+    {
+      "name": "columns",
+      "label": "Columns",
+      "type": "enum",
+      "required": false,
+      "defaultValue": "3",
+      "values": ["2", "3", "4"]
+    },
+    {
+      "name": "cards",
+      "label": "Cards",
+      "type": "array",
+      "required": true,
+      "itemType": "string",
+      "description": "One card per line: Title | Description | ImageURL | Link"
+    }
+  ]
+}
