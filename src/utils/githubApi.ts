@@ -1790,6 +1790,210 @@ export async function saveCollection(
   }
 }
 
+// Content collections available for item management (excludes meta-collections)
+export const CONTENT_COLLECTIONS = ['centers', 'tournaments', 'honors', 'news', 'committees'] as const;
+export type ContentCollectionName = typeof CONTENT_COLLECTIONS[number];
+
+/**
+ * Fetch all JSON items from a content collection folder
+ */
+export async function fetchCollectionDirectory(
+  collectionName: string,
+  token: string,
+  owner: string = DEFAULT_OWNER,
+  repo: string = DEFAULT_REPO,
+  forceGitHubAPI: boolean = false
+): Promise<{ success: boolean; files?: GitHubFileResponse[]; error?: string }> {
+  const collectionPath = `src/content/${collectionName}`;
+  try {
+    if (import.meta.env.DEV && !forceGitHubAPI) {
+      const modules = import.meta.glob('/src/content/**/*.json', { eager: false });
+      const prefix = `/src/content/${collectionName}/`;
+      const files: GitHubFileResponse[] = Object.keys(modules)
+        .filter(p => p.startsWith(prefix) && p.endsWith('.json'))
+        .map(p => {
+          const filename = p.split('/').pop() || '';
+          return {
+            name: filename,
+            path: `${collectionPath}/${filename}`,
+            sha: '',
+            size: 0,
+            url: '',
+            html_url: '',
+            git_url: '',
+            download_url: p,
+            type: 'file' as const,
+          };
+        });
+      return { success: true, files };
+    }
+
+    // Production: GitHub API
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${collectionPath}?ref=main`;
+    const response = await fetch(apiUrl, {
+      headers: {
+        Authorization: `token ${token}`,
+        Accept: 'application/vnd.github.v3+json',
+      },
+    });
+    if (!response.ok) {
+      if (response.status === 404) return { success: true, files: [] };
+      const err = await response.json();
+      throw new Error(err.message || 'Failed to fetch collection directory');
+    }
+    const allFiles: GitHubFileResponse[] = await response.json();
+    return { success: true, files: allFiles.filter(f => f.type === 'file' && f.name.endsWith('.json')) };
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
+/**
+ * Fetch a single collection item by filename
+ */
+export async function fetchCollectionItem(
+  collectionName: string,
+  filename: string,
+  token: string,
+  owner: string = DEFAULT_OWNER,
+  repo: string = DEFAULT_REPO,
+  forceGitHubAPI: boolean = false
+): Promise<any> {
+  try {
+    if (import.meta.env.DEV && !forceGitHubAPI) {
+      const modules = import.meta.glob('/src/content/**/*.json', { eager: false });
+      const key = `/src/content/${collectionName}/${filename}`;
+      const loader = modules[key];
+      if (!loader) throw new Error(`File not found: ${key}`);
+      const mod = await (loader as () => Promise<any>)();
+      return mod.default ?? mod;
+    }
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/src/content/${collectionName}/${filename}?ref=main`;
+    const response = await fetch(apiUrl, {
+      headers: {
+        Authorization: `token ${token}`,
+        Accept: 'application/vnd.github.v3+json',
+      },
+    });
+    if (!response.ok) throw new Error(`Failed to fetch item: ${response.statusText}`);
+    const fileData = await response.json();
+    const content = atob(fileData.content.replace(/\n/g, ''));
+    return JSON.parse(content);
+  } catch (error) {
+    throw error instanceof Error ? error : new Error('Unknown error loading item');
+  }
+}
+
+/**
+ * Save (create or update) a collection item as a JSON file
+ */
+export async function saveCollectionItem(
+  collectionName: string,
+  filename: string,
+  data: any,
+  token: string,
+  owner: string = DEFAULT_OWNER,
+  repo: string = DEFAULT_REPO,
+  forceGitHubAPI: boolean = false
+): Promise<{ success: boolean; error?: string }> {
+  const filePath = `src/content/${collectionName}/${filename}`;
+
+  if (import.meta.env.DEV && !forceGitHubAPI) {
+    // Write via local API endpoint
+    try {
+      const response = await fetch('/api/save-file', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: filePath, content: JSON.stringify(data, null, 2) }),
+      });
+      if (!response.ok) {
+        const text = await response.text();
+        return { success: false, error: `Server error: ${response.status}. ${text}` };
+      }
+      const result = await response.json();
+      if (!result.success) return { success: false, error: result.error || 'Save failed' };
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  }
+
+  // Production: commit to GitHub
+  return commitToGitHub({
+    token,
+    owner,
+    repo,
+    path: filePath,
+    content: JSON.stringify(data, null, 2),
+    message: `CMS: Update ${collectionName}/${filename}`,
+  });
+}
+
+/**
+ * Delete a collection item from the repository
+ */
+export async function deleteCollectionItem(
+  collectionName: string,
+  filename: string,
+  token: string,
+  owner: string = DEFAULT_OWNER,
+  repo: string = DEFAULT_REPO,
+  forceGitHubAPI: boolean = false
+): Promise<{ success: boolean; error?: string }> {
+  const filePath = `src/content/${collectionName}/${filename}`;
+
+  if (import.meta.env.DEV && !forceGitHubAPI) {
+    try {
+      const response = await fetch('/api/delete-file', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: filePath }),
+      });
+      if (!response.ok) {
+        const text = await response.text();
+        return { success: false, error: `Server error: ${response.status}. ${text}` };
+      }
+      const result = await response.json();
+      if (!result.success) return { success: false, error: result.error || 'Delete failed' };
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  }
+
+  // Production: delete via GitHub API
+  try {
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}?ref=main`;
+    const existingRes = await fetch(apiUrl, {
+      headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' },
+    });
+    if (!existingRes.ok) {
+      return { success: false, error: `File not found: ${filename}` };
+    }
+    const fileData = await existingRes.json();
+    const deleteRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `token ${token}`,
+        Accept: 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message: `CMS: Delete ${collectionName}/${filename}`,
+        sha: fileData.sha,
+        branch: 'main',
+      }),
+    });
+    if (!deleteRes.ok) {
+      const err = await deleteRes.json();
+      return { success: false, error: err.message || 'Delete failed' };
+    }
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
 // =============================================================================
 // Component Management Functions
 // =============================================================================

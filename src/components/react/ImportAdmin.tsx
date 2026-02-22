@@ -9,6 +9,8 @@ import ThemeList from "./ThemeList";
 import ThemeEditor from "./ThemeEditor";
 import ComponentList from "./ComponentList";
 import CompositeComponentEditor from "./CompositeComponentEditor";
+import CollectionList from "./CollectionList";
+import CollectionItemEditor from "./CollectionItemEditor";
 
 type Mode =
   | "themes"
@@ -18,7 +20,9 @@ type Mode =
   | "pages"
   | "page-editor"
   | "components"
-  | "composite-editor";
+  | "composite-editor"
+  | "collections"
+  | "collection-item-editor";
 
 export default function ImportAdmin() {
   const { isLoading, error, isAuthenticated, user, logout, getIdTokenClaims } =
@@ -59,6 +63,14 @@ export default function ImportAdmin() {
     undefined,
   );
   const [editingCompositeId, setEditingCompositeId] = useState<
+    string | undefined
+  >(undefined);
+
+  // Collection management state
+  const [editingCollectionName, setEditingCollectionName] = useState<
+    string | undefined
+  >(undefined);
+  const [editingCollectionFile, setEditingCollectionFile] = useState<
     string | undefined
   >(undefined);
 
@@ -252,6 +264,33 @@ export default function ImportAdmin() {
     setEditingCompositeId(undefined);
   };
 
+  const handleEditCollectionItem = (
+    collectionName: string,
+    filename: string,
+  ) => {
+    setEditingCollectionName(collectionName);
+    setEditingCollectionFile(filename);
+    setMode("collection-item-editor");
+  };
+
+  const handleCreateCollectionItem = (collectionName: string) => {
+    setEditingCollectionName(collectionName);
+    setEditingCollectionFile(undefined);
+    setMode("collection-item-editor");
+  };
+
+  const handleCollectionItemSaved = () => {
+    setMode("collections");
+    setEditingCollectionName(undefined);
+    setEditingCollectionFile(undefined);
+  };
+
+  const handleCancelCollectionItemEdit = () => {
+    setMode("collections");
+    setEditingCollectionName(undefined);
+    setEditingCollectionFile(undefined);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <header className="bg-background shadow-sm border-b border-text/10">
@@ -398,6 +437,20 @@ export default function ImportAdmin() {
                   Build reusable components
                 </p>
               </button>
+              <button
+                onClick={() => setMode("collections")}
+                className={`p-6 rounded-lg border-2 transition-all ${
+                  mode === "collections" || mode === "collection-item-editor"
+                    ? "border-primary bg-primary/10"
+                    : "border-text/20 hover:border-primary/50"
+                }`}
+              >
+                <div className="text-4xl mb-3">📦</div>
+                <h3 className="font-semibold text-text mb-1">Collections</h3>
+                <p className="text-sm text-text-secondary">
+                  Manage centers, news, honors &amp; more
+                </p>
+              </button>
             </div>
           </div>
 
@@ -475,6 +528,28 @@ export default function ImportAdmin() {
               token={githubToken}
               onSave={handleCompositeSaved}
               onCancel={handleCancelCompositeEdit}
+              useGitHubAPI={useGitHubAPI}
+            />
+          )}
+
+          {mode === "collections" && (
+            <CollectionList
+              token={githubToken}
+              onEditItem={handleEditCollectionItem}
+              onCreateItem={handleCreateCollectionItem}
+              useGitHubAPI={useGitHubAPI}
+            />
+          )}
+
+          {mode === "collection-item-editor" && editingCollectionName && (
+            <CollectionItemEditor
+              collectionName={editingCollectionName}
+              {...(editingCollectionFile
+                ? { filename: editingCollectionFile }
+                : {})}
+              token={githubToken}
+              onSave={handleCollectionItemSaved}
+              onCancel={handleCancelCollectionItemEdit}
               useGitHubAPI={useGitHubAPI}
             />
           )}
