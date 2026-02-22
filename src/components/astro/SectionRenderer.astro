@@ -20,17 +20,26 @@ const children: Section[] = (section as any).children ?? [];
 const ov: SectionStyleOverrides | undefined = (section as any).styleOverrides;
 const hasOverrides = ov && Object.values(ov).some(Boolean);
 
+// Token key → CSS var utilities
+const colorVar = (key: string) =>
+  `var(--color-${key.replace(/([A-Z])/g, (m) => "-" + m.toLowerCase())})`;
+const fontVar = (key: string) => `var(--font-${key})`;
+const spacingVar = (key: string) => `var(--spacing-${key})`;
+
 // Build inline style string for wrapper
 const ws: string[] = [];
-if (ov?.backgroundColor) ws.push(`background-color:${ov.backgroundColor}`);
+if (ov?.backgroundColor)
+  ws.push(`background-color:${colorVar(ov.backgroundColor)}`);
 if (ov?.backgroundImage) {
   ws.push(`background-image:url('${ov.backgroundImage}')`);
   ws.push(`background-size:${ov.backgroundSize ?? "cover"}`);
   ws.push(`background-position:${ov.backgroundPosition ?? "center"}`);
 }
-if (ov?.textColor) ws.push(`color:${ov.textColor}`);
-if (ov?.paddingTop) ws.push(`padding-top:${ov.paddingTop}`);
-if (ov?.paddingBottom) ws.push(`padding-bottom:${ov.paddingBottom}`);
+if (ov?.textColor) ws.push(`color:${colorVar(ov.textColor)}`);
+if (ov?.fontFamily) ws.push(`font-family:${fontVar(ov.fontFamily)}`);
+if (ov?.paddingTop) ws.push(`padding-top:${spacingVar(ov.paddingTop)}`);
+if (ov?.paddingBottom)
+  ws.push(`padding-bottom:${spacingVar(ov.paddingBottom)}`);
 const wrapperStyle = ws.join(";");
 
 // Scoped CSS: when a bg override is set, remove the inner <section>'s own background

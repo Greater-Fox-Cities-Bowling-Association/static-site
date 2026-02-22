@@ -13,7 +13,8 @@
       "heading": "Our Bowling Centers",
       "collection": "centers",
       "displayMode": "cards",
-      "columns": 3
+      "columns": 3,
+      "styleOverrides": {}
     }
   ],
   "data": [
@@ -123,5 +124,5 @@
     }
   ],
   "createdAt": "2026-02-15T00:00:00.000Z",
-  "updatedAt": "2026-02-21T18:07:35.410Z"
+  "updatedAt": "2026-02-22T06:40:06.309Z"
 }

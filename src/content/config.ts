@@ -117,6 +117,7 @@ const themesCollection = defineCollection({
       heading: z.string(),
       body: z.string(),
     }),
+    spacing: z.record(z.string()).optional(),
     createdAt: z.string().optional(),
     updatedAt: z.string().optional(),
   }),

@@ -414,6 +414,89 @@ export default function ThemeEditor({
           </div>
         </div>
 
+        {/* Spacing Tokens */}
+        <div className="space-y-4 border-t pt-6">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-text">Spacing Tokens</h3>
+            <button
+              onClick={() => {
+                const current = theme.spacing ?? {
+                  none: "0",
+                  sm: "1rem",
+                  md: "2rem",
+                  lg: "4rem",
+                  xl: "8rem",
+                };
+                const key = `token${Object.keys(current).length + 1}`;
+                updateTheme({ spacing: { ...current, [key]: "1rem" } });
+              }}
+              className="px-3 py-1 text-xs rounded border border-primary text-primary hover:opacity-80"
+            >
+              + Add token
+            </button>
+          </div>
+          <p className="text-xs text-text-secondary">
+            Define reusable spacing values (e.g. <code>md</code> →{" "}
+            <code>2rem</code>). Used by section padding overrides.
+          </p>
+          <div className="space-y-2">
+            {Object.entries(
+              theme.spacing ?? {
+                none: "0",
+                sm: "1rem",
+                md: "2rem",
+                lg: "4rem",
+                xl: "8rem",
+              },
+            ).map(([key, value]) => (
+              <div key={key} className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={key}
+                  onChange={(e) => {
+                    const newKey = e.target.value.trim();
+                    if (!newKey) return;
+                    const current = { ...(theme.spacing ?? {}) };
+                    const entries = Object.entries(current);
+                    const idx = entries.findIndex(([k]) => k === key);
+                    if (idx === -1) return;
+                    entries[idx] = [newKey, value];
+                    updateTheme({ spacing: Object.fromEntries(entries) });
+                  }}
+                  placeholder="key"
+                  className="w-24 px-2 py-1 text-xs rounded border border-border bg-background text-text font-mono"
+                />
+                <span className="text-text-secondary text-xs">→</span>
+                <input
+                  type="text"
+                  value={value}
+                  onChange={(e) => {
+                    updateTheme({
+                      spacing: {
+                        ...(theme.spacing ?? {}),
+                        [key]: e.target.value,
+                      },
+                    });
+                  }}
+                  placeholder="value"
+                  className="flex-1 px-2 py-1 text-xs rounded border border-border bg-background text-text font-mono"
+                />
+                <button
+                  onClick={() => {
+                    const next = { ...(theme.spacing ?? {}) };
+                    delete next[key];
+                    updateTheme({ spacing: next });
+                  }}
+                  className="text-xs text-text-secondary hover:text-red-500 px-1"
+                  title="Remove"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Preview */}
         <div className="space-y-4 border-t pt-6">
           <h3 className="text-lg font-semibold text-text">Preview</h3>

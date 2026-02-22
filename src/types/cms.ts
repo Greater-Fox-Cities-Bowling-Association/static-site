@@ -98,16 +98,28 @@ export interface NavigationConfig {
 // Section Style Overrides
 // =============================================================================
 
-/** Per-section style overrides that can be set in the page editor. */
+/** Named color token keys from the active theme. */
+export type ThemeColorKey = 'primary' | 'secondary' | 'background' | 'text' | 'textSecondary' | 'accent';
+
+/** Named font token keys from the active theme. */
+export type ThemeFontKey = 'heading' | 'body';
+
+/**
+ * Per-section style overrides.
+ * Values are theme token KEYS (e.g. "primary", "md"), not raw CSS values.
+ * The renderer resolves them to CSS custom properties (var(--color-primary) etc.)
+ * so they automatically track theme changes.
+ */
 export interface SectionStyleOverrides {
-  backgroundColor?: string;  // CSS color, e.g. "#1e293b"
-  backgroundImage?: string;  // URL
+  backgroundColor?: ThemeColorKey;   // e.g. "primary" → var(--color-primary)
+  backgroundImage?: string;          // URL — free-form
   backgroundSize?: 'cover' | 'contain' | 'auto';
-  backgroundPosition?: string; // e.g. "center", "top"
-  textColor?: string;         // CSS color for text cascade
-  paddingTop?: string;        // CSS value e.g. "2rem"
-  paddingBottom?: string;
-  customClasses?: string;     // Extra Tailwind / CSS class names
+  backgroundPosition?: string;
+  textColor?: ThemeColorKey;         // e.g. "text" → var(--color-text)
+  fontFamily?: ThemeFontKey;         // e.g. "heading" → var(--font-heading)
+  paddingTop?: string;               // spacing token key → var(--spacing-key)
+  paddingBottom?: string;            // spacing token key → var(--spacing-key)
+  customClasses?: string;            // extra Tailwind / CSS classes
 }
 
 // =============================================================================
@@ -232,6 +244,8 @@ export interface Theme {
   isActive?: boolean;
   colors: ThemeColors;
   fonts: ThemeFonts;
+  /** Named spacing tokens, e.g. { "none": "0", "sm": "1rem", "md": "2rem", "lg": "4rem", "xl": "8rem" } */
+  spacing?: Record<string, string>;
   createdAt?: string;
   updatedAt?: string;
 }

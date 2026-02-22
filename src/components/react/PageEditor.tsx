@@ -7,6 +7,8 @@ import type {
   ComponentSection,
   CompositeComponent,
   SectionStyleOverrides,
+  ThemeColorKey,
+  ThemeFontKey,
 } from "../../types/cms";
 import {
   fetchPageContent,
@@ -1709,7 +1711,6 @@ export default function PageEditor({
                   styleOverrides: ov,
                 } as Section)
               }
-              colors={colors}
             />
           </aside>
         )}
@@ -1720,21 +1721,27 @@ export default function PageEditor({
 
 // ── Style Override Panel ──────────────────────────────────────────────────────
 
+const THEME_COLOR_KEYS: ThemeColorKey[] = [
+  "primary",
+  "secondary",
+  "background",
+  "text",
+  "textSecondary",
+  "accent",
+];
+const THEME_FONT_KEYS: ThemeFontKey[] = ["heading", "body"];
+
 interface StyleOverridePanelProps {
   overrides: SectionStyleOverrides;
   onChange: (ov: SectionStyleOverrides) => void;
-  colors: ReturnType<typeof useTheme>["colors"];
 }
 
-function StyleOverridePanel({
-  overrides,
-  onChange,
-  colors,
-}: StyleOverridePanelProps) {
+function StyleOverridePanel({ overrides, onChange }: StyleOverridePanelProps) {
+  const { colors, fonts, spacing } = useTheme();
   const [open, setOpen] = useState(false);
   const hasAny = Object.values(overrides).some(Boolean);
 
-  const set = (key: keyof SectionStyleOverrides, value: string) =>
+  const set = (key: keyof SectionStyleOverrides, value: string | undefined) =>
     onChange({ ...overrides, [key]: value || undefined });
 
   const clear = () => onChange({});
@@ -1746,14 +1753,14 @@ function StyleOverridePanel({
     label: string;
     children: React.ReactNode;
   }) => (
-    <div className="flex items-center gap-2 py-1.5">
+    <div className="py-1.5">
       <span
-        className="w-28 shrink-0 text-xs"
+        className="block text-xs mb-1"
         style={{ color: colors.textSecondary }}
       >
         {label}
       </span>
-      <div className="flex-1 min-w-0">{children}</div>
+      <div>{children}</div>
     </div>
   );
 
@@ -1772,38 +1779,44 @@ function StyleOverridePanel({
     />
   );
 
-  const colorInput = (key: keyof SectionStyleOverrides) => (
-    <div className="flex items-center gap-1.5">
-      <input
-        type="color"
-        value={(overrides[key] as string) || "#ffffff"}
-        onChange={(e) => set(key, e.target.value)}
-        className="w-8 h-7 rounded border cursor-pointer p-0.5"
-        style={{ borderColor: colors.secondary }}
-      />
-      <input
-        type="text"
-        value={(overrides[key] as string) ?? ""}
-        onChange={(e) => set(key, e.target.value)}
-        placeholder="e.g. #1e293b"
-        className="flex-1 px-2 py-1 text-xs rounded border font-mono"
-        style={{
-          borderColor: colors.secondary,
-          backgroundColor: colors.background,
-          color: colors.text,
-        }}
-      />
-      {overrides[key] && (
+  const ColorSwatches = ({
+    field,
+  }: {
+    field: "backgroundColor" | "textColor";
+  }) => (
+    <div className="flex flex-wrap gap-1.5">
+      {THEME_COLOR_KEYS.map((key) => {
+        const hex = colors[key] || "#888";
+        const active = overrides[field] === key;
+        return (
+          <button
+            key={key}
+            title={key}
+            onClick={() => set(field, active ? "" : key)}
+            className="w-8 h-8 rounded border-2 transition-all"
+            style={{
+              backgroundColor: hex,
+              borderColor: active ? colors.text : "transparent",
+              outline: active ? `2px solid ${hex}` : "none",
+              outlineOffset: "2px",
+            }}
+          />
+        );
+      })}
+      {overrides[field] && (
         <button
-          onClick={() => set(key, "")}
-          className="text-xs text-gray-400 hover:text-red-500 shrink-0"
+          onClick={() => set(field, "")}
+          className="text-xs px-1.5 rounded self-center hover:opacity-80"
+          style={{ color: colors.textSecondary }}
           title="Clear"
         >
-          x
+          ✕
         </button>
       )}
     </div>
   );
+
+  const spacingKeys = Object.keys(spacing);
 
   return (
     <div className="border-t" style={{ borderColor: colors.secondary }}>
@@ -1830,35 +1843,146 @@ function StyleOverridePanel({
       </button>
 
       {open && (
-        <div className="px-4 pb-4 space-y-0.5">
-          <Row label="Background">{colorInput("backgroundColor")}</Row>
-          <Row label="Background img">
+        <div className="px-4 pb-4 space-y-1">
+          <Row label="Background color">
+            <ColorSwatches field="backgroundColor" />
+          </Row>
+          <Row label="Background image">
             {textInput("backgroundImage", "https://...")}
           </Row>
-          <Row label="Bg size">
-            <select
-              value={overrides.backgroundSize ?? "cover"}
-              onChange={(e) => set("backgroundSize", e.target.value)}
-              className="w-full px-2 py-1 text-xs rounded border"
-              style={{
-                borderColor: colors.secondary,
-                backgroundColor: colors.background,
-                color: colors.text,
-              }}
-            >
-              <option value="cover">cover</option>
-              <option value="contain">contain</option>
-              <option value="auto">auto</option>
-            </select>
+          {overrides.backgroundImage && (
+            <>
+              <Row label="Bg size">
+                <div className="flex gap-1">
+                  {(["cover", "contain", "auto"] as const).map((v) => (
+                    <button
+                      key={v}
+                      onClick={() => set("backgroundSize", v)}
+                      className="px-2 py-1 text-xs rounded border"
+                      style={{
+                        borderColor:
+                          overrides.backgroundSize === v
+                            ? colors.primary
+                            : colors.secondary,
+                        color:
+                          overrides.backgroundSize === v
+                            ? colors.primary
+                            : colors.text,
+                      }}
+                    >
+                      {v}
+                    </button>
+                  ))}
+                </div>
+              </Row>
+              <Row label="Bg position">
+                {textInput("backgroundPosition", "center")}
+              </Row>
+            </>
+          )}
+          <Row label="Text color">
+            <ColorSwatches field="textColor" />
           </Row>
-          <Row label="Bg position">
-            {textInput("backgroundPosition", "center")}
+          <Row label="Font family">
+            <div className="flex gap-1">
+              {THEME_FONT_KEYS.map((k) => (
+                <button
+                  key={k}
+                  onClick={() =>
+                    set("fontFamily", overrides.fontFamily === k ? "" : k)
+                  }
+                  className="px-3 py-1 text-xs rounded border"
+                  style={{
+                    borderColor:
+                      overrides.fontFamily === k
+                        ? colors.primary
+                        : colors.secondary,
+                    color:
+                      overrides.fontFamily === k ? colors.primary : colors.text,
+                    fontFamily: fonts[k],
+                  }}
+                >
+                  {k}
+                </button>
+              ))}
+              {overrides.fontFamily && (
+                <button
+                  onClick={() => set("fontFamily", "")}
+                  className="text-xs px-1.5 hover:opacity-80"
+                  style={{ color: colors.textSecondary }}
+                  title="Clear"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
           </Row>
-          <Row label="Text color">{colorInput("textColor")}</Row>
-          <Row label="Padding top">{textInput("paddingTop", "e.g. 4rem")}</Row>
-          <Row label="Padding bottom">
-            {textInput("paddingBottom", "e.g. 4rem")}
-          </Row>
+          {spacingKeys.length > 0 ? (
+            <>
+              <Row label="Padding top">
+                <div className="flex flex-wrap gap-1">
+                  {spacingKeys.map((k) => (
+                    <button
+                      key={k}
+                      onClick={() =>
+                        set("paddingTop", overrides.paddingTop === k ? "" : k)
+                      }
+                      className="px-2 py-1 text-xs rounded border"
+                      style={{
+                        borderColor:
+                          overrides.paddingTop === k
+                            ? colors.primary
+                            : colors.secondary,
+                        color:
+                          overrides.paddingTop === k
+                            ? colors.primary
+                            : colors.text,
+                      }}
+                    >
+                      {k}
+                    </button>
+                  ))}
+                </div>
+              </Row>
+              <Row label="Padding bottom">
+                <div className="flex flex-wrap gap-1">
+                  {spacingKeys.map((k) => (
+                    <button
+                      key={k}
+                      onClick={() =>
+                        set(
+                          "paddingBottom",
+                          overrides.paddingBottom === k ? "" : k,
+                        )
+                      }
+                      className="px-2 py-1 text-xs rounded border"
+                      style={{
+                        borderColor:
+                          overrides.paddingBottom === k
+                            ? colors.primary
+                            : colors.secondary,
+                        color:
+                          overrides.paddingBottom === k
+                            ? colors.primary
+                            : colors.text,
+                      }}
+                    >
+                      {k}
+                    </button>
+                  ))}
+                </div>
+              </Row>
+            </>
+          ) : (
+            <>
+              <Row label="Padding top">
+                {textInput("paddingTop", "spacing token key")}
+              </Row>
+              <Row label="Padding bottom">
+                {textInput("paddingBottom", "spacing token key")}
+              </Row>
+            </>
+          )}
           <Row label="Extra classes">
             {textInput("customClasses", "e.g. rounded-xl shadow-lg")}
           </Row>

@@ -81,6 +81,13 @@ export function applyThemeToCssVariables(theme: Theme): void {
   // Set font variables
   root.style.setProperty('--font-heading', theme.fonts.heading);
   root.style.setProperty('--font-body', theme.fonts.body);
+
+  // Set spacing variables
+  if (theme.spacing) {
+    for (const [key, value] of Object.entries(theme.spacing)) {
+      root.style.setProperty(`--spacing-${key}`, value);
+    }
+  }
 }
 
 /**
