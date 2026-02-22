@@ -9,7 +9,7 @@
     {
       "id": "hero-1",
       "type": "hero",
-      "order": 1,
+      "order": 0,
       "title": "Greater Fox Cities Bowling Association",
       "subtitle": "Welcome to our bowling community",
       "backgroundImage": "",
@@ -17,6 +17,6 @@
       "ctaLink": "#"
     }
   ],
-  "updatedAt": "2026-02-16T04:25:52.623Z",
+  "updatedAt": "2026-02-22T17:15:24.163Z",
   "layoutId": "default"
 }
