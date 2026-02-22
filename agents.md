@@ -202,10 +202,12 @@ Push to main
 
 See `SECRETS.md` (gitignored) for actual values. Expected variables:
 
-| Variable                 | Purpose                                              |
-| ------------------------ | ---------------------------------------------------- |
-| `PUBLIC_AUTH0_DOMAIN`    | Auth0 tenant domain                                  |
-| `PUBLIC_AUTH0_CLIENT_ID` | Auth0 SPA client ID                                  |
-| `PUBLIC_GITHUB_OWNER`    | GitHub repo owner                                    |
-| `PUBLIC_GITHUB_REPO`     | GitHub repo name                                     |
-| `PUBLIC_SITE_BRANCH`     | Branch to commit content to (set by `set-branch.js`) |
+| Variable                       | Purpose                                                          |
+| ------------------------------ | ---------------------------------------------------------------- |
+| `PUBLIC_AUTH0_DOMAIN`          | Auth0 tenant domain                                              |
+| `PUBLIC_AUTH0_CLIENT_ID`       | Auth0 SPA client ID                                              |
+| `PUBLIC_AUTH0_CLAIM_NAMESPACE` | Namespace for Auth0 custom claims (default: `https://cms.local`) |
+| `PUBLIC_GITHUB_OWNER`          | GitHub repo owner                                                |
+| `PUBLIC_GITHUB_REPO`           | GitHub repo name                                                 |
+| `PUBLIC_SITE_BRANCH`           | Branch to commit content to (set by `set-branch.js`)             |
+| `PUBLIC_SITE_NAME`             | Site display name used as default meta description fallback      |

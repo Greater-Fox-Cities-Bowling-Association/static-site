@@ -62,7 +62,7 @@ const sortedSections = [...sections].sort((a, b) => a.order - b.order);
 
 <BaseLayout
   title={title}
-  description={metaDescription || "Greater Fox Cities Bowling Association"}
+  description={metaDescription || import.meta.env.PUBLIC_SITE_NAME || ""}
 >
   {
     selectedLayout ? (

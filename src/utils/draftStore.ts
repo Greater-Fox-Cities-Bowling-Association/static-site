@@ -1,6 +1,6 @@
 import type { PageContent, Draft, DraftMetadata } from '../types/cms';
 
-const DRAFT_PREFIX = 'gfcba-draft-';
+const DRAFT_PREFIX = 'cms-draft-';
 const DRAFT_VERSION = 1;
 
 /**

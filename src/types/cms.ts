@@ -212,7 +212,7 @@ export interface CtaSection extends BaseSection {
 export interface ContentListSection extends BaseSection {
   type: 'contentList';
   heading?: string;
-  collection: string; // Name of any collection defined in config.ts (e.g., 'centers', 'honors', etc.)
+  collection: string; // Name of any user-defined collection (e.g., 'news', 'events', 'products', etc.)
   displayMode: ContentListDisplayMode;
   itemIds?: string[]; // Optional: specific items to show. If empty, show all
   limit?: number; // Optional: max items to display

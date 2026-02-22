@@ -149,14 +149,10 @@ export default function ContentListEditor({
             onChange={(e) => updateField("collection", e.target.value)}
             list="collection-suggestions"
             className="w-full px-3 py-2 border border-text/20 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-            placeholder="Enter collection name (e.g., centers, honors)"
+            placeholder="Enter collection name (e.g., news, events)"
           />
           <datalist id="collection-suggestions">
-            <option value="centers">Bowling Centers</option>
-            <option value="honors">Honors & Awards</option>
-            <option value="news">News Articles</option>
-            <option value="tournaments">Tournaments</option>
-            <option value="committees">Committees</option>
+            {/* Options are populated at runtime from collection-defs — no hardcoded tenant values */}
           </datalist>
           <p className="mt-1 text-xs text-text-secondary">
             Enter the collection name from your content config (suggestions

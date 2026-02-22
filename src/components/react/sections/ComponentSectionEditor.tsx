@@ -692,11 +692,12 @@ export default function ComponentSectionEditor({
                     (child) => {
                       return (
                         <div key={child.id}>
-                          {renderPrimitivePreview(
-                            child.primitive,
-                            child.props,
-                            section.data,
-                          )}
+                          {child.primitive &&
+                            renderPrimitivePreview(
+                              child.primitive,
+                              child.props,
+                              section.data,
+                            )}
                         </div>
                       );
                     },

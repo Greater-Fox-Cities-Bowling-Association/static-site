@@ -49,7 +49,7 @@ Use this checklist to set up the admin panel authentication for your GFCBA websi
   ```env
   PUBLIC_GITHUB_CLIENT_ID=your_github_oauth_client_id
   PUBLIC_GITHUB_OWNER=your_github_username
-  PUBLIC_GITHUB_REPO=gfcba
+  PUBLIC_GITHUB_REPO=your-repo-name
   ```
 - [ ] Verify `.env` is in `.gitignore` (should already be there)
 

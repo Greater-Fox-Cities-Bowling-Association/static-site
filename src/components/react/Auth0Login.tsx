@@ -72,8 +72,8 @@ export default function Auth0Login({ onAuthenticated }: Auth0LoginProps) {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="bg-background rounded-2xl shadow-xl p-8 max-w-md w-full">
         <div className="text-center mb-8">
-          <div className="text-5xl mb-4">🎳</div>
-          <h1 className="text-3xl font-bold text-text mb-2">GFCBA Admin</h1>
+          <div className="text-5xl mb-4">⚙️</div>
+          <h1 className="text-3xl font-bold text-text mb-2">CMS Admin</h1>
           <p className="text-text-secondary">
             Import CSV data to update your website
           </p>

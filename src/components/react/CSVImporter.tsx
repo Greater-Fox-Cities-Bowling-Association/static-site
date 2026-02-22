@@ -7,7 +7,7 @@ interface CSVRow {
 
 interface ImporterProps {
   onDataParsed: (data: any[], filename: string) => void;
-  collectionType: "honors" | "tournaments" | "centers" | "news";
+  collectionType: string;
 }
 
 export default function CSVImporter({

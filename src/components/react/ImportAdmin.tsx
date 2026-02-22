@@ -102,19 +102,21 @@ export default function ImportAdmin() {
           const claims = await getIdTokenClaims();
 
           // Check for GitHub token in custom claim
-          const token = claims?.["https://gfcba.com/github_token"];
+          const claimNamespace =
+            import.meta.env.PUBLIC_AUTH0_CLAIM_NAMESPACE || "https://cms.local";
+          const token = claims?.[`${claimNamespace}/github_token`];
 
           if (token) {
             setGithubToken(token);
-            setGithubUser("fox-cities-bowling-association");
+            const owner = import.meta.env.PUBLIC_GITHUB_OWNER || "";
+            setGithubUser(owner);
             localStorage.setItem("github_token", token);
-            localStorage.setItem(
-              "github_user",
-              "fox-cities-bowling-association",
-            );
+            localStorage.setItem("github_user", owner);
           } else {
             console.warn("❌ No GitHub token found in ID token claims");
-            console.warn("Expected claim: https://gfcba.com/github_token");
+            console.warn(
+              `Expected claim: ${import.meta.env.PUBLIC_AUTH0_CLAIM_NAMESPACE || "https://cms.local"}/github_token`,
+            );
             console.warn(
               "Available custom claims:",
               Object.keys(claims || {}).filter((k) => k.includes("http")),
@@ -326,9 +328,7 @@ export default function ImportAdmin() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-text">
-                🏆 GFCBA Admin Panel
-              </h1>
+              <h1 className="text-2xl font-bold text-text">⚙️ CMS Admin</h1>
               <p className="text-sm text-text-secondary mt-1">
                 Logged in as {user?.email}
               </p>

@@ -83,12 +83,12 @@ export function enableGitHubAPITesting() {
 }
 
 // Get defaults from environment variables
-const DEFAULT_OWNER = typeof import.meta !== 'undefined' 
-  ? (import.meta.env.PUBLIC_GITHUB_OWNER || import.meta.env.GITHUB_OWNER || 'myoung-admin')
-  : 'myoung-admin';
+const DEFAULT_OWNER = typeof import.meta !== 'undefined'
+  ? (import.meta.env.PUBLIC_GITHUB_OWNER || import.meta.env.GITHUB_OWNER || '')
+  : '';
 const DEFAULT_REPO = typeof import.meta !== 'undefined'
-  ? (import.meta.env.PUBLIC_GITHUB_REPO || import.meta.env.GITHUB_REPO || 'gfcba')
-  : 'gfcba';
+  ? (import.meta.env.PUBLIC_GITHUB_REPO || import.meta.env.GITHUB_REPO || '')
+  : '';
 const PAGES_PATH = 'src/content/pages';
 const LAYOUTS_PATH = 'src/content/layouts';
 const THEMES_PATH = 'src/content/themes';
@@ -167,21 +167,16 @@ export async function commitToGitHub({
 }
 
 // Generate filename from data
-export function generateFilename(collectionType: string, data: any, originalFilename: string): string {
+export function generateFilename(_collectionType: string, data: any, originalFilename: string): string {
   const sanitize = (str: string) => str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   
-  switch (collectionType) {
-    case 'honors':
-      return `${sanitize(data.category)}-${data.year}.json`;
-    case 'centers':
-      return `${sanitize(data.name)}.json`;
-    case 'tournaments':
-      return `${sanitize(data.name)}.json`;
-    case 'news':
-      return `${sanitize(data.title)}.json`;
-    default:
-      return sanitize(originalFilename.replace('.csv', '')) + '.json';
+  // Resolve a human-readable primary key from whichever common field is present
+  const primary = data.id ?? data.name ?? data.title ?? data.label ?? data.category;
+  if (primary) {
+    const year = data.year ? `-${data.year}` : '';
+    return `${sanitize(String(primary))}${year}.json`;
   }
+  return sanitize(originalFilename.replace('.csv', '')) + '.json';
 }
 
 // =============================================================================

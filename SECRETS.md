@@ -49,7 +49,7 @@ See detailed setup instructions in [GITHUB-OAUTH-SETUP.md](./GITHUB-OAUTH-SETUP.
   ```env
   PUBLIC_GITHUB_CLIENT_ID=your_github_oauth_client_id
   PUBLIC_GITHUB_OWNER=your_github_username
-  PUBLIC_GITHUB_REPO=gfcba
+  PUBLIC_GITHUB_REPO=your-repo-name
   ```
 - **Production**: Set as environment variables in your hosting platform
 
@@ -116,11 +116,15 @@ See detailed setup instructions in [GITHUB-OAUTH-SETUP.md](./GITHUB-OAUTH-SETUP.
    # Auth0 (Required for admin access)
    PUBLIC_AUTH0_DOMAIN=your-tenant.auth0.com
    PUBLIC_AUTH0_CLIENT_ID=your_auth0_client_id
+   PUBLIC_AUTH0_CLAIM_NAMESPACE=https://cms.local
 
    # GitHub OAuth (Required for committing changes)
    PUBLIC_GITHUB_CLIENT_ID=your_github_oauth_client_id
    PUBLIC_GITHUB_OWNER=yourusername
-   PUBLIC_GITHUB_REPO=gfcba
+   PUBLIC_GITHUB_REPO=your-repo-name
+
+   # Site identity
+   PUBLIC_SITE_NAME=My Site Name
 
    # Static.app (Required for deployment)
    STATIC_APP_API_KEY=sa_your_actual_key_here

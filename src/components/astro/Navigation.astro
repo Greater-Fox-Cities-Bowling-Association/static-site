@@ -1,36 +1,16 @@
 ---
-import type { NavigationItem } from '../../types/cms';
+import type { NavigationItem } from "../../types/cms";
 
 // Try to load navigation config, fallback to default if not found
 let navItems: NavigationItem[] = [];
 
 try {
-  const navigationModule = await import('../../content/navigation/default.json');
+  const navigationModule =
+    await import("../../content/navigation/default.json");
   navItems = navigationModule.default.items || [];
 } catch (error) {
-  // Fallback to default navigation
-  navItems = [
-    { id: 'home', label: 'Home', href: '/', order: 1 },
-    { id: 'news', label: 'News', href: '/news', order: 2 },
-    { id: 'tournaments', label: 'Tournaments', href: '/tournaments', order: 3 },
-    { 
-      id: 'honors', 
-      label: 'Honors', 
-      href: '/honors', 
-      order: 4,
-      children: [
-        { id: 'hall-of-fame', label: 'Hall of Fame', href: '/honors/hall-of-fame', order: 1 },
-        { id: '300-games', label: '300 Games', href: '/honors/300-games', order: 2 },
-        { id: 'high-average', label: 'High Average', href: '/honors/high-average', order: 3 },
-        { id: 'high-series', label: 'High Series', href: '/honors/high-series', order: 4 },
-      ]
-    },
-    { id: 'awards', label: 'Awards', href: '/awards', order: 5 },
-    { id: 'scholarships', label: 'Scholarships', href: '/scholarships', order: 6 },
-    { id: 'centers', label: 'Centers', href: '/centers', order: 7 },
-    { id: 'committees', label: 'Committees', href: '/committees', order: 8 },
-    { id: 'contact', label: 'Contact', href: '/contact', order: 9 },
-  ];
+  // Fallback to minimal single home link if no navigation config is found
+  navItems = [{ id: "home", label: "Home", href: "/", order: 1 }];
 }
 
 // Sort by order
@@ -42,47 +22,59 @@ navItems.sort((a, b) => a.order - b.order);
     <div class="flex justify-between items-center h-16">
       <div class="flex-shrink-0">
         <a href="/" class="font-display font-bold text-xl text-primary">
-          GFCBA
+          {import.meta.env.PUBLIC_SITE_NAME || "Home"}
         </a>
       </div>
-      
+
       <!-- Desktop Navigation -->
       <div class="hidden md:flex md:space-x-1">
-        {navItems.map((item) => (
-          item.children && item.children.length > 0 ? (
-            <div class="relative group">
-              <button
-                class="px-3 py-2 rounded-md text-sm font-medium text-text hover:text-primary hover:bg-primary/10 transition-colors flex items-center gap-1"
-                aria-haspopup="true"
-                aria-expanded="false"
-              >
-                {item.label}
-                <svg class="w-4 h-4 transition-transform group-hover:rotate-180" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                </svg>
-              </button>
-              <div class="absolute left-0 mt-0 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                <div class="bg-background shadow-lg rounded-md border border-text/10 py-1">
-                  {item.children.map((child) => (
-                    <a
-                      href={child.href}
-                      class="block px-4 py-2 text-sm text-text hover:text-primary hover:bg-primary/10 transition-colors"
-                    >
-                      {child.label}
-                    </a>
-                  ))}
+        {
+          navItems.map((item) =>
+            item.children && item.children.length > 0 ? (
+              <div class="relative group">
+                <button
+                  class="px-3 py-2 rounded-md text-sm font-medium text-text hover:text-primary hover:bg-primary/10 transition-colors flex items-center gap-1"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                >
+                  {item.label}
+                  <svg
+                    class="w-4 h-4 transition-transform group-hover:rotate-180"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+                    />
+                  </svg>
+                </button>
+                <div class="absolute left-0 mt-0 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                  <div class="bg-background shadow-lg rounded-md border border-text/10 py-1">
+                    {item.children.map((child) => (
+                      <a
+                        href={child.href}
+                        class="block px-4 py-2 text-sm text-text hover:text-primary hover:bg-primary/10 transition-colors"
+                      >
+                        {child.label}
+                      </a>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
-          ) : (
-            <a
-              href={item.href}
-              class="px-3 py-2 rounded-md text-sm font-medium text-text hover:text-primary hover:bg-primary/10 transition-colors"
-            >
-              {item.label}
-            </a>
+            ) : (
+              <a
+                href={item.href}
+                class="px-3 py-2 rounded-md text-sm font-medium text-text hover:text-primary hover:bg-primary/10 transition-colors"
+              >
+                {item.label}
+              </a>
+            ),
           )
-        ))}
+        }
       </div>
 
       <!-- Mobile menu button -->
@@ -95,8 +87,18 @@ navItems.sort((a, b) => a.order - b.order);
           aria-expanded="false"
         >
           <span class="sr-only">Open main menu</span>
-          <svg class="block h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+          <svg
+            class="block h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"></path>
           </svg>
         </button>
       </div>
@@ -106,65 +108,79 @@ navItems.sort((a, b) => a.order - b.order);
   <!-- Mobile menu -->
   <div class="md:hidden hidden" id="mobile-menu">
     <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-      {navItems.map((item) => (
-        item.children && item.children.length > 0 ? (
-          <div class="mobile-dropdown">
-            <button
-              class="mobile-dropdown-button w-full flex items-center justify-between px-3 py-2 rounded-md text-base font-medium text-text-secondary hover:text-primary hover:bg-primary/10 transition-colors"
-              data-dropdown-id={item.id}
+      {
+        navItems.map((item) =>
+          item.children && item.children.length > 0 ? (
+            <div class="mobile-dropdown">
+              <button
+                class="mobile-dropdown-button w-full flex items-center justify-between px-3 py-2 rounded-md text-base font-medium text-text-secondary hover:text-primary hover:bg-primary/10 transition-colors"
+                data-dropdown-id={item.id}
+              >
+                {item.label}
+                <svg
+                  class="w-4 h-4 transition-transform mobile-dropdown-icon"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+                  />
+                </svg>
+              </button>
+              <div class="mobile-dropdown-content hidden pl-4">
+                {item.children.map((child) => (
+                  <a
+                    href={child.href}
+                    class="block px-3 py-2 rounded-md text-sm font-medium text-text-secondary hover:text-primary hover:bg-primary/10 transition-colors"
+                  >
+                    {child.label}
+                  </a>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <a
+              href={item.href}
+              class="block px-3 py-2 rounded-md text-base font-medium text-text-secondary hover:text-primary hover:bg-primary/10 transition-colors"
             >
               {item.label}
-              <svg class="w-4 h-4 transition-transform mobile-dropdown-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-              </svg>
-            </button>
-            <div class="mobile-dropdown-content hidden pl-4">
-              {item.children.map((child) => (
-                <a
-                  href={child.href}
-                  class="block px-3 py-2 rounded-md text-sm font-medium text-text-secondary hover:text-primary hover:bg-primary/10 transition-colors"
-                >
-                  {child.label}
-                </a>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <a
-            href={item.href}
-            class="block px-3 py-2 rounded-md text-base font-medium text-text-secondary hover:text-primary hover:bg-primary/10 transition-colors"
-          >
-            {item.label}
-          </a>
+            </a>
+          ),
         )
-      ))}
+      }
     </div>
   </div>
 </nav>
 
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const button = document.getElementById('mobile-menu-button');
-    const menu = document.getElementById('mobile-menu');
+  document.addEventListener("DOMContentLoaded", () => {
+    const button = document.getElementById("mobile-menu-button");
+    const menu = document.getElementById("mobile-menu");
 
-    button?.addEventListener('click', () => {
-      const isExpanded = button.getAttribute('aria-expanded') === 'true';
-      button.setAttribute('aria-expanded', (!isExpanded).toString());
-      menu?.classList.toggle('hidden');
+    button?.addEventListener("click", () => {
+      const isExpanded = button.getAttribute("aria-expanded") === "true";
+      button.setAttribute("aria-expanded", (!isExpanded).toString());
+      menu?.classList.toggle("hidden");
     });
 
     // Handle mobile dropdown toggles
-    const dropdownButtons = document.querySelectorAll('.mobile-dropdown-button');
+    const dropdownButtons = document.querySelectorAll(
+      ".mobile-dropdown-button",
+    );
     dropdownButtons.forEach((btn) => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener("click", (e) => {
         e.preventDefault();
-        const dropdown = btn.closest('.mobile-dropdown');
-        const content = dropdown?.querySelector('.mobile-dropdown-content');
-        const icon = dropdown?.querySelector('.mobile-dropdown-icon');
-        
+        const dropdown = btn.closest(".mobile-dropdown");
+        const content = dropdown?.querySelector(".mobile-dropdown-content");
+        const icon = dropdown?.querySelector(".mobile-dropdown-icon");
+
         // Toggle this dropdown
-        content?.classList.toggle('hidden');
-        icon?.classList.toggle('rotate-180');
+        content?.classList.toggle("hidden");
+        icon?.classList.toggle("rotate-180");
       });
     });
   });

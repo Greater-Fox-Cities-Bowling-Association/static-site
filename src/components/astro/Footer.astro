@@ -1,46 +1,75 @@
 ---
+// Load navigation items to use as footer quick links
+import type { NavigationItem } from "../../types/cms";
+
 const currentYear = new Date().getFullYear();
+const siteName = import.meta.env.PUBLIC_SITE_NAME || "";
+
+let navItems: NavigationItem[] = [];
+try {
+  const navigationModule =
+    await import("../../content/navigation/default.json");
+  navItems = (navigationModule.default.items || []).slice(0, 5);
+} catch {
+  // No navigation config; quick links section will be empty
+}
 ---
 
 <footer class="bg-secondary text-text-secondary mt-16">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-      <!-- About Section -->
+      <!-- Site name / About -->
       <div>
-        <h3 class="text-text font-display font-bold text-lg mb-4">
-          Greater Fox Cities BA
-        </h3>
-        <p class="text-sm leading-relaxed">
-          Promoting and supporting bowling excellence in the Greater Fox Cities area since 1950.
-        </p>
+        {
+          siteName && (
+            <h3 class="text-text font-display font-bold text-lg mb-4">
+              {siteName}
+            </h3>
+          )
+        }
       </div>
 
-      <!-- Quick Links -->
-      <div>
-        <h3 class="text-text font-display font-bold text-lg mb-4">
-          Quick Links
-        </h3>
-        <ul class="space-y-2 text-sm">
-          <li><a href="/tournaments" class="hover:text-primary transition-colors">Tournaments</a></li>
-          <li><a href="/honors" class="hover:text-primary transition-colors">Honors</a></li>
-          <li><a href="/centers" class="hover:text-primary transition-colors">Centers</a></li>
-          <li><a href="/scholarships" class="hover:text-primary transition-colors">Scholarships</a></li>
-        </ul>
-      </div>
+      <!-- Quick Links (driven by navigation/default.json) -->
+      {
+        navItems.length > 0 && (
+          <div>
+            <h3 class="text-text font-display font-bold text-lg mb-4">
+              Quick Links
+            </h3>
+            <ul class="space-y-2 text-sm">
+              {navItems.map((item) => (
+                <li>
+                  <a
+                    href={item.href}
+                    class="hover:text-primary transition-colors"
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )
+      }
 
       <!-- Contact -->
       <div>
-        <h3 class="text-text font-display font-bold text-lg mb-4">
-          Contact
-        </h3>
+        <h3 class="text-text font-display font-bold text-lg mb-4">Contact</h3>
         <p class="text-sm">
-          Questions? <a href="/contact" class="text-accent hover:text-primary transition-colors">Get in touch</a>
+          Questions? <a
+            href="/contact"
+            class="text-accent hover:text-primary transition-colors"
+            >Get in touch</a
+          >
         </p>
       </div>
     </div>
 
     <div class="border-t border-text/20 mt-8 pt-8 text-sm text-center">
-      <p>&copy; {currentYear} Greater Fox Cities Bowling Association. All rights reserved.</p>
+      <p>
+        &copy; {currentYear}{siteName ? ` ${siteName}` : ""}. All rights
+        reserved.
+      </p>
     </div>
   </div>
 </footer>

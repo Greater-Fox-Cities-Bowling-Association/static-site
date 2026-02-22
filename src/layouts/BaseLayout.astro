@@ -7,7 +7,7 @@ interface Props {
   description?: string | undefined;
 }
 
-const { title, description = "Greater Fox Cities Bowling Association" } =
+const { title, description = import.meta.env.PUBLIC_SITE_NAME ?? "" } =
   Astro.props;
 
 // Load the active theme for server-side rendering

@@ -144,8 +144,8 @@ After successful authentication, the app **automatically verifies** that the use
 Set these in `.env`:
 
 ```env
-PUBLIC_GITHUB_OWNER=fox-cities-bowling-association
-PUBLIC_GITHUB_REPO=static-site
+PUBLIC_GITHUB_OWNER=your-github-username
+PUBLIC_GITHUB_REPO=your-repo-name
 ```
 
 If not configured, the access check is skipped (dev mode fallback).
@@ -187,8 +187,8 @@ This shows the original token input for users who want manual control.
 
    ```bash
    # Check .env file
-   PUBLIC_GITHUB_OWNER=fox-cities-bowling-association  # Must match your repo
-   PUBLIC_GITHUB_REPO=static-site                       # Must match your repo
+   PUBLIC_GITHUB_OWNER=your-github-username  # Must match your repo
+   PUBLIC_GITHUB_REPO=your-repo-name          # Must match your repo
    ```
 
 3. **For organization repos:**
