@@ -1,0 +1,33 @@
+{
+  "slug": "tournaments/youth-2025",
+  "title": "Youth Association Tournament",
+  "metaDescription": "2024-2025 Youth Association Tournament details, entry form, and results.",
+  "status": "published",
+  "useLayout": true,
+  "layoutId": "default",
+  "sections": [
+    {
+      "id": "youth-hero",
+      "type": "hero",
+      "order": 0,
+      "title": "Youth Association Tournament",
+      "subtitle": "November 1–2 / 8–9 / 15–16, 2025 · Electric City Lanes, Kaukauna"
+    },
+    {
+      "id": "youth-details",
+      "type": "text",
+      "order": 1,
+      "heading": "Tournament Details",
+      "content": "<p>Annual Youth Association Tournament for young bowlers.</p><ul><li><strong>Date:</strong> November 1–2 / 8–9 / 15–16, 2025</li><li><strong>Location:</strong> Electric City Lanes, Kaukauna</li><li><strong>Entry Fee:</strong> See entry form</li><li><strong>Status:</strong> Completed</li><li><strong>Contact:</strong> Beth Kosiorek — <a href=\"mailto:bethkusbc@gmail.com\">bethkusbc@gmail.com</a></li></ul>"
+    },
+    {
+      "id": "youth-links",
+      "type": "text",
+      "order": 2,
+      "heading": "Documents",
+      "content": "<ul><li><a href=\"https://www.greaterfoxcitiesba.com/wp-content/uploads/2025-Youth-Tournament-Entry-Form.pdf\">Entry Form and Rules</a></li><li>Results — TBD</li></ul>"
+    }
+  ],
+  "createdAt": "2026-02-22T00:00:00.000Z",
+  "updatedAt": "2026-02-22T00:00:00.000Z"
+}

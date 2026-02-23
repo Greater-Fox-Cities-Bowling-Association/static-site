@@ -1,0 +1,33 @@
+{
+  "slug": "tournaments/championship-2026",
+  "title": "Open Association Tournament",
+  "metaDescription": "2025-2026 Open Association Tournament details, entry form, results, and prize list.",
+  "status": "published",
+  "useLayout": true,
+  "layoutId": "default",
+  "sections": [
+    {
+      "id": "champ-hero",
+      "type": "hero",
+      "order": 0,
+      "title": "Open Association Tournament",
+      "subtitle": "January 10–11 / 17–18, 2026 · Rolling Thunder Lanes, Neenah"
+    },
+    {
+      "id": "champ-details",
+      "type": "text",
+      "order": 1,
+      "heading": "Tournament Details",
+      "content": "<p>Annual Open Association Tournament featuring singles, doubles, and team events.</p><ul><li><strong>Date:</strong> January 10–11 / 17–18, 2026</li><li><strong>Location:</strong> Rolling Thunder Lanes, Neenah</li><li><strong>Entry Fee:</strong> See entry form</li><li><strong>Status:</strong> Completed</li><li><strong>Contact:</strong> Beth Kosiorek — <a href=\"mailto:bethkusbc@gmail.com\">bethkusbc@gmail.com</a></li></ul>"
+    },
+    {
+      "id": "champ-links",
+      "type": "text",
+      "order": 2,
+      "heading": "Documents",
+      "content": "<ul><li><a href=\"https://webapps.bowl.com/USBC.Registration/registration?tags=GrFoxCities86887\">Online Registration</a></li><li><a href=\"https://www.greaterfoxcitiesba.com/wp-content/uploads/2026-Open-Tournament-Entry-Form.pdf\">Entry Form and Rules</a></li><li><a href=\"https://www.greaterfoxcitiesba.com/wp-content/uploads/2026-Open-Final-Standings.pdf\">Final Standings</a></li><li><a href=\"https://www.greaterfoxcitiesba.com/wp-content/uploads/2026-Open-Final-Prize-List.pdf\">Prize List</a></li></ul>"
+    }
+  ],
+  "createdAt": "2026-02-22T00:00:00.000Z",
+  "updatedAt": "2026-02-22T00:00:00.000Z"
+}

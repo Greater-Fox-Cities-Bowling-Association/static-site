@@ -1,0 +1,33 @@
+{
+  "slug": "tournaments/masters-2026",
+  "title": "Match Play (Masters)",
+  "metaDescription": "2025-2026 Match Play Masters tournament details, entry form, qualifying results, and bracket results.",
+  "status": "published",
+  "useLayout": true,
+  "layoutId": "default",
+  "sections": [
+    {
+      "id": "masters-hero",
+      "type": "hero",
+      "order": 0,
+      "title": "Match Play (Masters)",
+      "subtitle": "January 3, 2026 · Super Bowl, Appleton"
+    },
+    {
+      "id": "masters-details",
+      "type": "text",
+      "order": 1,
+      "heading": "Tournament Details",
+      "content": "<p>Masters division match play tournament with qualifying round followed by head-to-head competition.</p><ul><li><strong>Date:</strong> January 3, 2026</li><li><strong>Location:</strong> Super Bowl, Appleton</li><li><strong>Entry Fee:</strong> See entry form</li><li><strong>Status:</strong> Completed</li><li><strong>Contact:</strong> Beth Kosiorek — <a href=\"mailto:bethkusbc@gmail.com\">bethkusbc@gmail.com</a></li></ul>"
+    },
+    {
+      "id": "masters-links",
+      "type": "text",
+      "order": 2,
+      "heading": "Documents",
+      "content": "<ul><li><a href=\"https://www.greaterfoxcitiesba.com/wp-content/uploads/2026-Match-Play-Masters-Entry-Form.pdf\">Entry Form and Rules</a></li><li><a href=\"https://www.greaterfoxcitiesba.com/wp-content/uploads/2026-Masters-Qualifying-Results.pdf\">Qualifying Results</a></li><li><a href=\"https://www.greaterfoxcitiesba.com/wp-content/uploads/2026-Masters-Bracket-Results.pdf\">Match Play Bracket Results</a></li></ul>"
+    }
+  ],
+  "createdAt": "2026-02-22T00:00:00.000Z",
+  "updatedAt": "2026-02-22T00:00:00.000Z"
+}
