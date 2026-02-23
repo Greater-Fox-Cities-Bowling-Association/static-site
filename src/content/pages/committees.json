@@ -5,7 +5,29 @@
   "status": "published",
   "useLayout": true,
   "layoutId": "default",
-  "sections": [],
+  "sections": [
+    {
+      "id": "committees-hero",
+      "type": "hero",
+      "order": 0,
+      "title": "Committees",
+      "subtitle": "Association President and Association Manager are ad-hoc members of all committees"
+    },
+    {
+      "id": "committees-note",
+      "type": "text",
+      "order": 1,
+      "content": "<p><em>* denotes non-board member. <strong>Bold</strong> denotes committee chair.</em></p>"
+    },
+    {
+      "id": "committees-list",
+      "type": "contentList",
+      "order": 2,
+      "collection": "committees",
+      "displayMode": "cards",
+      "columns": 2
+    }
+  ],
   "data": [
     {
       "name": "Board of Directors",

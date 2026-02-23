@@ -5,7 +5,23 @@
   "status": "published",
   "useLayout": true,
   "layoutId": "default",
-  "sections": [],
+  "sections": [
+    {
+      "id": "news-hero",
+      "type": "hero",
+      "order": 0,
+      "title": "News",
+      "subtitle": "Latest updates from the Greater Fox Cities Bowling Association"
+    },
+    {
+      "id": "news-list",
+      "type": "contentList",
+      "order": 1,
+      "collection": "news",
+      "displayMode": "cards",
+      "columns": 2
+    }
+  ],
   "data": [
     {
       "title": "New Wisconsin State Hall of Famers!",

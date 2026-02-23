@@ -1,0 +1,14 @@
+{
+  "id": "legislative",
+  "name": "Legislative Committee",
+  "role": "Policy",
+  "description": "Reviews and recommends changes to association bylaws and USBC legislative matters.",
+  "members": [
+    { "name": "Ryan Duescher", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Jim Kading", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Matt Mattson", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Annette Zelinski", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" }
+  ],
+  "createdAt": "2026-02-22T00:00:00.000Z",
+  "updatedAt": "2026-02-22T00:00:00.000Z"
+}

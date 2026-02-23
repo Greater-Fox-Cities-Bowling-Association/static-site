@@ -1,0 +1,17 @@
+{
+  "id": "audit-finance",
+  "name": "Audit / Finance Committee",
+  "role": "Finance",
+  "description": "Oversees financial auditing and fiscal management for the Greater Fox Cities Bowling Association.",
+  "members": [
+    { "name": "Ryan Duescher", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Rhonda Hansen", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Beth Kosiorek", "position": "Member", "email": "bethkusbc@gmail.com", "phone": "" },
+    { "name": "Glenn Monte", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Megan Salentine", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Mary Jo Woods", "position": "Member (non-board)", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Annette Zelinski", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" }
+  ],
+  "createdAt": "2026-02-22T00:00:00.000Z",
+  "updatedAt": "2026-02-22T00:00:00.000Z"
+}

@@ -7,10 +7,16 @@
   "layoutId": "default",
   "sections": [
     {
+      "id": "honors-hero",
+      "type": "hero",
+      "order": 0,
+      "title": "Honors & Awards",
+      "subtitle": "Recognizing the achievements of Greater Fox Cities bowlers"
+    },
+    {
       "id": "honors-categories",
       "type": "cardGrid",
       "order": 1,
-      "heading": "Achievements & Recognition",
       "columns": 3,
       "cards": [
         {
@@ -47,6 +53,21 @@
           "title": "Team Records",
           "description": "Team bowling records in the Greater Fox Cities BA.",
           "link": "/honors/team-records"
+        },
+        {
+          "title": "Career Honor Scores",
+          "description": "Cumulative honor scores earned over a bowler's career.",
+          "link": "/honors/career-honor-scores"
+        },
+        {
+          "title": "Career Total Pins",
+          "description": "Total pins knocked down over a bowler's career.",
+          "link": "/honors/career-total-pins"
+        },
+        {
+          "title": "Career Total Games",
+          "description": "Total games bowled over a bowler's career.",
+          "link": "/honors/career-total-games"
         }
       ]
     }

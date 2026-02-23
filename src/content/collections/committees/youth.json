@@ -1,0 +1,16 @@
+{
+  "id": "youth",
+  "name": "Youth Committee",
+  "role": "Youth Programs",
+  "description": "Supports youth bowling programs and the annual Youth Association Tournament.",
+  "members": [
+    { "name": "Carlene Enama", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Rhonda Hansen", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Becky Landgraf", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Caroline Pirkola", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Megan Salentine", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Amy Young", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" }
+  ],
+  "createdAt": "2026-02-22T00:00:00.000Z",
+  "updatedAt": "2026-02-22T00:00:00.000Z"
+}

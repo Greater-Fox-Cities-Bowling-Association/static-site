@@ -1,20 +1,20 @@
 {
-  "slug": "honors/bowler-of-the-year",
-  "title": "Bowler of the Year",
-  "metaDescription": "Annual recognition of the top bowler in each division of the Greater Fox Cities Bowling Association.",
+  "slug": "honors/career-honor-scores",
+  "title": "Career Honor Scores",
+  "metaDescription": "Career honor scores for Greater Fox Cities Bowling Association members.",
   "status": "published",
   "useLayout": true,
   "layoutId": "default",
   "sections": [
     {
-      "id": "boty-hero",
+      "id": "career-honor-scores-hero",
       "type": "hero",
       "order": 0,
-      "title": "Bowler of the Year",
-      "subtitle": "Annual recognition of the top bowler in each division"
+      "title": "Career Honor Scores",
+      "subtitle": "Cumulative honor scores earned over a bowler's career"
     },
     {
-      "id": "boty-list",
+      "id": "career-honor-scores-list",
       "type": "contentList",
       "order": 1,
       "collection": "honors",

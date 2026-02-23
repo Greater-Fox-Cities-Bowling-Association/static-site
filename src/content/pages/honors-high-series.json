@@ -5,7 +5,29 @@
   "status": "published",
   "useLayout": true,
   "layoutId": "default",
-  "sections": [],
+  "sections": [
+    {
+      "id": "high-series-hero",
+      "type": "hero",
+      "order": 0,
+      "title": "High Series",
+      "subtitle": "Top 3-game series scores in Greater Fox Cities bowling history"
+    },
+    {
+      "id": "high-series-record",
+      "type": "text",
+      "order": 1,
+      "content": "<p><strong>Association Record:</strong> Kyle Blaese &mdash; 878 &mdash; Super Classic @ Super Bowl, February 22, 2005</p>"
+    },
+    {
+      "id": "high-series-list",
+      "type": "contentList",
+      "order": 2,
+      "collection": "honors",
+      "displayMode": "cards",
+      "columns": 2
+    }
+  ],
   "createdAt": "2026-02-22T00:00:00.000Z",
   "updatedAt": "2026-02-22T00:00:00.000Z"
 }

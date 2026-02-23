@@ -1,20 +1,20 @@
 {
-  "slug": "honors/bowler-of-the-year",
-  "title": "Bowler of the Year",
-  "metaDescription": "Annual recognition of the top bowler in each division of the Greater Fox Cities Bowling Association.",
+  "slug": "honors/career-total-games",
+  "title": "Career Total Games",
+  "metaDescription": "Career total games bowled for Greater Fox Cities Bowling Association members.",
   "status": "published",
   "useLayout": true,
   "layoutId": "default",
   "sections": [
     {
-      "id": "boty-hero",
+      "id": "career-total-games-hero",
       "type": "hero",
       "order": 0,
-      "title": "Bowler of the Year",
-      "subtitle": "Annual recognition of the top bowler in each division"
+      "title": "Career Total Games",
+      "subtitle": "Total games bowled over a bowler's career"
     },
     {
-      "id": "boty-list",
+      "id": "career-total-games-list",
       "type": "contentList",
       "order": 1,
       "collection": "honors",

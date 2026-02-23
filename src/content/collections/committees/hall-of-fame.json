@@ -1,0 +1,16 @@
+{
+  "id": "hall-of-fame",
+  "name": "Hall of Fame Committee",
+  "role": "Honors",
+  "description": "Reviews nominations and selects inductees for the Greater Fox Cities USBC Hall of Fame.",
+  "members": [
+    { "name": "Ryan Duescher", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Rhonda Hansen", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Becky Landgraf", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Holland Rittmann", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Amy Young", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Annette Zelinski", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" }
+  ],
+  "createdAt": "2026-02-22T00:00:00.000Z",
+  "updatedAt": "2026-02-22T00:00:00.000Z"
+}

@@ -2,7 +2,7 @@
   "id": "st-patricks-day",
   "name": "St. Patrick's Day",
   "description": "Irish green and gold theme for St. Patrick's Day",
-  "isActive": true,
+  "isActive": false,
   "colors": {
     "primary": "#16a34a",
     "secondary": "#f2d31b",

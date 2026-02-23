@@ -1,0 +1,11 @@
+{
+  "id": "career-total-games",
+  "category": "career",
+  "title": "Career Total Games",
+  "description": "Total games bowled over a bowler's career in the Greater Fox Cities Bowling Association.",
+  "format": "tabular",
+  "data": [],
+  "recipients": [],
+  "createdAt": "2026-02-22T00:00:00.000Z",
+  "updatedAt": "2026-02-22T00:00:00.000Z"
+}

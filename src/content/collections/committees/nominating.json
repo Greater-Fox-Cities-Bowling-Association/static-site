@@ -1,0 +1,16 @@
+{
+  "id": "nominating",
+  "name": "Nominating Committee",
+  "role": "Elections",
+  "description": "Identifies and nominates candidates for board positions and officer roles.",
+  "members": [
+    { "name": "Ryan Duescher", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Carlene Enama", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Rhonda Hansen", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Michele Minkebige", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Caroline Pirkola", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Holland Rittmann", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" }
+  ],
+  "createdAt": "2026-02-22T00:00:00.000Z",
+  "updatedAt": "2026-02-22T00:00:00.000Z"
+}

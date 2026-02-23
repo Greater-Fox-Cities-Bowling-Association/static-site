@@ -5,7 +5,23 @@
   "status": "published",
   "useLayout": true,
   "layoutId": "default",
-  "sections": [],
+  "sections": [
+    {
+      "id": "three-hundred-hero",
+      "type": "hero",
+      "order": 0,
+      "title": "300 Games",
+      "subtitle": "Perfect games bowled by members of the Greater Fox Cities Bowling Association"
+    },
+    {
+      "id": "three-hundred-list",
+      "type": "contentList",
+      "order": 1,
+      "collection": "honors",
+      "displayMode": "cards",
+      "columns": 2
+    }
+  ],
   "createdAt": "2026-02-22T00:00:00.000Z",
   "updatedAt": "2026-02-22T00:00:00.000Z"
 }

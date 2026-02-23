@@ -1,20 +1,20 @@
 {
-  "slug": "honors/bowler-of-the-year",
-  "title": "Bowler of the Year",
-  "metaDescription": "Annual recognition of the top bowler in each division of the Greater Fox Cities Bowling Association.",
+  "slug": "honors/career-total-pins",
+  "title": "Career Total Pins",
+  "metaDescription": "Career total pins for Greater Fox Cities Bowling Association members.",
   "status": "published",
   "useLayout": true,
   "layoutId": "default",
   "sections": [
     {
-      "id": "boty-hero",
+      "id": "career-total-pins-hero",
       "type": "hero",
       "order": 0,
-      "title": "Bowler of the Year",
-      "subtitle": "Annual recognition of the top bowler in each division"
+      "title": "Career Total Pins",
+      "subtitle": "Total pins knocked down over a bowler's career"
     },
     {
-      "id": "boty-list",
+      "id": "career-total-pins-list",
       "type": "contentList",
       "order": 1,
       "collection": "honors",

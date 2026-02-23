@@ -1,0 +1,17 @@
+{
+  "id": "awards",
+  "name": "Awards Committee",
+  "role": "Awards",
+  "description": "Reviews and approves bowler award submissions for the Greater Fox Cities Bowling Association.",
+  "members": [
+    { "name": "Carlene Enama", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Becky Landgraf", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Matt Mattson", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Holland Rittmann", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Megan Salentine", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Amy Young", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Annette Zelinski", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" }
+  ],
+  "createdAt": "2026-02-22T00:00:00.000Z",
+  "updatedAt": "2026-02-22T00:00:00.000Z"
+}

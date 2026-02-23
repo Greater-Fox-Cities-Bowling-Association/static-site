@@ -1,0 +1,15 @@
+{
+  "id": "scholarship",
+  "name": "Scholarship Committee",
+  "role": "Scholarships",
+  "description": "Reviews scholarship applications and awards scholarships to deserving youth bowlers.",
+  "members": [
+    { "name": "Carlene Enama", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Jim Kading", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Michele Minkebige", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Holland Rittmann", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Megan Salentine", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" }
+  ],
+  "createdAt": "2026-02-22T00:00:00.000Z",
+  "updatedAt": "2026-02-22T00:00:00.000Z"
+}

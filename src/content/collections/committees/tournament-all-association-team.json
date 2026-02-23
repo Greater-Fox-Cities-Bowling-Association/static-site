@@ -1,0 +1,20 @@
+{
+  "id": "tournament-all-association-team",
+  "name": "Tournament / All-Association Team Committee",
+  "role": "Tournaments & Recognition",
+  "description": "Oversees association tournament operations and all-association team selection.",
+  "members": [
+    { "name": "Carlene Enama", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Ryan Duescher", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Becky Landgraf", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Matt Mattson", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Michele Minkebige", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Glenn Monte", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Caroline Pirkola", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Holland Rittmann", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Megan Salentine", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" },
+    { "name": "Amy Young", "position": "Member", "email": "gfcba920@gmail.com", "phone": "" }
+  ],
+  "createdAt": "2026-02-22T00:00:00.000Z",
+  "updatedAt": "2026-02-22T00:00:00.000Z"
+}

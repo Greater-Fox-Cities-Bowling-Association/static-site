@@ -5,7 +5,30 @@
   "status": "published",
   "useLayout": true,
   "layoutId": "default",
-  "sections": [],
+  "sections": [
+    {
+      "id": "aat-hero",
+      "type": "hero",
+      "order": 0,
+      "title": "All Association Teams",
+      "subtitle": "Annual recognition of the top bowlers across all divisions"
+    },
+    {
+      "id": "aat-documents",
+      "type": "text",
+      "order": 1,
+      "heading": "Programs",
+      "content": "<ul><li><a href=\"https://www.greaterfoxcitiesba.com/wp-content/uploads/2026-All-Association-Team-Program.pdf\">2025-2026 All-Association Team Program</a></li><li><a href=\"https://www.greaterfoxcitiesba.com/wp-content/uploads/2025-All-Association-Team-Program.pdf\">2024-2025 All-Association Team Program</a></li></ul>"
+    },
+    {
+      "id": "aat-list",
+      "type": "contentList",
+      "order": 2,
+      "collection": "honors",
+      "displayMode": "cards",
+      "columns": 2
+    }
+  ],
   "createdAt": "2026-02-22T00:00:00.000Z",
   "updatedAt": "2026-02-22T00:00:00.000Z"
 }

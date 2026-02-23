@@ -13,14 +13,35 @@
       "title": "Contact Us",
       "subtitle": "We are here to help with questions, memberships, and events.",
       "ctaText": "Email Us",
-      "ctaLink": "mailto:info@example.org"
+      "ctaLink": "mailto:bethkusbc@gmail.com"
     },
     {
-      "id": "contact-details",
+      "id": "contact-board-app",
       "order": 2,
       "type": "text",
-      "heading": "Contact Details",
-      "content": "This is a test contact"
+      "heading": "Join the Board",
+      "content": "<p>We are looking for people to join our Board of Directors and future Officer positions. Please consider applying and help make our association even better.</p><p><a href=\"https://www.greaterfoxcitiesba.com/wp-content/uploads/2024/04/Greater-Fox-Cities-BoardMemberApplication.doc\">Download Board Member Application</a></p>"
+    },
+    {
+      "id": "contact-emails",
+      "order": 3,
+      "type": "text",
+      "heading": "Association Emails",
+      "content": "<p><a href=\"mailto:bethkusbc@gmail.com\">bethkusbc@gmail.com</a><br/><a href=\"mailto:gfcba920@gmail.com\">gfcba920@gmail.com</a></p><p><strong>Association Facebook Page:</strong><br/><a href=\"https://www.facebook.com/groups/170723710059698\" target=\"_blank\">Greater Fox Cities USBC</a></p>"
+    },
+    {
+      "id": "contact-officers",
+      "order": 4,
+      "type": "text",
+      "heading": "Association Officers",
+      "content": "<ul><li>Andrew Belonger — President</li><li>Annette Zelinski — Vice President</li><li>Becky Landgraf — Sergeant at Arms</li><li>Beth Kosiorek — Association Manager</li><li>Keith Koch &amp; Terry Anderson — Historian</li></ul>"
+    },
+    {
+      "id": "contact-board",
+      "order": 5,
+      "type": "text",
+      "heading": "Board of Directors",
+      "content": "<ul><li>Ryan Duescher</li><li>Carlene Enama</li><li>Rhonda Hansen</li><li>Jim Kading</li><li>Matt Mattson</li><li>Glenn Monte</li><li>Michele Minkebige</li><li>Caroline Pirkola</li><li>Holland Rittmann</li><li>Megan Salentine</li><li>Amy Young</li><li><em>Vacancies — 1 spot available, apply today!</em></li></ul>"
     }
   ],
   "createdAt": "2026-02-15T00:00:00.000Z",

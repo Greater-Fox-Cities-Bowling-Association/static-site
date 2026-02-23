@@ -5,7 +5,23 @@
   "status": "published",
   "useLayout": true,
   "layoutId": "default",
-  "sections": [],
+  "sections": [
+    {
+      "id": "team-records-hero",
+      "type": "hero",
+      "order": 0,
+      "title": "Team Records",
+      "subtitle": "Outstanding team performances in Greater Fox Cities bowling"
+    },
+    {
+      "id": "team-records-list",
+      "type": "contentList",
+      "order": 1,
+      "collection": "honors",
+      "displayMode": "cards",
+      "columns": 2
+    }
+  ],
   "createdAt": "2026-02-22T00:00:00.000Z",
   "updatedAt": "2026-02-22T00:00:00.000Z"
 }

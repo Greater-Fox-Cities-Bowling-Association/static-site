@@ -5,7 +5,30 @@
   "status": "published",
   "useLayout": true,
   "layoutId": "default",
-  "sections": [],
+  "sections": [
+    {
+      "id": "hof-hero",
+      "type": "hero",
+      "order": 0,
+      "title": "Hall of Fame",
+      "subtitle": "Honoring the greatest bowlers in Greater Fox Cities history"
+    },
+    {
+      "id": "hof-documents",
+      "type": "text",
+      "order": 1,
+      "heading": "Documents",
+      "content": "<ul><li><a href=\"https://www.greaterfoxcitiesba.com/wp-content/uploads/Hall-of-Fame-Constitution-2022.pdf\">Hall of Fame Constitution</a></li><li><a href=\"https://www.greaterfoxcitiesba.com/wp-content/uploads/Hall-of-Fame-Nomination-Form.pdf\">Hall of Fame Nomination Form</a></li></ul>"
+    },
+    {
+      "id": "hof-list",
+      "type": "contentList",
+      "order": 2,
+      "collection": "honors",
+      "displayMode": "cards",
+      "columns": 2
+    }
+  ],
   "createdAt": "2026-02-22T00:00:00.000Z",
   "updatedAt": "2026-02-22T00:00:00.000Z"
 }

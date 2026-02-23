@@ -1,0 +1,47 @@
+{
+  "slug": "awards",
+  "title": "Awards",
+  "metaDescription": "Bowling awards for Greater Fox Cities USBC members.",
+  "status": "published",
+  "useLayout": true,
+  "layoutId": "default",
+  "sections": [
+    {
+      "id": "awards-hero",
+      "type": "hero",
+      "order": 0,
+      "title": "Awards",
+      "subtitle": "Recognizing outstanding performances by Greater Fox Cities USBC members"
+    },
+    {
+      "id": "awards-forms",
+      "type": "text",
+      "order": 1,
+      "heading": "Award Applications",
+      "content": "<p><a href=\"https://www.greaterfoxcitiesba.com/wp-content/uploads/gfcba-awards-application.pdf\">Awards Form – Paper (PDF)</a></p><p><a href=\"https://bit.ly/gfcusbc-awards\">Awards Form – Online</a></p><p><a href=\"https://www.greaterfoxcitiesba.com/wp-content/uploads/Awards-Control-Form.pdf\">Awards Control Form (PDF)</a></p>"
+    },
+    {
+      "id": "awards-eligibility",
+      "type": "text",
+      "order": 2,
+      "heading": "Eligibility",
+      "content": "<p><strong>Who:</strong> Adults, 18 years or older, who are sanctioned in any certified league within Greater Fox Cities USBC, are eligible for the awards shown below. Bowler must pay sanction, and card must be received by Association Manager, in order to be valid.</p><p><strong>When:</strong> Use last season's Bowl.com average until bowler establishes new average this season (21 games), then use this current season's average going forward. If no average is available, awards will begin for that bowler after 21 games this season in that league. Previous season scores are not eligible for local awards. Awards for Dutch 200, splits, clean game, etc. are available the first night you bowl.</p><p><strong>Where:</strong> Forms are available on our website and in League Secretary packets. Bowlers should contact their secretary. Secretaries should turn forms into the Association Manager.</p>"
+    },
+    {
+      "id": "awards-lifetime",
+      "type": "text",
+      "order": 3,
+      "heading": "Once Per Lifetime Awards",
+      "content": "<ul><li>800 series (Men or Women)</li><li>700 series (Women, or Men with average under 190)</li><li>600 series (Women with average under 170)</li><li>300 game (Men or Women)</li></ul>"
+    },
+    {
+      "id": "awards-season",
+      "type": "text",
+      "order": 4,
+      "heading": "Once Per Season Awards",
+      "content": "<ul><li>Triplicate</li><li>Clean Series</li><li>All Spare Game</li><li>Dutch 200 Game</li><li>11 in a row</li><li>60 pins over average game (Men)</li><li>120 pins over average series (Men)</li><li>40 pins over average game (Women)</li><li>80 pins over average series (Women)</li><li>Convert any of the following splits: 7-10, Big 4 (4-6-7-10), Lily (5-7-10), Greek Church (4-6-7-9-10 or 4-6-7-8-10)</li></ul>"
+    }
+  ],
+  "createdAt": "2026-02-22T00:00:00.000Z",
+  "updatedAt": "2026-02-22T00:00:00.000Z"
+}

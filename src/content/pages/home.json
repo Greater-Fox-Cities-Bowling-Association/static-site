@@ -11,10 +11,45 @@
       "type": "hero",
       "order": 0,
       "title": "Greater Fox Cities Bowling Association",
-      "subtitle": "Welcome to our bowling community",
+      "subtitle": "Serving bowlers in the Fox Cities area since 1947",
       "backgroundImage": "",
-      "ctaText": "Learn More",
-      "ctaLink": "#"
+      "ctaText": "View Tournaments",
+      "ctaLink": "/tournaments"
+    },
+    {
+      "id": "home-welcome",
+      "type": "text",
+      "order": 1,
+      "heading": "Welcome",
+      "content": "<p>The Greater Fox Cities Bowling Association (GFCBA) is the local USBC-chartered association serving adult and youth bowlers in the Fox Cities area of Wisconsin. We organize and sanction competitive bowling tournaments, recognize outstanding achievements through our honors and awards programs, award scholarships to deserving youth bowlers, and support the bowling community through our local member centers.</p><p>Whether you are a seasoned competitor or a first-time bowler, we invite you to get involved with your local bowling association.</p>"
+    },
+    {
+      "id": "home-quicklinks",
+      "type": "cardGrid",
+      "order": 2,
+      "columns": 4,
+      "cards": [
+        {
+          "title": "Tournaments",
+          "description": "Compete in our annual association tournaments including Open, Women's, Masters, Seniors, and Youth events.",
+          "link": "/tournaments"
+        },
+        {
+          "title": "Honors & Awards",
+          "description": "Recognizing outstanding bowlers through hall of fame, high average, high series, and bowler of the year awards.",
+          "link": "/honors"
+        },
+        {
+          "title": "Bowling Centers",
+          "description": "Find a local USBC-certified bowling center near you in the Greater Fox Cities area.",
+          "link": "/centers"
+        },
+        {
+          "title": "Committees",
+          "description": "Meet the dedicated volunteers who serve on our board and association committees.",
+          "link": "/committees"
+        }
+      ]
     }
   ],
   "updatedAt": "2026-02-22T17:15:24.163Z",

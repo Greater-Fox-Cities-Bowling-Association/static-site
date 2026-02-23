@@ -19,7 +19,15 @@
       "id": "tournaments",
       "label": "Tournaments",
       "href": "/tournaments",
-      "order": 3
+      "order": 3,
+      "children": [
+        {
+          "id": "tournament-history",
+          "label": "Tournament History",
+          "href": "/tournaments/tournament-history",
+          "order": 1
+        }
+      ]
     },
     {
       "id": "honors",
@@ -62,6 +70,30 @@
           "label": "Bowler of the Year",
           "href": "/honors/bowler-of-the-year",
           "order": 6
+        },
+        {
+          "id": "team-records",
+          "label": "Team Records",
+          "href": "/honors/team-records",
+          "order": 7
+        },
+        {
+          "id": "career-honor-scores",
+          "label": "Career Honor Scores",
+          "href": "/honors/career-honor-scores",
+          "order": 8
+        },
+        {
+          "id": "career-total-pins",
+          "label": "Career Total Pins",
+          "href": "/honors/career-total-pins",
+          "order": 9
+        },
+        {
+          "id": "career-total-games",
+          "label": "Career Total Games",
+          "href": "/honors/career-total-games",
+          "order": 10
         }
       ]
     },

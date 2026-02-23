@@ -5,7 +5,23 @@
   "status": "published",
   "useLayout": true,
   "layoutId": "default",
-  "sections": [],
+  "sections": [
+    {
+      "id": "high-avg-hero",
+      "type": "hero",
+      "order": 0,
+      "title": "High Average",
+      "subtitle": "Highest seasonal averages recognized by the Greater Fox Cities Bowling Association"
+    },
+    {
+      "id": "high-avg-list",
+      "type": "contentList",
+      "order": 1,
+      "collection": "honors",
+      "displayMode": "cards",
+      "columns": 2
+    }
+  ],
   "createdAt": "2026-02-22T00:00:00.000Z",
   "updatedAt": "2026-02-22T00:00:00.000Z"
 }

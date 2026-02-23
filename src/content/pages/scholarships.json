@@ -5,7 +5,22 @@
   "status": "published",
   "useLayout": true,
   "layoutId": "default",
-  "sections": [],
+  "sections": [
+    {
+      "id": "scholarships-hero",
+      "type": "hero",
+      "order": 0,
+      "title": "Scholarships",
+      "subtitle": "Supporting the next generation of bowlers"
+    },
+    {
+      "id": "scholarships-forms",
+      "type": "text",
+      "order": 1,
+      "heading": "Scholarship Applications",
+      "content": "<p>Download and complete the appropriate scholarship application form below.</p><ul><li><a href=\"https://www.greaterfoxcitiesba.com/wp-content/uploads/2026-GFCUSBC-Scholarship.pdf\">Greater Fox Cities BA Scholarship Form</a></li><li><a href=\"https://www.greaterfoxcitiesba.com/wp-content/uploads/2026-WSUSBC-Scholarship.pdf\">Wisconsin State Scholarship Form</a></li></ul>"
+    }
+  ],
   "createdAt": "2026-02-15T00:00:00.000Z",
   "updatedAt": "2026-02-15T00:00:00.000Z"
 }

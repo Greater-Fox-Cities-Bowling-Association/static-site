@@ -2,7 +2,7 @@
   "id": "bowling-green",
   "name": "Bowling Green",
   "description": "A vibrant green theme inspired by bowling lanes",
-  "isActive": false,
+  "isActive": true,
   "colors": {
     "primary": "#10b981",
     "secondary": "#6b7280",
