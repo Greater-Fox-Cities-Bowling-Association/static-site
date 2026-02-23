@@ -3,8 +3,10 @@ import type {
   PrimitiveComponent,
   ComponentField,
   FieldType,
+  SectionStyleOverrides,
 } from "../../types/cms";
 import { fetchPrimitiveComponents, saveComponent } from "../../utils/githubApi";
+import StylesPalette from "./StylesPalette";
 
 interface PrimitiveComponentEditorProps {
   componentId?: string;
@@ -388,6 +390,24 @@ export default function PrimitiveComponentEditor({
               </div>
             )}
           </div>
+        </div>
+
+        {/* Styles */}
+        <div className="border-t border-gray-200 pt-4">
+          <h3 className="text-sm font-medium text-gray-700 mb-3">
+            Default Styles
+          </h3>
+          <p className="text-xs text-gray-500 mb-3">
+            These style overrides are applied by default when this component is
+            rendered.
+          </p>
+          <StylesPalette
+            styles={component.styles ?? {}}
+            onChange={(styles: SectionStyleOverrides) =>
+              setComponent({ ...component, styles })
+            }
+            collapsible={false}
+          />
         </div>
 
         {/* Actions */}

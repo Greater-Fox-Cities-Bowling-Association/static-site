@@ -10,12 +10,16 @@
     {
       "id": "content-list-section",
       "primitive": "section",
-      "props": { "padding": "large" }
+      "props": {
+        "padding": "large"
+      }
     },
     {
       "id": "content-list-heading",
       "primitive": "text",
-      "props": { "heading": "{{heading}}" }
+      "props": {
+        "heading": "{{heading}}"
+      }
     },
     {
       "id": "content-list-data",
@@ -29,7 +33,12 @@
     }
   ],
   "dataSchema": [
-    { "name": "heading", "label": "Heading", "type": "string", "required": false },
+    {
+      "name": "heading",
+      "label": "Heading",
+      "type": "string",
+      "required": false
+    },
     {
       "name": "collection",
       "label": "Collection",
@@ -43,7 +52,11 @@
       "type": "enum",
       "required": true,
       "defaultValue": "cards",
-      "values": ["cards", "table", "list"]
+      "values": [
+        "cards",
+        "table",
+        "list"
+      ]
     },
     {
       "name": "columns",
@@ -51,7 +64,11 @@
       "type": "enum",
       "required": false,
       "defaultValue": "3",
-      "values": ["2", "3", "4"]
+      "values": [
+        "2",
+        "3",
+        "4"
+      ]
     },
     {
       "name": "limit",
@@ -60,6 +77,14 @@
       "required": false,
       "description": "Leave blank to show all"
     },
-    { "name": "showFilters", "label": "Show Filters", "type": "boolean", "required": false }
-  ]
+    {
+      "name": "showFilters",
+      "label": "Show Filters",
+      "type": "boolean",
+      "required": false
+    }
+  ],
+  "styles": {
+    "textColor": "#111827"
+  }
 }

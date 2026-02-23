@@ -76,6 +76,8 @@ export interface PrimitiveComponent {
   type: 'primitive';
   icon?: string;
   fields: ComponentField[];
+  /** Default style overrides applied when this component is rendered. */
+  styles?: SectionStyleOverrides;
 }
 
 export interface CompositeComponentInstance {
@@ -96,6 +98,8 @@ export interface CompositeComponent {
   defaultColumns: number; // Suggested column span (1-12) when placed on a page
   components: CompositeComponentInstance[]; // Ordered list of primitive components
   dataSchema: ComponentField[]; // Schema for data that gets passed to the composite
+  /** Default style overrides applied when this composite is rendered. */
+  styles?: SectionStyleOverrides;
 }
 
 export type Component = PrimitiveComponent | CompositeComponent;
