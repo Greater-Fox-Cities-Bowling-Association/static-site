@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import type { CompositeComponent } from "../../types/cms";
+import type { CompositeComponent, PrimitiveComponent } from "../../types/cms";
 import {
   fetchCompositeComponents,
+  fetchPrimitiveComponents,
   deleteCompositeComponent,
 } from "../../utils/githubApi";
 
@@ -9,6 +10,8 @@ interface ComponentListProps {
   token: string;
   onEditComposite: (componentId: string) => void;
   onCreateComposite: () => void;
+  onEditPrimitive: (componentId: string) => void;
+  onCreatePrimitive: () => void;
   useGitHubAPI: boolean;
 }
 
@@ -16,11 +19,17 @@ export default function ComponentList({
   token,
   onEditComposite,
   onCreateComposite,
+  onEditPrimitive,
+  onCreatePrimitive,
   useGitHubAPI,
 }: ComponentListProps) {
   const [composites, setComposites] = useState<CompositeComponent[]>([]);
+  const [primitives, setPrimitives] = useState<PrimitiveComponent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"composites" | "primitives">(
+    "composites",
+  );
   const [deleting, setDeleting] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<CompositeComponent | null>(
     null,
@@ -35,13 +44,12 @@ export default function ComponentList({
     setLoading(true);
     setError(null);
     try {
-      const compositesData = await fetchCompositeComponents(
-        token,
-        undefined,
-        undefined,
-        useGitHubAPI,
-      );
+      const [compositesData, primitivesData] = await Promise.all([
+        fetchCompositeComponents(token, undefined, undefined, useGitHubAPI),
+        fetchPrimitiveComponents(token, undefined, undefined, useGitHubAPI),
+      ]);
       setComposites(compositesData);
+      setPrimitives(primitivesData);
     } catch (err) {
       console.error("Error loading components:", err);
       setError(
@@ -141,15 +149,43 @@ export default function ComponentList({
             Component Library
           </h2>
           <p className="text-sm text-gray-600 mt-1">
-            Create reusable composite components from primitives or other
-            composites
+            Manage primitives (building blocks) and composites (assembled
+            layouts)
           </p>
         </div>
         <button
-          onClick={onCreateComposite}
+          onClick={
+            activeTab === "composites" ? onCreateComposite : onCreatePrimitive
+          }
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
         >
-          + Create Component
+          {activeTab === "composites"
+            ? "+ Create Composite"
+            : "+ Create Primitive"}
+        </button>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex border-b border-gray-200 mb-6">
+        <button
+          onClick={() => setActiveTab("composites")}
+          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+            activeTab === "composites"
+              ? "border-blue-600 text-blue-600"
+              : "border-transparent text-gray-500 hover:text-gray-700"
+          }`}
+        >
+          Composites ({composites.length})
+        </button>
+        <button
+          onClick={() => setActiveTab("primitives")}
+          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+            activeTab === "primitives"
+              ? "border-blue-600 text-blue-600"
+              : "border-transparent text-gray-500 hover:text-gray-700"
+          }`}
+        >
+          Primitives ({primitives.length})
         </button>
       </div>
 
@@ -194,83 +230,135 @@ export default function ComponentList({
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {composites.map((composite) => {
-          const primitiveCount = composite.components.filter(
-            (c) => c.kind !== "composite",
-          ).length;
-          const compositeCount = composite.components.filter(
-            (c) => c.kind === "composite",
-          ).length;
-          const isDeleting = deleting === composite.id;
-          return (
-            <div
-              key={composite.id}
-              className={`border rounded-lg p-4 transition-colors relative ${
-                isDeleting
-                  ? "border-gray-200 opacity-50 pointer-events-none"
-                  : "border-gray-200 hover:border-blue-400 cursor-pointer"
-              }`}
-              onClick={() => !isDeleting && onEditComposite(composite.id)}
-            >
-              <div className="flex items-start justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  {composite.icon && (
-                    <span className="text-2xl">{composite.icon}</span>
+      {/* Composites tab */}
+      {activeTab === "composites" && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {composites.map((composite) => {
+              const primitiveCount = composite.components.filter(
+                (c) => c.kind !== "composite",
+              ).length;
+              const compositeCount = composite.components.filter(
+                (c) => c.kind === "composite",
+              ).length;
+              const isDeleting = deleting === composite.id;
+              return (
+                <div
+                  key={composite.id}
+                  className={`border rounded-lg p-4 transition-colors relative ${
+                    isDeleting
+                      ? "border-gray-200 opacity-50 pointer-events-none"
+                      : "border-gray-200 hover:border-blue-400 cursor-pointer"
+                  }`}
+                  onClick={() => !isDeleting && onEditComposite(composite.id)}
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      {composite.icon && (
+                        <span className="text-2xl">{composite.icon}</span>
+                      )}
+                      <h3 className="font-semibold text-gray-900">
+                        {composite.name}
+                      </h3>
+                    </div>
+                    <button
+                      onClick={(e) => handleDeleteClick(e, composite)}
+                      disabled={isDeleting}
+                      title="Delete component"
+                      className="text-gray-300 hover:text-red-500 transition-colors text-sm px-1 disabled:opacity-30"
+                    >
+                      🗑
+                    </button>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-3">
+                    {composite.description}
+                  </p>
+                  <div className="flex items-center gap-3 text-xs text-gray-500">
+                    {primitiveCount > 0 && (
+                      <span>
+                        {primitiveCount} primitive
+                        {primitiveCount !== 1 ? "s" : ""}
+                      </span>
+                    )}
+                    {compositeCount > 0 && (
+                      <>
+                        {primitiveCount > 0 && <span>•</span>}
+                        <span className="text-purple-600">
+                          {compositeCount} composite
+                          {compositeCount !== 1 ? "s" : ""}
+                        </span>
+                      </>
+                    )}
+                    <span>•</span>
+                    <span>
+                      {composite.dataSchema.length} field
+                      {composite.dataSchema.length !== 1 ? "s" : ""}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          {composites.length === 0 && (
+            <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
+              <p className="text-gray-500 mb-4">No composites created yet</p>
+              <button
+                onClick={onCreateComposite}
+                className="text-blue-600 hover:text-blue-700 font-medium"
+              >
+                Create your first composite
+              </button>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Primitives tab */}
+      {activeTab === "primitives" && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {primitives.map((primitive) => (
+              <div
+                key={primitive.id}
+                className="border border-gray-200 hover:border-blue-400 cursor-pointer rounded-lg p-4 transition-colors"
+                onClick={() => onEditPrimitive(primitive.id)}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  {primitive.icon && (
+                    <span className="text-2xl">{primitive.icon}</span>
                   )}
                   <h3 className="font-semibold text-gray-900">
-                    {composite.name}
+                    {primitive.name}
                   </h3>
                 </div>
-                <button
-                  onClick={(e) => handleDeleteClick(e, composite)}
-                  disabled={isDeleting}
-                  title="Delete component"
-                  className="text-gray-300 hover:text-red-500 transition-colors text-sm px-1 disabled:opacity-30"
-                >
-                  🗑
-                </button>
+                <p className="text-sm text-gray-600 mb-3">
+                  {primitive.description}
+                </p>
+                <div className="text-xs text-gray-500">
+                  {primitive.fields.length} field
+                  {primitive.fields.length !== 1 ? "s" : ""}
+                  {primitive.styles &&
+                    Object.values(primitive.styles).some(Boolean) && (
+                      <span className="ml-2 px-1.5 py-0.5 bg-purple-100 text-purple-700 rounded">
+                        styled
+                      </span>
+                    )}
+                </div>
               </div>
-              <p className="text-sm text-gray-600 mb-3">
-                {composite.description}
-              </p>
-              <div className="flex items-center gap-3 text-xs text-gray-500">
-                {primitiveCount > 0 && (
-                  <span>
-                    {primitiveCount} primitive
-                    {primitiveCount !== 1 ? "s" : ""}
-                  </span>
-                )}
-                {compositeCount > 0 && (
-                  <>
-                    {primitiveCount > 0 && <span>•</span>}
-                    <span className="text-purple-600">
-                      {compositeCount} composite
-                      {compositeCount !== 1 ? "s" : ""}
-                    </span>
-                  </>
-                )}
-                <span>•</span>
-                <span>
-                  {composite.dataSchema.length} field
-                  {composite.dataSchema.length !== 1 ? "s" : ""}
-                </span>
-              </div>
+            ))}
+          </div>
+          {primitives.length === 0 && (
+            <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
+              <p className="text-gray-500 mb-4">No primitives found</p>
+              <button
+                onClick={onCreatePrimitive}
+                className="text-blue-600 hover:text-blue-700 font-medium"
+              >
+                Create your first primitive
+              </button>
             </div>
-          );
-        })}
-      </div>
-
-      {composites.length === 0 && (
-        <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
-          <p className="text-gray-500 mb-4">No components created yet</p>
-          <button
-            onClick={onCreateComposite}
-            className="text-blue-600 hover:text-blue-700 font-medium"
-          >
-            Create your first component
-          </button>
-        </div>
+          )}
+        </>
       )}
 
       {/* Info Box */}

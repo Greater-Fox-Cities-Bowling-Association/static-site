@@ -26,8 +26,15 @@
       "type": "enum",
       "required": false,
       "defaultValue": "left",
-      "values": ["left", "center", "right"],
+      "values": [
+        "left",
+        "center",
+        "right"
+      ],
       "description": "How to align the text"
     }
-  ]
+  ],
+  "styles": {
+    "textColor": "text"
+  }
 }

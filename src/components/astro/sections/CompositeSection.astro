@@ -18,9 +18,11 @@
  * Supported primitives: text, image, button, link, list, divider, spacer,
  *   table, cards (pipe-separated card grid), collection (async CMS data)
  */
-import type { ComponentSection } from "../../../types/cms";
+import type {
+  ComponentSection,
+  SectionStyleOverrides,
+} from "../../../types/cms";
 import { getCollection } from "astro:content";
-import NestedComposite from "./CompositeSection.astro";
 
 interface Props {
   section: ComponentSection;
@@ -92,6 +94,41 @@ const spacerClass: Record<string, string> = {
   xlarge: "h-24",
 };
 
+// ── Style helpers ─────────────────────────────────────────────────────────────
+// Resolve a theme token name ("textSecondary") or pass through raw CSS ("#f2d31b", "2rem")
+const THEME_TOKENS = new Set([
+  "primary",
+  "secondary",
+  "background",
+  "text",
+  "textSecondary",
+  "accent",
+]);
+function resolveColor(v: string | undefined): string | undefined {
+  if (!v) return undefined;
+  if (THEME_TOKENS.has(v)) {
+    return `var(--color-${v.replace(/([A-Z])/g, (m: string) => `-${m.toLowerCase()}`)})`;
+  }
+  return v;
+}
+
+function styleOverridesToCSS(s: SectionStyleOverrides | undefined): string {
+  if (!s) return "";
+  const parts: string[] = [];
+  if (s.backgroundColor)
+    parts.push(`background-color:${resolveColor(s.backgroundColor)}`);
+  if (s.backgroundImage) {
+    parts.push(`background-image:url('${s.backgroundImage}')`);
+    parts.push(`background-size:${s.backgroundSize ?? "cover"}`);
+    parts.push(`background-position:${s.backgroundPosition ?? "center"}`);
+  }
+  if (s.textColor) parts.push(`color:${resolveColor(s.textColor)}`);
+  if (s.fontFamily) parts.push(`font-family:${s.fontFamily}`);
+  if (s.paddingTop) parts.push(`padding-top:${s.paddingTop}`);
+  if (s.paddingBottom) parts.push(`padding-bottom:${s.paddingBottom}`);
+  return parts.join(";");
+}
+
 // ── Determine what to render ──────────────────────────────────────────────────
 
 // Instances can be primitive renders OR nested composite renders
@@ -101,11 +138,16 @@ type InstanceItem =
 
 let instances: InstanceItem[] = [];
 let containerStyle = "";
+let containerClasses = "";
 
 if (section.componentType === "composite") {
   const composite = composites.find((c) => c.id === section.componentId);
   if (composite) {
+    // Apply composite-level default styles as a base
+    containerStyle = styleOverridesToCSS(composite.styles);
+    containerClasses = composite.styles?.customClasses ?? "";
     // Extract wrapper props from the "section" primitive instance (if present)
+    // — these take priority over composite-level default styles
     const sectionInst = composite.components?.find(
       (c: any) => c.primitive === "section" && c.kind !== "composite",
     );
@@ -116,7 +158,9 @@ if (section.componentType === "composite") {
         parts.push(`background-color:${cp.backgroundColor}`);
       if (cp.padding)
         parts.push(`padding:${paddingMap[String(cp.padding)] ?? "1.25rem"}`);
-      containerStyle = parts.join(";");
+      containerStyle = [containerStyle, parts.join(";")]
+        .filter(Boolean)
+        .join(";");
     }
     // Build instance list — composites embedded inline, primitives as before
     instances = (composite.components ?? [])
@@ -179,7 +223,10 @@ for (const inst of instances) {
 {
   instances.length > 0 && (
     <div
-      class="composite-component rounded shadow-sm overflow-hidden"
+      class:list={[
+        "composite-component rounded shadow-sm overflow-hidden",
+        containerClasses,
+      ]}
       data-component-id={section.componentId}
       data-component-type={section.componentType}
       style={containerStyle || undefined}
@@ -195,16 +242,22 @@ for (const inst of instances) {
             columns: 12,
             data: inst.props,
           };
-          return <NestedComposite section={nestedSection as any} />;
+          return <Astro.self section={nestedSection as any} />;
         }
 
         const primitive = (inst as any).primitive ?? "";
         const p = inst.props;
+        const primDef = primitiveMap[primitive as string];
+        const primStyle = styleOverridesToCSS(primDef?.styles);
+        const primCls = primDef?.styles?.customClasses ?? "";
 
         /* ── text ── */
         if (primitive === "text") {
           return (
-            <div class={`text-${String(p.alignment ?? "left")}`}>
+            <div
+              class:list={[`text-${String(p.alignment ?? "left")}`, primCls]}
+              style={primStyle || undefined}
+            >
               {p.heading && (
                 <h3 class="font-bold text-lg mb-1">{String(p.heading)}</h3>
               )}
@@ -216,7 +269,10 @@ for (const inst of instances) {
         /* ── image ── */
         if (primitive === "image" && p.src) {
           return (
-            <figure class="m-0">
+            <figure
+              class:list={["m-0", primCls]}
+              style={primStyle || undefined}
+            >
               <img
                 src={String(p.src)}
                 alt={p.alt ? String(p.alt) : ""}
@@ -246,7 +302,12 @@ for (const inst of instances) {
           return (
             <a
               href={String(p.link)}
-              class={`inline-block px-4 py-2 rounded font-semibold transition-colors text-sm ${btnClass}`}
+              class:list={[
+                "inline-block px-4 py-2 rounded font-semibold transition-colors text-sm",
+                btnClass,
+                primCls,
+              ]}
+              style={primStyle || undefined}
             >
               {String(p.text ?? "")}
             </a>
@@ -260,7 +321,14 @@ for (const inst of instances) {
               href={String(p.href)}
               target={p.openInNewTab ? "_blank" : undefined}
               rel={p.openInNewTab ? "noopener noreferrer" : undefined}
-              class={`text-primary text-sm ${p.underline !== "false" && p.underline !== false ? "underline" : ""}`}
+              class:list={[
+                "text-primary text-sm",
+                p.underline !== "false" && p.underline !== false
+                  ? "underline"
+                  : "",
+                primCls,
+              ]}
+              style={primStyle || undefined}
             >
               {String(p.text ?? p.href)}
             </a>
@@ -276,7 +344,7 @@ for (const inst of instances) {
               ? rawItems.split(",").map((s) => s.trim())
               : [];
           return (
-            <div>
+            <div class={primCls || undefined} style={primStyle || undefined}>
               {p.heading && (
                 <h4 class="font-semibold text-sm mb-1">{String(p.heading)}</h4>
               )}
@@ -309,8 +377,12 @@ for (const inst of instances) {
           const mc = marginClass[String(p.margin ?? "medium")] ?? "my-4";
           return (
             <hr
-              class={`${thicknessClass} ${mc} border-gray-200`}
-              style={p.color ? `border-color:${String(p.color)}` : undefined}
+              class:list={[thicknessClass, mc, "border-gray-200", primCls]}
+              style={
+                [p.color ? `border-color:${String(p.color)}` : "", primStyle]
+                  .filter(Boolean)
+                  .join(";") || undefined
+              }
             />
           );
         }
@@ -318,7 +390,13 @@ for (const inst of instances) {
         /* ── spacer ── */
         if (primitive === "spacer") {
           const sc = spacerClass[String(p.size ?? "medium")] ?? "h-8";
-          return <div class={sc} aria-hidden="true" />;
+          return (
+            <div
+              class:list={[sc, primCls]}
+              style={primStyle || undefined}
+              aria-hidden="true"
+            />
+          );
         }
 
         /* ── cards (grid of pipe-separated items) ── */
@@ -337,7 +415,10 @@ for (const inst of instances) {
                 ? "md:grid-cols-4"
                 : "md:grid-cols-3";
           return (
-            <div class={`grid gap-4 grid-cols-1 ${gridClass}`}>
+            <div
+              class:list={["grid gap-4 grid-cols-1", gridClass, primCls]}
+              style={primStyle || undefined}
+            >
               {cardItems.map((item) => {
                 const parts = item.split("|").map((s) => s.trim());
                 const cardTitle = parts[0] ?? "";
@@ -395,7 +476,10 @@ for (const inst of instances) {
           }
           if (mode === "table") {
             return (
-              <div class="overflow-x-auto">
+              <div
+                class:list={["overflow-x-auto", primCls]}
+                style={primStyle || undefined}
+              >
                 <table class="min-w-full bg-surface border border-border rounded-lg text-sm">
                   <thead>
                     <tr class="bg-muted/20 text-left">
@@ -429,7 +513,10 @@ for (const inst of instances) {
           }
           if (mode === "list") {
             return (
-              <ul class="space-y-2">
+              <ul
+                class:list={["space-y-2", primCls]}
+                style={primStyle || undefined}
+              >
                 {collItems.map((item: any) => (
                   <li class="flex items-center gap-3 bg-surface rounded p-3 border border-border">
                     <span class="font-medium text-foreground">
@@ -442,7 +529,10 @@ for (const inst of instances) {
           }
           // default: cards
           return (
-            <div class={`grid gap-6 grid-cols-1 ${gridClass}`}>
+            <div
+              class:list={["grid gap-6 grid-cols-1", gridClass, primCls]}
+              style={primStyle || undefined}
+            >
               {collItems.map((item: any) => {
                 const d = item.data ?? {};
                 return (
@@ -466,7 +556,10 @@ for (const inst of instances) {
         /* ── table ── */
         if (primitive === "table") {
           return (
-            <div class="overflow-x-auto text-sm">
+            <div
+              class:list={["overflow-x-auto text-sm", primCls]}
+              style={primStyle || undefined}
+            >
               <table class="min-w-full border-collapse">
                 {p.heading && (
                   <caption class="font-semibold text-left mb-1">

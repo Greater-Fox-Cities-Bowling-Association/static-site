@@ -49,6 +49,30 @@ export interface CollectionDef {
 
 export type ContentListDisplayMode = 'cards' | 'table' | 'list';
 
+/**
+ * Per-field style overrides for a ContentListSection.
+ * Values are theme token names (e.g. "primary", "textSecondary") so they
+ * automatically follow theme changes instead of being frozen to a hex value.
+ */
+export interface ContentListStyles {
+  /** Background of the outer <section> wrapper. */
+  sectionBg?: ThemeColorKey;
+  /** Section heading text color. */
+  headingColor?: ThemeColorKey;
+  /** Card / row background color. */
+  cardBg?: ThemeColorKey;
+  /** Card / row border color. */
+  cardBorder?: ThemeColorKey;
+  /** Item title text color. */
+  titleColor?: ThemeColorKey;
+  /** Subtitle / date accent text color. */
+  subtitleColor?: ThemeColorKey;
+  /** Body / description text color. */
+  bodyColor?: ThemeColorKey;
+  /** "Learn More" / "View" link color. */
+  linkColor?: ThemeColorKey;
+}
+
 // =============================================================================
 // Component System Type Definitions
 // =============================================================================
@@ -222,6 +246,7 @@ export interface ContentListSection extends BaseSection {
   limit?: number; // Optional: max items to display
   columns?: 2 | 3 | 4; // For card display mode
   showFilters?: boolean; // Allow users to filter/search the list
+  styles?: ContentListStyles; // Optional per-element style overrides
 }
 
 export interface ComponentSection extends BaseSection {

@@ -21,15 +21,33 @@ const children: Section[] = (section as any).children ?? [];
 const ov: SectionStyleOverrides | undefined = (section as any).styleOverrides;
 const hasOverrides = ov && Object.values(ov).some(Boolean);
 
-// Build inline style string for wrapper — values are already resolved CSS (hex, rem, font-family)
+// Resolve a theme token name ("textSecondary") or pass through raw CSS ("#f2d31b", "2rem")
+const THEME_TOKENS = new Set([
+  "primary",
+  "secondary",
+  "background",
+  "text",
+  "textSecondary",
+  "accent",
+]);
+function resolveColor(v: string | undefined): string | undefined {
+  if (!v) return undefined;
+  if (THEME_TOKENS.has(v)) {
+    return `var(--color-${v.replace(/([A-Z])/g, (m: string) => `-${m.toLowerCase()}`)})`;
+  }
+  return v;
+}
+
+// Build inline style string for wrapper
 const ws: string[] = [];
-if (ov?.backgroundColor) ws.push(`background-color:${ov.backgroundColor}`);
+if (ov?.backgroundColor)
+  ws.push(`background-color:${resolveColor(ov.backgroundColor)}`);
 if (ov?.backgroundImage) {
   ws.push(`background-image:url('${ov.backgroundImage}')`);
   ws.push(`background-size:${ov.backgroundSize ?? "cover"}`);
   ws.push(`background-position:${ov.backgroundPosition ?? "center"}`);
 }
-if (ov?.textColor) ws.push(`color:${ov.textColor}`);
+if (ov?.textColor) ws.push(`color:${resolveColor(ov.textColor)}`);
 if (ov?.fontFamily) ws.push(`font-family:${ov.fontFamily}`);
 if (ov?.paddingTop) ws.push(`padding-top:${ov.paddingTop}`);
 if (ov?.paddingBottom) ws.push(`padding-bottom:${ov.paddingBottom}`);

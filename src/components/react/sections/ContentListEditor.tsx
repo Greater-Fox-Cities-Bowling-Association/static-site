@@ -3,9 +3,11 @@ import Papa from "papaparse";
 import type {
   ContentListSection,
   ContentListDisplayMode,
+  ContentListStyles,
 } from "../../../types/cms";
 import type { SectionEditorProps } from "../../../types/cms";
 import SectionWrapper from "./SectionWrapper";
+import { useTheme } from "../../../utils/useTheme";
 
 type ContentListEditorProps = SectionEditorProps & {
   section: ContentListSection;
@@ -23,12 +25,82 @@ export default function ContentListEditor({
   const [newItemId, setNewItemId] = useState("");
   const [showCSVImport, setShowCSVImport] = useState(false);
   const [csvParsing, setCsvParsing] = useState(false);
+  const { colors } = useTheme();
+
+  const THEME_COLOR_KEYS = [
+    "primary",
+    "secondary",
+    "background",
+    "text",
+    "textSecondary",
+    "accent",
+  ] as const;
 
   const updateField = <K extends keyof ContentListSection>(
     field: K,
     value: ContentListSection[K],
   ) => {
     onChange({ ...section, [field]: value });
+  };
+
+  const updateStyle = (key: keyof ContentListStyles, value: string) => {
+    const current = section.styles ?? {};
+    onChange({ ...section, styles: { ...current, [key]: value || undefined } });
+  };
+
+  // Render a row of theme color swatches for a single ContentListStyles field
+  const ColorSwatchField = ({
+    label: fieldLabel,
+    field,
+  }: {
+    label: string;
+    field: keyof ContentListStyles;
+  }) => {
+    const active = section.styles?.[field];
+    return (
+      <div className="py-1.5">
+        <span className="block text-xs mb-1 text-text-secondary">
+          {fieldLabel}
+        </span>
+        <div className="flex flex-wrap gap-1.5 items-center">
+          {THEME_COLOR_KEYS.map((key) => {
+            const hex = (colors[key] || "").trim();
+            if (!hex) return null;
+            const isActive = active === key;
+            return (
+              <button
+                key={key}
+                type="button"
+                title={`${key}: ${hex}`}
+                onClick={() => updateStyle(field, isActive ? "" : key)}
+                className="w-8 h-8 rounded border-2 transition-all"
+                style={{
+                  backgroundColor: hex,
+                  borderColor: isActive ? colors.text : "#00000033",
+                  outline: isActive ? `2px solid ${hex}` : "none",
+                  outlineOffset: "2px",
+                }}
+              />
+            );
+          })}
+          {active && (
+            <>
+              <span className="text-xs font-mono text-text-secondary">
+                {active}
+              </span>
+              <button
+                type="button"
+                onClick={() => updateStyle(field, "")}
+                className="text-xs px-1.5 rounded hover:opacity-80 text-text-secondary"
+                title="Clear"
+              >
+                ✕
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    );
   };
 
   const addItemId = () => {
@@ -297,6 +369,41 @@ export default function ContentListEditor({
               Show search/filter controls (coming soon)
             </span>
           </label>
+        </div>
+
+        <div className="mt-4 p-3 bg-primary/5 border border-primary/20 rounded">
+          <details>
+            <summary className="cursor-pointer text-sm font-medium text-text-secondary select-none">
+              Style Overrides
+            </summary>
+            <div className="mt-3 space-y-1">
+              <ColorSwatchField label="Section Background" field="sectionBg" />
+              <ColorSwatchField label="Heading Color" field="headingColor" />
+              <ColorSwatchField label="Card / Row Background" field="cardBg" />
+              <ColorSwatchField label="Card / Row Border" field="cardBorder" />
+              <ColorSwatchField label="Title Color" field="titleColor" />
+              <ColorSwatchField
+                label="Subtitle / Date Color"
+                field="subtitleColor"
+              />
+              <ColorSwatchField
+                label="Body / Description Color"
+                field="bodyColor"
+              />
+              <ColorSwatchField label="Link Color" field="linkColor" />
+              {section.styles &&
+                Object.values(section.styles).some(Boolean) && (
+                  <button
+                    type="button"
+                    onClick={() => onChange({ ...section, styles: {} })}
+                    className="mt-2 w-full py-1 text-xs rounded border hover:opacity-80"
+                    style={{ borderColor: "#ef4444", color: "#ef4444" }}
+                  >
+                    Clear all style overrides
+                  </button>
+                )}
+            </div>
+          </details>
         </div>
 
         <div className="mt-4 p-3 bg-primary/5 border border-primary/20 rounded">

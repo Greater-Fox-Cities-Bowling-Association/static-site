@@ -18,7 +18,11 @@
       "type": "enum",
       "required": false,
       "defaultValue": "cards",
-      "values": ["cards", "table", "list"]
+      "values": [
+        "cards",
+        "table",
+        "list"
+      ]
     },
     {
       "name": "columns",
@@ -26,7 +30,11 @@
       "type": "enum",
       "required": false,
       "defaultValue": "3",
-      "values": ["2", "3", "4"]
+      "values": [
+        "2",
+        "3",
+        "4"
+      ]
     },
     {
       "name": "limit",
@@ -35,5 +43,8 @@
       "required": false,
       "description": "Leave blank to show all items"
     }
-  ]
+  ],
+  "styles": {
+    "textColor": "text"
+  }
 }

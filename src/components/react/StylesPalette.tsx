@@ -96,12 +96,12 @@ export default function StylesPalette({
       {THEME_COLOR_KEYS.map((key) => {
         const hex = (colors[key] || "").trim();
         if (!hex) return null;
-        const active = styles[field] === hex;
+        const active = styles[field] === key;
         return (
           <button
             key={key}
             title={`${key}: ${hex}`}
-            onClick={() => set(field, active ? "" : hex)}
+            onClick={() => set(field, active ? "" : key)}
             className="w-8 h-8 rounded border-2 transition-all"
             style={{
               backgroundColor: hex,

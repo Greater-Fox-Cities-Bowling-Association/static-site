@@ -108,5 +108,8 @@
       "type": "string",
       "required": true
     }
-  ]
+  ],
+  "styles": {
+    "textColor": "text"
+  }
 }

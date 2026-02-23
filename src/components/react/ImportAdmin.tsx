@@ -9,6 +9,7 @@ import ThemeList from "./ThemeList";
 import ThemeEditor from "./ThemeEditor";
 import ComponentList from "./ComponentList";
 import CompositeComponentEditor from "./CompositeComponentEditor";
+import PrimitiveComponentEditor from "./PrimitiveComponentEditor";
 import CollectionList from "./CollectionList";
 import CollectionItemEditor from "./CollectionItemEditor";
 import CollectionDefEditor from "./CollectionDefEditor";
@@ -25,6 +26,7 @@ type Mode =
   | "page-editor"
   | "components"
   | "composite-editor"
+  | "primitive-editor"
   | "collections"
   | "collection-item-editor"
   | "collection-defs"
@@ -71,6 +73,10 @@ export default function ImportAdmin() {
     undefined,
   );
   const [editingCompositeId, setEditingCompositeId] = useState<
+    string | undefined
+  >(undefined);
+
+  const [editingPrimitiveId, setEditingPrimitiveId] = useState<
     string | undefined
   >(undefined);
 
@@ -282,6 +288,26 @@ export default function ImportAdmin() {
   const handleCancelCompositeEdit = () => {
     setMode("components");
     setEditingCompositeId(undefined);
+  };
+
+  const handleEditPrimitive = (componentId: string) => {
+    setEditingPrimitiveId(componentId);
+    setMode("primitive-editor");
+  };
+
+  const handleCreateNewPrimitive = () => {
+    setEditingPrimitiveId(undefined);
+    setMode("primitive-editor");
+  };
+
+  const handlePrimitiveSaved = () => {
+    setMode("components");
+    setEditingPrimitiveId(undefined);
+  };
+
+  const handleCancelPrimitiveEdit = () => {
+    setMode("components");
+    setEditingPrimitiveId(undefined);
   };
 
   const handleEditCollectionItem = (
@@ -604,6 +630,8 @@ export default function ImportAdmin() {
               token={githubToken}
               onEditComposite={handleEditComposite}
               onCreateComposite={handleCreateNewComposite}
+              onEditPrimitive={handleEditPrimitive}
+              onCreatePrimitive={handleCreateNewPrimitive}
               useGitHubAPI={useGitHubAPI}
             />
           )}
@@ -616,6 +644,18 @@ export default function ImportAdmin() {
               token={githubToken}
               onSave={handleCompositeSaved}
               onCancel={handleCancelCompositeEdit}
+              useGitHubAPI={useGitHubAPI}
+            />
+          )}
+
+          {mode === "primitive-editor" && (
+            <PrimitiveComponentEditor
+              {...(editingPrimitiveId
+                ? { componentId: editingPrimitiveId }
+                : {})}
+              token={githubToken}
+              onSave={handlePrimitiveSaved}
+              onCancel={handleCancelPrimitiveEdit}
               useGitHubAPI={useGitHubAPI}
             />
           )}

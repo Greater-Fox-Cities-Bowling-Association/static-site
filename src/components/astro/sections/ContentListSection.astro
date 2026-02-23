@@ -1,5 +1,5 @@
 ---
-import type { ContentListSection } from "../../../types/cms";
+import type { ContentListSection, ContentListStyles } from "../../../types/cms";
 import type { CollectionDef } from "../../../types/cms";
 
 interface Props {
@@ -14,7 +14,25 @@ const {
   itemIds,
   limit,
   columns = 3,
+  styles = {} as ContentListStyles,
 } = section;
+
+// Resolve a ThemeColorKey token name ("textSecondary") → CSS var ("var(--color-text-secondary)")
+function tokenToVar(token: string | undefined): string | undefined {
+  if (!token) return undefined;
+  const kebab = token.replace(/([A-Z])/g, (m: string) => `-${m.toLowerCase()}`);
+  return `var(--color-${kebab})`;
+}
+
+// Helper: build an inline style string from style override values (skips undefined)
+// Values that are theme token names are automatically resolved to CSS variables.
+function s(...pairs: [string, string | undefined][]): string | undefined {
+  const parts = pairs
+    .map(([k, v]) => [k, tokenToVar(v) ?? v] as [string, string | undefined])
+    .filter(([, v]) => v)
+    .map(([k, v]) => `${k}:${v}`);
+  return parts.length ? parts.join(";") : undefined;
+}
 
 // ── Load all items from the collection folder via glob ────────────────────────
 // Items live in src/content/collections/{name}/ and are read generically.
@@ -109,11 +127,17 @@ const gridColsClass = {
 }[columns];
 ---
 
-<section class="py-16 bg-background">
+<section
+  class="py-16 bg-background"
+  style={s(["background-color", styles.sectionBg])}
+>
   <div class="container mx-auto px-4">
     {
       heading && (
-        <h2 class="text-3xl md:text-4xl font-bold mb-12 text-center text-text">
+        <h2
+          class="text-3xl md:text-4xl font-bold mb-12 text-center text-text"
+          style={s(["color", styles.headingColor])}
+        >
           {heading}
         </h2>
       )
@@ -123,19 +147,41 @@ const gridColsClass = {
       displayMode === "cards" && (
         <div class={`grid grid-cols-1 ${gridColsClass} gap-8`}>
           {displayItems.map((item) => (
-            <div class="bg-background rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow border border-text/10">
+            <div
+              class="bg-background rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow border border-text/10"
+              style={s(
+                ["background-color", styles.cardBg],
+                ["border-color", styles.cardBorder],
+              )}
+            >
               <div class="p-6">
-                <h3 class="text-xl font-bold mb-2 text-text">{item.title}</h3>
+                <h3
+                  class="text-xl font-bold mb-2 text-text"
+                  style={s(["color", styles.titleColor])}
+                >
+                  {item.title}
+                </h3>
                 {item.subtitle && (
-                  <p class="text-sm text-primary font-semibold mb-3">
+                  <p
+                    class="text-sm text-primary font-semibold mb-3"
+                    style={s(["color", styles.subtitleColor])}
+                  >
                     {item.subtitle}
                   </p>
                 )}
                 {item.description && (
-                  <p class="text-text-secondary mb-4">{item.description}</p>
+                  <p
+                    class="text-text-secondary mb-4"
+                    style={s(["color", styles.bodyColor])}
+                  >
+                    {item.description}
+                  </p>
                 )}
                 {item.details.length > 0 && (
-                  <div class="text-sm text-text-secondary space-y-1 mb-4">
+                  <div
+                    class="text-sm text-text-secondary space-y-1 mb-4"
+                    style={s(["color", styles.bodyColor])}
+                  >
                     {item.details.map((detail) => (
                       <p>{detail}</p>
                     ))}
@@ -145,6 +191,7 @@ const gridColsClass = {
                   <a
                     href={item.link}
                     class="text-primary hover:text-accent font-semibold inline-flex items-center"
+                    style={s(["color", styles.linkColor])}
                     target={item.link.startsWith("http") ? "_blank" : undefined}
                     rel={
                       item.link.startsWith("http")
@@ -181,25 +228,40 @@ const gridColsClass = {
             </thead>
             <tbody class="divide-y divide-text/10">
               {displayItems.map((item) => (
-                <tr class="hover:bg-primary/5 transition-colors">
+                <tr
+                  class="hover:bg-primary/5 transition-colors"
+                  style={s(["background-color", styles.cardBg])}
+                >
                   <td class="px-6 py-4">
-                    <div class="text-sm font-medium text-text">
+                    <div
+                      class="text-sm font-medium text-text"
+                      style={s(["color", styles.titleColor])}
+                    >
                       {item.title}
                     </div>
                     {item.subtitle && (
-                      <div class="text-sm text-text-secondary">
+                      <div
+                        class="text-sm text-text-secondary"
+                        style={s(["color", styles.subtitleColor])}
+                      >
                         {item.subtitle}
                       </div>
                     )}
                   </td>
                   <td class="px-6 py-4">
                     {item.description && (
-                      <div class="text-sm text-text-secondary">
+                      <div
+                        class="text-sm text-text-secondary"
+                        style={s(["color", styles.bodyColor])}
+                      >
                         {item.description}
                       </div>
                     )}
                     {item.details.length > 0 && (
-                      <div class="text-xs text-text-secondary space-y-1 mt-1">
+                      <div
+                        class="text-xs text-text-secondary space-y-1 mt-1"
+                        style={s(["color", styles.bodyColor])}
+                      >
                         {item.details.map((detail) => (
                           <div>{detail}</div>
                         ))}
@@ -211,6 +273,7 @@ const gridColsClass = {
                       <a
                         href={item.link}
                         class="text-primary hover:text-accent font-semibold text-sm"
+                        style={s(["color", styles.linkColor])}
                         target={
                           item.link.startsWith("http") ? "_blank" : undefined
                         }
@@ -236,20 +299,42 @@ const gridColsClass = {
       displayMode === "list" && (
         <div class="max-w-4xl mx-auto space-y-6">
           {displayItems.map((item) => (
-            <div class="bg-background rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow border border-text/10">
+            <div
+              class="bg-background rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow border border-text/10"
+              style={s(
+                ["background-color", styles.cardBg],
+                ["border-color", styles.cardBorder],
+              )}
+            >
               <div class="flex justify-between items-start">
                 <div class="flex-1">
-                  <h3 class="text-xl font-bold text-text mb-2">{item.title}</h3>
+                  <h3
+                    class="text-xl font-bold text-text mb-2"
+                    style={s(["color", styles.titleColor])}
+                  >
+                    {item.title}
+                  </h3>
                   {item.subtitle && (
-                    <p class="text-sm text-primary font-semibold mb-2">
+                    <p
+                      class="text-sm text-primary font-semibold mb-2"
+                      style={s(["color", styles.subtitleColor])}
+                    >
                       {item.subtitle}
                     </p>
                   )}
                   {item.description && (
-                    <p class="text-text-secondary mb-3">{item.description}</p>
+                    <p
+                      class="text-text-secondary mb-3"
+                      style={s(["color", styles.bodyColor])}
+                    >
+                      {item.description}
+                    </p>
                   )}
                   {item.details.length > 0 && (
-                    <div class="text-sm text-text-secondary space-y-1">
+                    <div
+                      class="text-sm text-text-secondary space-y-1"
+                      style={s(["color", styles.bodyColor])}
+                    >
                       {item.details.map((detail) => (
                         <p>{detail}</p>
                       ))}
@@ -260,6 +345,7 @@ const gridColsClass = {
                   <a
                     href={item.link}
                     class="ml-4 text-primary hover:text-accent font-semibold text-sm whitespace-nowrap"
+                    style={s(["color", styles.linkColor])}
                     target={item.link.startsWith("http") ? "_blank" : undefined}
                     rel={
                       item.link.startsWith("http")
