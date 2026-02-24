@@ -12,7 +12,7 @@
  *     name: csv_import
  *     widget: csv-import
  *     collection: posts        # target collection name
- *     fields:                  # required fields that must be mapped
+ *     required_fields:         # required fields that must be mapped
  *       - title
  *       - description
  *       - date
@@ -68,7 +68,7 @@
           complete: (result) => {
             const headers = result.meta.fields || [];
             // Build default mapping: if a header matches a required field name, pre-select it
-            const requiredFields = this.props.field.get('fields') || ['title'];
+            const requiredFields = this.props.field.get('required_fields') || ['title'];
             const mapping = {};
             requiredFields.forEach(f => {
               const match = headers.find(h => h.toLowerCase() === f.toLowerCase());
@@ -101,7 +101,7 @@
     async handleImport() {
       const { rows, mapping, slugColumn } = this.state;
       const collectionName = this.props.field.get('collection') || 'posts';
-      const requiredFields = this.props.field.get('fields') || ['title'];
+      const requiredFields = this.props.field.get('required_fields') || ['title'];
 
       // Validate all required fields are mapped
       const missing = requiredFields.filter(f => !mapping[f]);
@@ -143,7 +143,7 @@
 
     render() {
       const { rows, headers, mapping, slugColumn, status, message, preview } = this.state;
-      const requiredFields = (this.props.field.get('fields') || ['title']);
+      const requiredFields = (this.props.field.get('required_fields') || ['title']);
 
       const h = window.h; // hyperscript shorthand provided by Decap
 
