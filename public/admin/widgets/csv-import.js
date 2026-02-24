@@ -43,6 +43,16 @@
     return new Date().toISOString().split('T')[0];
   }
 
+  // ── Defer until Decap CMS + React are both on window ──────────────────────
+  function initWidget() {
+    if (!window.React || !window.CMS) {
+      return setTimeout(initWidget, 50);
+    }
+    registerWidget();
+  }
+
+  function registerWidget() {
+
   // ── Widget Control (React component) ──────────────────────────────────────
   const CsvImportControl = createReactClass({
     getInitialState() {
@@ -273,10 +283,9 @@
   };
 
   // ── Register with Decap CMS ───────────────────────────────────────────────
-  if (window.CMS) {
     window.CMS.registerWidget('csv-import', CsvImportControl, CsvImportPreview);
     console.log('[csv-import] Widget registered.');
-  } else {
-    console.warn('[csv-import] window.CMS not found. Make sure Decap CMS is loaded first.');
-  }
+  } // end registerWidget
+
+  initWidget();
 })();
