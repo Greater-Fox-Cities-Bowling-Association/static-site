@@ -15,59 +15,80 @@
  */
 
 (async function () {
-  const config = window.__AUTH0_CONFIG__;
+  function showError(title, detail) {
+    const el = document.getElementById('auth-loading');
+    if (el) el.innerHTML =
+      '<h2 style="color:#dc2626;font-family:system-ui,sans-serif">' + title + '</h2>' +
+      '<p style="font-family:system-ui,sans-serif;color:#374151;max-width:480px">' + detail + '</p>';
+  }
 
-  // Guard: ensure config was injected by the Astro build
+  // ── 1. Guard: ensure config was injected by the Astro build ────────────────
+  const config = window.__AUTH0_CONFIG__;
   if (!config || !config.domain || !config.clientId ||
       config.domain === '' || config.clientId === '') {
-    document.getElementById('auth-loading').innerHTML = `
-      <h2 style="color:#dc2626">Auth0 not configured</h2>
-      <p>Set <code>PUBLIC_AUTH0_DOMAIN</code> and <code>PUBLIC_AUTH0_CLIENT_ID</code>
-         in your <strong>.env</strong> file, then rebuild.</p>
-      <p style="margin-top:8px">See <strong>.env.example</strong> for all required variables.</p>
-    `;
+    showError(
+      'Auth0 not configured',
+      'Set <code>PUBLIC_AUTH0_DOMAIN</code> and <code>PUBLIC_AUTH0_CLIENT_ID</code> ' +
+      'in your <strong>.env</strong> file, then rebuild. ' +
+      'See <strong>.env.example</strong> for all required variables.'
+    );
     return;
   }
 
-  // Initialise Auth0 SPA client
-  const auth0 = await window.auth0.createAuth0Client({
-    domain:   config.domain,
-    clientId: config.clientId,
-    authorizationParams: {
-      redirect_uri: config.redirectUri,
-      ...(config.audience ? { audience: config.audience } : {}),
-    },
-    cacheLocation: 'localstorage',
-  });
+  try {
+    // ── 2. Initialise Auth0 SPA client ────────────────────────────────────────
+    const auth0 = await window.auth0.createAuth0Client({
+      domain:   config.domain,
+      clientId: config.clientId,
+      authorizationParams: {
+        redirect_uri: config.redirectUri,
+        ...(config.audience ? { audience: config.audience } : {}),
+      },
+      cacheLocation: 'localstorage',
+    });
 
-  // Handle redirect callback after Auth0 login
-  if (window.location.search.includes('code=') && window.location.search.includes('state=')) {
-    await auth0.handleRedirectCallback();
-    window.history.replaceState({}, document.title, '/admin/');
+    // ── 3. Handle redirect callback after Auth0 login ─────────────────────────
+    if (window.location.search.includes('code=') && window.location.search.includes('state=')) {
+      try {
+        await auth0.handleRedirectCallback();
+      } catch (cbErr) {
+        // Stale or replayed callback — clear params and continue; a fresh
+        // isAuthenticated() check will redirect to login if truly unauthenticated.
+        console.warn('[auth.js] handleRedirectCallback error (ignored):', cbErr);
+      }
+      window.history.replaceState({}, document.title, '/admin/');
+    }
+
+    // ── 4. Check authentication ───────────────────────────────────────────────
+    const isAuthenticated = await auth0.isAuthenticated();
+    if (!isAuthenticated) {
+      await auth0.loginWithRedirect();
+      return;
+    }
+
+    // ── 5. Extract GitHub PAT from the ID token custom claim ──────────────────
+    const claims    = await auth0.getIdTokenClaims();
+    const githubPAT = claims && claims['https://gfcba.com/github_token'];
+
+    if (!githubPAT) {
+      showError(
+        'GitHub PAT not found',
+        'No <code>https://gfcba.com/github_token</code> claim in the Auth0 ID token. ' +
+        'Ensure your Auth0 Post-Login Action sets this claim from ' +
+        '<code>event.user.app_metadata.github_pat</code>.'
+      );
+      return;
+    }
+
+    // ── 6. Signal to index.astro that auth is complete ───────────────────────
+    window.dispatchEvent(new CustomEvent('auth0:ready', { detail: { token: githubPAT } }));
+
+  } catch (err) {
+    console.error('[auth.js] unexpected error:', err);
+    showError(
+      'Authentication error',
+      (err && err.message ? err.message : String(err)) +
+      '<br><br>Open the browser console for details.'
+    );
   }
-
-  const isAuthenticated = await auth0.isAuthenticated();
-
-  if (!isAuthenticated) {
-    await auth0.loginWithRedirect();
-    return;
-  }
-
-  // Extract GitHub PAT from the Auth0 ID token custom claim
-  const claims = await auth0.getIdTokenClaims();
-  const githubPAT = claims?.['https://gfcba.com/github_token'];
-
-  if (!githubPAT) {
-    document.getElementById('auth-loading').innerHTML = `
-      <h2 style="color:#dc2626">GitHub PAT not found</h2>
-      <p>No <code>https://gfcba.com/github_token</code> claim was found in the Auth0 ID token.</p>
-      <p style="margin-top:8px">Ensure your Auth0 Post-Login Action sets this claim from
-         <code>event.user.app_metadata.github_pat</code>.</p>
-    `;
-    return;
-  }
-
-  // Pass the token to index.astro via event detail — it will inject it into
-  // Decap CMS's Redux store after the CMS script loads.
-  window.dispatchEvent(new CustomEvent('auth0:ready', { detail: { token: githubPAT } }));
 })();

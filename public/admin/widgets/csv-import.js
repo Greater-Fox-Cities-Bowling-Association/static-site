@@ -12,7 +12,7 @@
  *     name: csv_import
  *     widget: csv-import
  *     collection: posts        # target collection name
- *     fields:                  # required fields that must be mapped
+ *     required_fields:         # required fields that must be mapped
  *       - title
  *       - description
  *       - date
@@ -43,6 +43,16 @@
     return new Date().toISOString().split('T')[0];
   }
 
+  // ── Defer until Decap CMS + React are both on window ──────────────────────
+  function initWidget() {
+    if (!window.React || !window.CMS) {
+      return setTimeout(initWidget, 50);
+    }
+    registerWidget();
+  }
+
+  function registerWidget() {
+
   // ── Widget Control (React component) ──────────────────────────────────────
   const CsvImportControl = createReactClass({
     getInitialState() {
@@ -68,7 +78,7 @@
           complete: (result) => {
             const headers = result.meta.fields || [];
             // Build default mapping: if a header matches a required field name, pre-select it
-            const requiredFields = this.props.field.get('fields') || ['title'];
+            const requiredFields = this.props.field.get('required_fields') || ['title'];
             const mapping = {};
             requiredFields.forEach(f => {
               const match = headers.find(h => h.toLowerCase() === f.toLowerCase());
@@ -101,7 +111,7 @@
     async handleImport() {
       const { rows, mapping, slugColumn } = this.state;
       const collectionName = this.props.field.get('collection') || 'posts';
-      const requiredFields = this.props.field.get('fields') || ['title'];
+      const requiredFields = this.props.field.get('required_fields') || ['title'];
 
       // Validate all required fields are mapped
       const missing = requiredFields.filter(f => !mapping[f]);
@@ -143,7 +153,7 @@
 
     render() {
       const { rows, headers, mapping, slugColumn, status, message, preview } = this.state;
-      const requiredFields = (this.props.field.get('fields') || ['title']);
+      const requiredFields = (this.props.field.get('required_fields') || ['title']);
 
       const h = window.h; // hyperscript shorthand provided by Decap
 
@@ -273,10 +283,9 @@
   };
 
   // ── Register with Decap CMS ───────────────────────────────────────────────
-  if (window.CMS) {
     window.CMS.registerWidget('csv-import', CsvImportControl, CsvImportPreview);
     console.log('[csv-import] Widget registered.');
-  } else {
-    console.warn('[csv-import] window.CMS not found. Make sure Decap CMS is loaded first.');
-  }
+  } // end registerWidget
+
+  initWidget();
 })();

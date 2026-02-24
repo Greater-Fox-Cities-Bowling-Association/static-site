@@ -92,6 +92,23 @@ collections:
             options: [centered, wide, full]
             default: centered
 
+  # CSV Bulk Importer — uses the custom csv-import widget
+  - name: csv_importer
+    label: CSV Import
+    files:
+      - label: Bulk Import
+        name: bulk_import
+        file: public/admin/csv-import-state.json
+        fields:
+          - label: CSV Import
+            name: csv_import
+            widget: csv-import
+            collection: posts
+            required_fields:
+              - title
+              - description
+              - date
+
   # Site Settings
   - name: settings
     label: Settings
