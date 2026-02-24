@@ -1,16 +1,13 @@
 import { defineConfig } from 'astro/config';
-import react from '@astrojs/react';
+import sitemap from '@astrojs/sitemap';
 import tailwind from '@astrojs/tailwind';
 
 // https://astro.build/config
 export default defineConfig({
+  site: 'https://your-domain.com', // TODO: Replace with your site URL
   integrations: [
-    react(),
-    tailwind()
+    sitemap(),
+    tailwind(),
   ],
-  output: 'hybrid',
-  site: 'https://www.greaterfoxcitiesba.com',
-  
-  // Handle trailing slashes flexibly
-  trailingSlash: 'ignore',
+  output: 'static',
 });

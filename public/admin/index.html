@@ -1,13 +1,36 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <meta charset="utf-8" />
+    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Content Manager</title>
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <title>CMS Admin</title>
+    <!-- Prevent indexing of admin panel -->
+    <meta name="robots" content="noindex, nofollow" />
+    <style>
+      #auth-loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        font-family: system-ui, sans-serif;
+        color: #374151;
+      }
+      #auth-loading h2 { margin-bottom: 0.5rem; }
+      #auth-loading p  { color: #6b7280; font-size: 0.9rem; }
+    </style>
   </head>
   <body>
-    <!-- Include the script that builds the page and powers Decap CMS -->
-    <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+    <!-- Shown while Auth0 validates the session -->
+    <div id="auth-loading">
+      <h2>Checking authentication…</h2>
+      <p>You will be redirected to login if needed.</p>
+    </div>
+
+    <!-- Auth0 SPA SDK -->
+    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js"></script>
+
+    <!-- Auth0 configuration & Decap loader -->
+    <script src="/admin/auth.js"></script>
   </body>
 </html>

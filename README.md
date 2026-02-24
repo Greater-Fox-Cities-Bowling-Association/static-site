@@ -1,169 +1,211 @@
-# Greater Fox Cities Bowling Association Website
+# Static Site Template
 
-Modern, high-performance static website for the Greater Fox Cities Bowling Association.
+A fully static, SEO-optimised site template built with:
 
-## 🚀 Tech Stack
+- **[Astro](https://astro.build)** — static site generator, zero JS by default
+- **[Decap CMS](https://decapcms.org)** — Git-based headless CMS served from `/admin/`
+- **[Auth0](https://auth0.com)** — SPA login gate for the CMS admin panel
+- **[Tailwind CSS](https://tailwindcss.com)** — utility-first styling
+- **GitHub** — the only backend (content storage + versioning)
 
-- **Framework:** Astro (SSG Mode)
-- **UI:** React + TypeScript
-- **Styling:** Tailwind CSS
-- **Content:** JSON-driven with Astro Content Collections
-- **Deployment:** GitHub Actions + Static.app
+No server. No database. No runtime backend.
 
-## 🏗️ Project Structure
+---
 
-```
-/src
-  /content
-    /config.ts          # Zod schemas for content validation
-    /pages              # Page content (JSON)
-    /centers            # Bowling center data (JSON)
-    /tournaments        # Tournament information (JSON)
-    /news               # News articles (JSON)
-    /committees         # Committee information (JSON)
-    /honors             # Honors and awards (JSON)
-  /components
-    /react              # Interactive React components
-    /astro              # Static Astro components
-  /layouts
-    /BaseLayout.astro   # Main layout wrapper
-  /pages
-    /index.astro        # Home page
-    /[slug].astro       # Dynamic page routing
-```
-
-## 📦 Getting Started
-
-### Prerequisites
-
-- Node.js 18+ and npm
-
-### Installation
+## Quick Start
 
 ```bash
-# Install dependencies
+# 1. Clone the template
+git clone https://github.com/YOUR_USERNAME/YOUR_REPO static-site
+cd static-site
+
+# 2. Install dependencies
 npm install
 
-# Start development server
+# 3. Start the dev server
 npm run dev
-
-# Build for production
-npm run build
-
-# Preview production build
-npm run preview
 ```
 
-## 🎨 Design Philosophy
+Visit `http://localhost:4321` to see the site.
 
-This website follows a **Professional Builder** aesthetic with:
+---
 
-- High-impact imagery and gradients
-- Minimalist, high-contrast typography
-- Card-based Bento-grid layouts
-- Mobile-first responsive design
-- Modern color palette with primary blue tones
+## Project Structure
 
-## 📝 Content Management
+```
+/
+├── src/
+│   ├── pages/              # Astro pages
+│   │   ├── index.astro     # Home page
+│   │   ├── 404.astro
+│   │   └── blog/
+│   │       ├── index.astro
+│   │       └── [slug].astro
+│   ├── layouts/
+│   │   └── BaseLayout.astro
+│   ├── components/
+│   │   ├── SEO.astro
+│   │   ├── Header.astro
+│   │   └── Footer.astro
+│   ├── content/            # Managed by Decap CMS
+│   │   ├── config.ts       # Collection schemas
+│   │   ├── pages/
+│   │   ├── posts/
+│   │   ├── lists/
+│   │   └── settings/
+│   └── theme.json          # Theme variables (editable in CMS)
+│
+├── public/
+│   └── admin/              # Decap CMS
+│       ├── index.html      # Auth0 gate + CMS loader
+│       ├── config.yml      # CMS collection configuration
+│       ├── auth.js         # Auth0 SPA integration
+│       └── widgets/
+│           └── csv-import.js  # Custom CSV bulk-import widget
+│
+├── astro.config.mjs
+├── tailwind.config.mjs
+├── tsconfig.json
+└── package.json
+```
 
-All content is managed through JSON files in the `src/content/` directory. This architecture:
+---
 
-- Enables easy content updates without code changes
-- Supports integration with Git-based CMS (Decap CMS)
-- Maintains type safety through Zod schemas
-- Ensures SEO-friendly static HTML generation
+## Configuration
 
-### Adding New Content
+### 1. GitHub Repository
 
-1. **Pages:** Add a new JSON file to `src/content/pages/`
-2. **Centers:** Add a new JSON file to `src/content/centers/`
-3. **News:** Add a new JSON file to `src/content/news/`
+Edit `public/admin/config.yml` and replace:
 
-Each content type has a defined schema in `src/content/config.ts` for validation.
+```yaml
+backend:
+  repo: YOUR_GITHUB_USERNAME/YOUR_REPO_NAME
+```
 
-## 🔐 Admin Panel
+Also update `site_url` and `display_url` to your domain.
 
-The site includes a powerful admin panel at `/admin` for importing CSV data and managing content.
+### 2. Auth0
 
-### Two-Layer Authentication
+Edit `public/admin/auth.js` and replace the placeholders:
 
-For security and proper audit trails, the admin panel uses a two-layer authentication approach:
+```js
+const AUTH0_DOMAIN = "dev-xxxx.us.auth0.com";
+const AUTH0_CLIENT_ID = "your-client-id";
+```
 
-**Layer 1: Auth0 Login**
+In the Auth0 dashboard, create a **Single Page Application** and set:
 
-- Controls who can access the admin dashboard
-- Secure, industry-standard authentication
-- Support for social logins (Google, GitHub, etc.)
-- [Setup Guide](./AUTH0-SETUP.md)
+| Setting               | Value                            |
+| --------------------- | -------------------------------- |
+| Allowed Callback URLs | `https://your-domain.com/admin/` |
+| Allowed Logout URLs   | `https://your-domain.com/`       |
+| Allowed Web Origins   | `https://your-domain.com`        |
 
-**Layer 2: GitHub OAuth**
+### 3. Site URL
 
-- After Auth0 login, users connect their GitHub account
-- Uses their personal GitHub credentials for making commits
-- Ensures proper attribution (commits show real usernames)
-- Users must have write access to your repository
-- [Setup Guide](./GITHUB-OAUTH-SETUP.md)
+Update the `site` field in `astro.config.mjs`:
 
-### Features
+```js
+export default defineConfig({
+  site: "https://your-domain.com",
+  // ...
+});
+```
 
-- **CSV Import:** Bulk import bowling center data, tournament results, and honors
-- **Page Editor:** Visual page builder with drag-and-drop sections
-- **Live Preview:** See changes before committing
-- **Git Integration:** Changes are committed directly to your GitHub repository
-- **Type Safety:** Automatic validation against content schemas
-- **Multi-user Support:** Team members can log in with their own accounts
+### 4. Theme
 
-### Quick Start
+Edit `src/theme.json` (or via the CMS at **Theme** in the sidebar):
 
-1. **Setup Authentication** (one-time):
-   - Follow [AUTH0-SETUP.md](./AUTH0-SETUP.md) to configure Auth0
-   - Follow [GITHUB-OAUTH-SETUP.md](./GITHUB-OAUTH-SETUP.md) to configure GitHub OAuth
-   - Add environment variables to `.env`
+```json
+{
+  "primaryColor": "#2563eb",
+  "secondaryColor": "#7c3aed",
+  "fontFamily": "system-ui, sans-serif",
+  "fontScale": 1,
+  "borderRadius": "0.5rem",
+  "layoutStyle": "centered"
+}
+```
 
-2. **Access Admin Panel**:
-   - Visit `https://yourdomain.com/admin`
-   - Sign in with Auth0
-   - Connect your GitHub account
-   - Start managing content!
+These generate CSS custom properties (`--color-primary`, etc.) consumed by Tailwind.
 
-3. **Import CSV Data**:
-   - Select data type (honors, tournaments, centers, news)
-   - Upload CSV file
-   - Preview and confirm changes
-   - Changes are committed to GitHub
+---
 
-For detailed setup instructions, see:
+## CMS Collections
 
-- [AUTH0-SETUP.md](./AUTH0-SETUP.md) - Auth0 configuration
-- [GITHUB-OAUTH-SETUP.md](./GITHUB-OAUTH-SETUP.md) - GitHub OAuth configuration
-- [SECRETS.md](./SECRETS.md) - All environment variables
+| Collection | Type      | Folder                           |
+| ---------- | --------- | -------------------------------- |
+| Pages      | Markdown  | `src/content/pages/`             |
+| Posts      | Markdown  | `src/content/posts/`             |
+| Lists      | JSON      | `src/content/lists/`             |
+| Theme      | JSON file | `src/theme.json`                 |
+| Settings   | JSON file | `src/content/settings/main.json` |
 
-## �🚢 Deployment
+---
 
-The site automatically deploys to Static.app when changes are pushed to the `main` branch.
+## CSV Bulk Import Widget
 
-### Setup
+The custom widget at `public/admin/widgets/csv-import.js` lets editors:
 
-1. Create a Static.app account and get an API key
-2. Add the API key as a GitHub secret: `STATIC_APP_API_KEY`
-3. Push to main branch - GitHub Actions will handle the rest
+1. Upload a `.csv` file
+2. Preview the first 5 rows
+3. Map CSV columns → collection fields
+4. Import all rows as separate entries in one commit
 
-## 🔧 Development
+**Commit message format:** `Bulk import via CSV: N items`
 
-### Key Commands
+To use it in `config.yml`, add a field with `widget: csv-import`:
 
-- `npm run dev` - Start dev server at http://localhost:4321
-- `npm run build` - Build production site to `dist/`
-- `npm run preview` - Preview production build locally
-- `npm run astro` - Run Astro CLI commands
+```yaml
+- label: CSV Import
+  name: csv_import
+  widget: csv-import
+  collection: posts
+  fields:
+    - title
+    - description
+    - date
+```
 
-### Making Changes
+---
 
-- **Content:** Edit JSON files in `src/content/`
-- **Styling:** Modify Tailwind classes or `tailwind.config.mjs`
-- **Components:** Update files in `src/components/`
-- **Layouts:** Edit files in `src/layouts/`
+## Deployment
 
-## 📄 License
+### Netlify
 
-© 2026 Greater Fox Cities Bowling Association. All rights reserved.
+1. Connect your GitHub repo to Netlify
+2. Set build command: `npm run build`
+3. Set publish directory: `dist`
+4. Add environment variables if needed
+
+### Vercel
+
+```bash
+vercel --prod
+```
+
+### GitHub Pages / Cloudflare Pages
+
+Set build command `npm run build`, output directory `dist`.
+
+---
+
+## Scripts
+
+| Command           | Description                                |
+| ----------------- | ------------------------------------------ |
+| `npm run dev`     | Start local dev server at `localhost:4321` |
+| `npm run build`   | Build static output to `dist/`             |
+| `npm run preview` | Preview the production build locally       |
+
+---
+
+## Authentication Flow
+
+```
+User visits /admin/
+  └─ Auth0 SDK checks session
+       ├─ Not authenticated → redirect to Auth0 login
+       └─ Authenticated → load Decap CMS
+            └─ User edits content → commits to GitHub → triggers build
+```

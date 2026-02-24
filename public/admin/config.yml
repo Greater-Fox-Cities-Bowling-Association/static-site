@@ -1,60 +1,148 @@
 backend:
-  name: test-repo
+  name: github
+  repo: YOUR_GITHUB_USERNAME/YOUR_REPO_NAME # TODO: Replace with your repo
+  branch: main
+  base_url: https://api.netlify.com # Required for OAuth; or use Netlify Identity
+  auth_endpoint: auth
 
-media_folder: "public/images"
-public_folder: "/images"
+# Uncomment to enable local dev backend (no GitHub required for testing)
+# local_backend: true
 
-# Pages collection removed - custom CMS will handle page management
+media_folder: public/uploads
+public_folder: /uploads
+
+site_url: https://your-domain.com # TODO: Replace
+display_url: https://your-domain.com # TODO: Replace
 
 collections:
-  - name: "centers"
-    label: "Bowling Centers"
-    folder: "src/content/centers"
+  # Pages collection
+  - name: pages
+    label: Pages
+    folder: src/content/pages
     create: true
-    extension: "json"
-    format: "json"
     slug: "{{slug}}"
+    extension: md
+    format: frontmatter
     fields:
-      - { label: "Name", name: "name", widget: "string" }
-      - { label: "Address", name: "address", widget: "string" }
-      - { label: "City", name: "city", widget: "string" }
-      - { label: "State", name: "state", widget: "string", default: "WI" }
-      - { label: "ZIP Code", name: "zip", widget: "string" }
-      - { label: "Phone", name: "phone", widget: "string" }
-      - { label: "Email", name: "email", widget: "string", required: false }
-      - { label: "Website", name: "website", widget: "string", required: false }
-      - { label: "Number of Lanes", name: "lanes", widget: "number", required: false }
-      - { label: "Features", name: "features", widget: "list", required: false }
+      - { label: Title, name: title, widget: string }
+      - {
+          label: Description,
+          name: description,
+          widget: string,
+          required: false,
+        }
+      - { label: Date, name: date, widget: datetime, required: false }
+      - { label: Draft, name: draft, widget: boolean, default: false }
+      - { label: Body, name: body, widget: markdown }
 
-  - name: "news"
-    label: "News"
-    folder: "src/content/news"
+  # Posts collection
+  - name: posts
+    label: Blog Posts
+    folder: src/content/posts
     create: true
-    extension: "json"
-    format: "json"
     slug: "{{slug}}"
+    extension: md
+    format: frontmatter
     fields:
-      - { label: "Title", name: "title", widget: "string" }
-      - { label: "Date", name: "date", widget: "date" }
-      - { label: "Author", name: "author", widget: "string", required: false }
-      - { label: "Excerpt", name: "excerpt", widget: "text" }
-      - { label: "Content", name: "content", widget: "markdown" }
-      - { label: "Image", name: "image", widget: "image", required: false }
-      - { label: "Tags", name: "tags", widget: "list", required: false }
+      - { label: Title, name: title, widget: string }
+      - {
+          label: Description,
+          name: description,
+          widget: string,
+          required: false,
+        }
+      - { label: Date, name: date, widget: datetime }
+      - { label: Tags, name: tags, widget: list, default: [], required: false }
+      - { label: Author, name: author, widget: string, required: false }
+      - { label: Draft, name: draft, widget: boolean, default: false }
+      - { label: Body, name: body, widget: markdown }
 
-  - name: "tournaments"
-    label: "Tournaments"
-    folder: "src/content/tournaments"
+  # Lists collection
+  - name: lists
+    label: Lists
+    folder: src/content/lists
     create: true
-    extension: "json"
-    format: "json"
     slug: "{{slug}}"
+    extension: json
+    format: json
     fields:
-      - { label: "Name", name: "name", widget: "string" }
-      - { label: "Date", name: "date", widget: "date" }
-      - { label: "Location", name: "location", widget: "string" }
-      - { label: "Description", name: "description", widget: "text" }
-      - { label: "Entry Fee", name: "entryFee", widget: "string", required: false }
-      - { label: "Prize Fund", name: "prizeFund", widget: "string", required: false }
-      - { label: "Rules", name: "rules", widget: "text", required: false }
-      - { label: "Status", name: "status", widget: "select", options: ["upcoming", "completed", "registration-open"], required: false }
+      - { label: Title, name: title, widget: string }
+      - label: Items
+        name: items
+        widget: list
+        fields:
+          - { label: Label, name: label, widget: string }
+          - { label: Value, name: value, widget: string }
+
+  # Theme settings
+  - name: theme
+    label: Theme
+    files:
+      - label: Theme Settings
+        name: theme
+        file: src/theme.json
+        fields:
+          - {
+              label: Primary Color,
+              name: primaryColor,
+              widget: color,
+              default: "#2563eb",
+            }
+          - {
+              label: Secondary Color,
+              name: secondaryColor,
+              widget: color,
+              default: "#7c3aed",
+            }
+          - {
+              label: Font Family,
+              name: fontFamily,
+              widget: string,
+              default: "system-ui, sans-serif",
+            }
+          - {
+              label: Font Scale,
+              name: fontScale,
+              widget: number,
+              default: 1,
+              value_type: float,
+              min: 0.75,
+              max: 1.5,
+              step: 0.05,
+            }
+          - {
+              label: Border Radius,
+              name: borderRadius,
+              widget: string,
+              default: "0.5rem",
+            }
+          - label: Layout Style
+            name: layoutStyle
+            widget: select
+            options: [centered, wide, full]
+            default: centered
+
+  # Site Settings
+  - name: settings
+    label: Settings
+    files:
+      - label: Site Settings
+        name: main
+        file: src/content/settings/main.json
+        fields:
+          - { label: Site Title, name: siteTitle, widget: string }
+          - { label: Site Description, name: siteDescription, widget: string }
+          - { label: Site URL, name: siteUrl, widget: string, required: false }
+          - { label: Logo, name: logo, widget: image, required: false }
+          - label: Navigation
+            name: nav
+            widget: list
+            fields:
+              - { label: Label, name: label, widget: string }
+              - { label: Link, name: href, widget: string }
+          - {
+              label: Footer Text,
+              name: footer,
+              widget: string,
+              required: false,
+            }
