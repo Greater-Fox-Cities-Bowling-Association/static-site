@@ -1,0 +1,12 @@
+{
+  "siteTitle": "My Static Site",
+  "siteDescription": "A fully static, SEO-optimized site powered by Astro and Decap CMS.",
+  "siteUrl": "https://your-domain.com",
+  "logo": "",
+  "nav": [
+    { "label": "Home", "href": "/" },
+    { "label": "Blog", "href": "/blog/" },
+    { "label": "Admin", "href": "/admin/" }
+  ],
+  "footer": "© 2026 My Static Site. All rights reserved."
+}

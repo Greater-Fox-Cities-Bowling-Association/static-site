@@ -1,33 +1,23 @@
-# Dependencies
-node_modules/
-
-# Build outputs
+# Build output
 dist/
 .astro/
 
-# Environment variables
+# Dependencies
+node_modules/
+
+# Environment
 .env
 .env.local
-.env.development
-.env.dev
-.env.production
-
-# Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
+.env.*.local
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Misc
-*.log
+# Editors
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

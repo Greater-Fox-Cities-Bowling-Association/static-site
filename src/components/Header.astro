@@ -1,0 +1,32 @@
+---
+export interface Props {
+  siteTitle: string;
+  logo?: string;
+  nav: Array<{ label: string; href: string }>;
+}
+
+const { siteTitle, logo, nav } = Astro.props;
+const currentPath = Astro.url.pathname;
+---
+
+<header class="w-full border-b border-gray-200 bg-white">
+  <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-2 font-bold text-xl text-primary no-underline">
+      {logo ? <img src={logo} alt={siteTitle} class="h-8 w-auto" /> : siteTitle}
+    </a>
+    <nav aria-label="Main navigation">
+      <ul class="flex gap-6 list-none m-0 p-0">
+        {nav.map((item) => (
+          <li>
+            <a
+              href={item.href}
+              class={`text-sm font-medium hover:text-primary transition-colors ${currentPath === item.href ? 'text-primary underline' : 'text-gray-700'}`}
+            >
+              {item.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  </div>
+</header>

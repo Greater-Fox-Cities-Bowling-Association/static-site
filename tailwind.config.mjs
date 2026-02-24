@@ -6,20 +6,14 @@ export default {
       colors: {
         primary: 'var(--color-primary)',
         secondary: 'var(--color-secondary)',
-        accent: 'var(--color-accent)',
-        background: 'var(--color-background)',
-        text: {
-          DEFAULT: 'var(--color-text)',
-          secondary: 'var(--color-text-secondary)',
-        },
       },
       fontFamily: {
-        sans: ['var(--font-body)', 'system-ui', 'sans-serif'],
-        display: ['var(--font-heading)', 'system-ui', 'sans-serif'],
-        heading: ['var(--font-heading)', 'system-ui', 'sans-serif'],
-        body: ['var(--font-body)', 'system-ui', 'sans-serif'],
+        base: 'var(--font-family)',
+      },
+      borderRadius: {
+        base: 'var(--border-radius)',
       },
     },
   },
   plugins: [],
-}
+};

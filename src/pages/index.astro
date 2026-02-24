@@ -1,41 +1,13 @@
 ---
-import { getCollection } from 'astro:content';
-import PageLayout from '../layouts/PageLayout.astro';
-import HeroSection from '../components/astro/sections/HeroSection.astro';
-import TextSection from '../components/astro/sections/TextSection.astro';
-import CardGridSection from '../components/astro/sections/CardGridSection.astro';
-import CtaSection from '../components/astro/sections/CtaSection.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getEntry, render } from 'astro:content';
 
-// Get all pages and find the one marked as landing page
-const allPages = await getCollection('pages');
-const landingPage = allPages.find(page => page.data.isLandingPage === true);
-
-// Fallback to 'home' page if no landing page is set
-const page = landingPage || allPages.find(page => page.id === 'home');
-
-if (!page) {
-  return Astro.redirect('/404');
-}
-
-const { title, metaDescription, sections } = page.data;
-
-// Sort sections by order
-const sortedSections = [...sections].sort((a, b) => a.order - b.order);
+const page = await getEntry('pages', 'home');
+const { Content } = page ? await render(page) : { Content: null };
 ---
 
-<PageLayout title={title} description={metaDescription || "Greater Fox Cities Bowling Association"}>
-  {sortedSections.map((section) => {
-    switch (section.type) {
-      case 'hero':
-        return <HeroSection section={section} />;
-      case 'text':
-        return <TextSection section={section} />;
-      case 'cardGrid':
-        return <CardGridSection section={section} />;
-      case 'cta':
-        return <CtaSection section={section} />;
-      default:
-        return null;
-    }
-  })}
-</PageLayout>
+<BaseLayout title="Home" description={page?.data.description}>
+  <article class="prose prose-blue max-w-none">
+    {Content ? <Content /> : <p>Welcome! Add a home page via the CMS.</p>}
+  </article>
+</BaseLayout>

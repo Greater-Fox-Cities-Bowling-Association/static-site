@@ -1,25 +1,95 @@
 ---
-import AdminApp from '../../components/react/AdminApp';
+// src/pages/admin/index.astro
+// Injects Auth0 config from environment variables, then loads Decap CMS.
+const auth0Domain   = import.meta.env.PUBLIC_AUTH0_DOMAIN   ?? '';
+const auth0ClientId = import.meta.env.PUBLIC_AUTH0_CLIENT_ID ?? '';
+const siteUrl       = import.meta.env.PUBLIC_SITE_URL        ?? '';
 ---
 
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GFCBA Admin - Import Data</title>
-  <style is:global>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      font-family: system-ui, -apple-system, sans-serif;
-    }
-  </style>
-</head>
-<body>
-  <AdminApp client:only="react" />
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CMS Admin</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <style>
+      #auth-loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        font-family: system-ui, sans-serif;
+        color: #374151;
+      }
+      #auth-loading h2 { margin-bottom: 0.5rem; }
+      #auth-loading p  { color: #6b7280; font-size: 0.9rem; }
+    </style>
+  </head>
+  <body>
+    <div id="auth-loading">
+      <h2>Checking authentication…</h2>
+      <p>You will be redirected to login if needed.</p>
+    </div>
+
+    <!-- Auth0 config injected at build time from environment variables -->
+    <script is:inline define:vars={{ auth0Domain, auth0ClientId, siteUrl }}>
+      window.__AUTH0_CONFIG__ = {
+        domain:      auth0Domain,
+        clientId:    auth0ClientId,
+        redirectUri: (siteUrl || window.location.origin) + '/admin/',
+      };
+    </script>
+
+    <!-- Auth0 SPA SDK -->
+    <script is:inline src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js"></script>
+
+    <!-- Auth0 guard: validates session, extracts GITHUB_PAT, dispatches auth0:ready -->
+    <script is:inline src="/admin/auth.js"></script>
+
+    <!-- Load Decap CMS only after auth0:ready fires -->
+    <script is:inline>
+      window.addEventListener('auth0:ready', function (e) {
+        var githubToken = e.detail.token;
+
+        // Fetch the GitHub user profile with the PAT first.
+        // Decap's LocalStorageAuthStore.retrieve() checks that backendName === 'github'
+        // before calling restoreUser() → authenticate(). Doing this fetch here means
+        // Decap finds a fully-populated `decap-cms-user` entry on startup and skips
+        // the login screen entirely.
+        fetch('https://api.github.com/user', {
+          headers: { Authorization: 'Bearer ' + githubToken }
+        })
+        .then(function (res) { return res.json(); })
+        .then(function (ghUser) {
+          window.localStorage.setItem('decap-cms-user', JSON.stringify({
+            token:       githubToken,
+            backendName: 'github',
+            login:       ghUser.login,
+            name:        ghUser.name || ghUser.login,
+            avatar_url:  ghUser.avatar_url,
+            url:         ghUser.url,
+          }));
+
+          document.getElementById('auth-loading').remove();
+
+          var decap = document.createElement('script');
+          decap.src = 'https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js';
+          document.body.appendChild(decap);
+
+          decap.onload = function () {
+            var widget = document.createElement('script');
+            widget.src = '/admin/widgets/csv-import.js';
+            document.body.appendChild(widget);
+          };
+        })
+        .catch(function (err) {
+          document.getElementById('auth-loading').innerHTML =
+            '<h2 style="color:#dc2626">GitHub API error</h2>' +
+            '<p>Could not fetch GitHub user with the provided PAT: ' + err.message + '</p>';
+        });
+      });
+    </script>
+  </body>
 </html>

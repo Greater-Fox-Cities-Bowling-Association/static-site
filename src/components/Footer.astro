@@ -1,0 +1,13 @@
+---
+export interface Props {
+  text: string;
+}
+
+const { text } = Astro.props;
+---
+
+<footer class="w-full border-t border-gray-200 bg-white mt-auto">
+  <div class="max-w-7xl mx-auto px-4 py-6 text-center text-sm text-gray-500">
+    {text || `© ${new Date().getFullYear()} My Static Site`}
+  </div>
+</footer>
