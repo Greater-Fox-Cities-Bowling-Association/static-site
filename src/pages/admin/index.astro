@@ -50,18 +50,45 @@ const siteUrl       = import.meta.env.PUBLIC_SITE_URL        ?? '';
 
     <!-- Load Decap CMS only after auth0:ready fires -->
     <script is:inline>
-      window.addEventListener('auth0:ready', function () {
-        document.getElementById('auth-loading').remove();
+      window.addEventListener('auth0:ready', function (e) {
+        var githubToken = e.detail.token;
 
-        var decap = document.createElement('script');
-        decap.src = 'https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js';
-        document.body.appendChild(decap);
+        // Fetch the GitHub user profile with the PAT first.
+        // Decap's LocalStorageAuthStore.retrieve() checks that backendName === 'github'
+        // before calling restoreUser() → authenticate(). Doing this fetch here means
+        // Decap finds a fully-populated `decap-cms-user` entry on startup and skips
+        // the login screen entirely.
+        fetch('https://api.github.com/user', {
+          headers: { Authorization: 'Bearer ' + githubToken }
+        })
+        .then(function (res) { return res.json(); })
+        .then(function (ghUser) {
+          window.localStorage.setItem('decap-cms-user', JSON.stringify({
+            token:       githubToken,
+            backendName: 'github',
+            login:       ghUser.login,
+            name:        ghUser.name || ghUser.login,
+            avatar_url:  ghUser.avatar_url,
+            url:         ghUser.url,
+          }));
 
-        decap.onload = function () {
-          var widget = document.createElement('script');
-          widget.src = '/admin/widgets/csv-import.js';
-          document.body.appendChild(widget);
-        };
+          document.getElementById('auth-loading').remove();
+
+          var decap = document.createElement('script');
+          decap.src = 'https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js';
+          document.body.appendChild(decap);
+
+          decap.onload = function () {
+            var widget = document.createElement('script');
+            widget.src = '/admin/widgets/csv-import.js';
+            document.body.appendChild(widget);
+          };
+        })
+        .catch(function (err) {
+          document.getElementById('auth-loading').innerHTML =
+            '<h2 style="color:#dc2626">GitHub API error</h2>' +
+            '<p>Could not fetch GitHub user with the provided PAT: ' + err.message + '</p>';
+        });
       });
     </script>
   </body>

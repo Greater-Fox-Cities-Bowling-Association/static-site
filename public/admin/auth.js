@@ -4,10 +4,9 @@
  * Flow:
  *   1. Initialise Auth0 with config injected at build time (window.__AUTH0_CONFIG__).
  *   2. Redirect to Auth0 login if not authenticated.
- *   3. After login, extract the GITHUB_PAT custom claim from the ID token.
- *   4. Store the PAT in localStorage as `decap-cms-user` so Decap CMS
- *      uses it directly for all GitHub API calls — no OAuth proxy needed.
- *   5. Dispatch `auth0:ready` so index.astro can load Decap CMS.
+ *   3. After login, extract the https://gfcba.com/github_token claim from the ID token.
+ *   4. Dispatch `auth0:ready` with the token — index.astro injects it into
+ *      Decap CMS's Redux store so the GitHub login screen is never shown.
  *
  * Required Auth0 Action (Post Login):
  *   exports.onExecutePostLogin = async (event, api) => {
@@ -68,12 +67,7 @@
     return;
   }
 
-  // Inject the PAT into localStorage so Decap CMS uses it for all GitHub API calls
-  window.localStorage.setItem('decap-cms-user', JSON.stringify({
-    token:    githubPAT,
-    provider: 'github',
-  }));
-
-  // Signal to index.astro that auth is complete — Decap will be loaded there
-  window.dispatchEvent(new CustomEvent('auth0:ready'));
+  // Pass the token to index.astro via event detail — it will inject it into
+  // Decap CMS's Redux store after the CMS script loads.
+  window.dispatchEvent(new CustomEvent('auth0:ready', { detail: { token: githubPAT } }));
 })();
