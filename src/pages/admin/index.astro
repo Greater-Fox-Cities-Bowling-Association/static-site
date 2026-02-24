@@ -45,7 +45,24 @@ const siteUrl       = import.meta.env.PUBLIC_SITE_URL        ?? '';
     <!-- Auth0 SPA SDK -->
     <script is:inline src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js"></script>
 
-    <!-- Auth0 guard + Decap CMS loader -->
+    <!-- Auth0 guard: validates session, extracts GITHUB_PAT, dispatches auth0:ready -->
     <script is:inline src="/admin/auth.js"></script>
+
+    <!-- Load Decap CMS only after auth0:ready fires -->
+    <script is:inline>
+      window.addEventListener('auth0:ready', function () {
+        document.getElementById('auth-loading').remove();
+
+        var decap = document.createElement('script');
+        decap.src = 'https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js';
+        document.body.appendChild(decap);
+
+        decap.onload = function () {
+          var widget = document.createElement('script');
+          widget.src = '/admin/widgets/csv-import.js';
+          document.body.appendChild(widget);
+        };
+      });
+    </script>
   </body>
 </html>
