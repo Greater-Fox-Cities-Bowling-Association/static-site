@@ -56,13 +56,16 @@ Visit `http://localhost:4321` to see the site.
 │   └── theme.json          # Theme variables (editable in CMS)
 │
 ├── public/
-│   └── admin/              # Decap CMS
-│       ├── index.html      # Auth0 gate + CMS loader
-│       ├── config.yml      # CMS collection configuration
-│       ├── auth.js         # Auth0 SPA integration
+│   └── admin/
+│       ├── auth.js             # Auth0 guard + Decap loader
 │       └── widgets/
-│           └── csv-import.js  # Custom CSV bulk-import widget
+│           └── csv-import.js   # Custom CSV bulk-import widget
 │
+├── src/pages/admin/
+│   ├── index.astro             # Auth0 gate page (injects env vars at build time)
+│   └── config.yml.ts           # Dynamic Decap config (injects env vars at build time)
+│
+├── .env.example            # All required environment variables (copy → .env)
 ├── astro.config.mjs
 ├── tailwind.config.mjs
 ├── tsconfig.json
@@ -73,27 +76,36 @@ Visit `http://localhost:4321` to see the site.
 
 ## Configuration
 
-### 1. GitHub Repository
+All configuration lives in a single `.env` file — nothing needs to be hardcoded.
 
-Edit `public/admin/config.yml` and replace:
-
-```yaml
-backend:
-  repo: YOUR_GITHUB_USERNAME/YOUR_REPO_NAME
+```bash
+cp .env.example .env
 ```
 
-Also update `site_url` and `display_url` to your domain.
+Then edit `.env`:
 
-### 2. Auth0
+```ini
+# Site
+PUBLIC_SITE_URL=https://your-domain.com
 
-Edit `public/admin/auth.js` and replace the placeholders:
+# GitHub backend (Decap CMS)
+PUBLIC_GITHUB_REPO=your-username/your-repo
+PUBLIC_GITHUB_BRANCH=main
+PUBLIC_GITHUB_BASE_URL=https://api.netlify.com
 
-```js
-const AUTH0_DOMAIN = "dev-xxxx.us.auth0.com";
-const AUTH0_CLIENT_ID = "your-client-id";
+# Auth0
+PUBLIC_AUTH0_DOMAIN=dev-xxxx.us.auth0.com
+PUBLIC_AUTH0_CLIENT_ID=your-client-id
 ```
 
-In the Auth0 dashboard, create a **Single Page Application** and set:
+Astro bakes these into the static output at **build time**:
+
+- `src/pages/admin/index.astro` injects Auth0 credentials via `window.__AUTH0_CONFIG__`
+- `src/pages/admin/config.yml.ts` generates the Decap CMS config with GitHub settings
+
+### Auth0 Dashboard Settings
+
+Create a **Single Page Application** in Auth0 and set:
 
 | Setting               | Value                            |
 | --------------------- | -------------------------------- |
@@ -101,18 +113,7 @@ In the Auth0 dashboard, create a **Single Page Application** and set:
 | Allowed Logout URLs   | `https://your-domain.com/`       |
 | Allowed Web Origins   | `https://your-domain.com`        |
 
-### 3. Site URL
-
-Update the `site` field in `astro.config.mjs`:
-
-```js
-export default defineConfig({
-  site: "https://your-domain.com",
-  // ...
-});
-```
-
-### 4. Theme
+### Theme
 
 Edit `src/theme.json` (or via the CMS at **Theme** in the sidebar):
 

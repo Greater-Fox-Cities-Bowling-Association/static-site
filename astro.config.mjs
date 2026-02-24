@@ -4,7 +4,7 @@ import tailwind from '@astrojs/tailwind';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://your-domain.com', // TODO: Replace with your site URL
+  site: import.meta.env.PUBLIC_SITE_URL ?? 'https://your-domain.com',
   integrations: [
     sitemap(),
     tailwind(),
