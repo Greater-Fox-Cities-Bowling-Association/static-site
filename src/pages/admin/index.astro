@@ -12,7 +12,9 @@ const AUTH0_CLIENT_ID = import.meta.env.AUTH0_CLIENT_ID ?? "";
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin — Loading…</title>
     <script
+      is:inline
       src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js"
+      onerror="document.getElementById('error-msg').style.display='block';document.getElementById('error-msg').textContent='Failed to load Auth0 SDK from CDN. Check your network connection.';console.error('[Admin] auth0-spa-js CDN script failed to load (404 or network error).');"
     ></script>
     <style>
       *,
@@ -88,8 +90,20 @@ const AUTH0_CLIENT_ID = import.meta.env.AUTH0_CLIENT_ID ?? "";
       <p id="status"></p>
     </div>
 
+    <!-- Inject env vars onto window so the logic script below (which is NOT
+         wrapped in a closure) can access them globally. -->
     <script is:inline define:vars={{ AUTH0_DOMAIN, AUTH0_CLIENT_ID }}>
-      // AUTH0_DOMAIN and AUTH0_CLIENT_ID are injected by Astro from the .env file.
+      window._AUTH0_DOMAIN = AUTH0_DOMAIN;
+      window._AUTH0_CLIENT_ID = AUTH0_CLIENT_ID;
+    </script>
+
+    <script is:inline>
+      // Read env vars injected above — this script has no define:vars so it
+      // is NOT wrapped in a closure, meaning login() and other functions are
+      // global and reachable from onclick attributes.
+      const AUTH0_DOMAIN = window._AUTH0_DOMAIN || "";
+      const AUTH0_CLIENT_ID = window._AUTH0_CLIENT_ID || "";
+
       const REDIRECT_URI = window.location.origin + "/admin/";
       const GITHUB_TOKEN_CLAIM = "https://gfcba.com/github_token";
 
@@ -114,6 +128,13 @@ const AUTH0_CLIENT_ID = import.meta.env.AUTH0_CLIENT_ID ?? "";
             "| AUTH0_CLIENT_ID:",
             AUTH0_CLIENT_ID,
           );
+          return;
+        }
+        if (typeof auth0 === "undefined") {
+          showError(
+            "Auth0 SDK failed to load. Check your internet connection and that the CDN script is reachable.",
+          );
+          console.error("[Admin] auth0-spa-js CDN script did not load.");
           return;
         }
         try {
@@ -231,7 +252,25 @@ const AUTH0_CLIENT_ID = import.meta.env.AUTH0_CLIENT_ID ?? "";
         setStatus("");
       }
 
-      initAuth0();
+      // Wait for the Auth0 CDN script to be available before initialising.
+      // The CDN script is blocking in <head> but we guard anyway in case of
+      // slow networks or a cached failed load.
+      function waitForAuth0(retries) {
+        if (typeof auth0 !== "undefined") {
+          initAuth0();
+        } else if (retries > 0) {
+          setTimeout(() => waitForAuth0(retries - 1), 200);
+        } else {
+          showError(
+            "Auth0 SDK failed to load from CDN. Check your network connection.",
+          );
+          console.error(
+            "[Admin] auth0-spa-js never became available after waiting.",
+          );
+        }
+      }
+
+      waitForAuth0(25); // up to 5 seconds
     </script>
   </body>
 </html>
