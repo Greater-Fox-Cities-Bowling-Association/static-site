@@ -90,6 +90,14 @@ const siteUrl       = import.meta.env.PUBLIC_SITE_URL        ?? '';
             var widget = document.createElement('script');
             widget.src = '/admin/widgets/csv-import.js';
             document.body.appendChild(widget);
+
+            // Load CMS customisations (preview templates, editor components, branding)
+            widget.onload = function () {
+              console.log('[index.astro] CSV widget loaded, loading CMS customisations');
+              var custom = document.createElement('script');
+              custom.src = '/admin/cms-customizations.js';
+              document.body.appendChild(custom);
+            };
           };
         })
         .catch(function (err) {
