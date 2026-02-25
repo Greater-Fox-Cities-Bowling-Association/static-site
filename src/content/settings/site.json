@@ -1,0 +1,10 @@
+{
+  "siteTitle": "My Site",
+  "siteDescription": "A statically generated site powered by Astro and TinaCMS.",
+  "siteUrl": "https://yourdomain.com",
+  "socialLinks": {
+    "twitter": "",
+    "github": "Greater-Fox-Cities-Bowling-Association/static-site",
+    "facebook": ""
+  }
+}

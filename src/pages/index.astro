@@ -1,0 +1,54 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+// Fetch latest posts
+let posts: Awaited<ReturnType<typeof getCollection<"posts">>> = [];
+try {
+  posts = await getCollection("posts");
+  posts = posts.sort(
+    (a, b) =>
+      (b.data.publishDate?.valueOf() ?? 0) -
+      (a.data.publishDate?.valueOf() ?? 0)
+  );
+} catch {
+  // content collection not yet built
+}
+---
+
+<BaseLayout
+  title="Home — My Site"
+  description="A statically generated site built with Astro and TinaCMS."
+>
+  <section class="py-16 text-center">
+    <h1 class="text-4xl font-bold mb-4">Welcome to My Site</h1>
+    <p class="text-xl text-gray-600 mb-8 max-w-xl mx-auto">
+      A fully static, SEO-optimized site powered by Astro and TinaCMS.
+    </p>
+    <a href="/blog" class="btn">Read the Blog</a>
+  </section>
+
+  {
+    posts.length > 0 && (
+      <section class="mt-12">
+        <h2 class="text-2xl font-bold mb-6">Latest Posts</h2>
+        <ul class="space-y-4">
+          {posts.slice(0, 5).map((post) => (
+            <li class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
+              <a href={`/blog/${post.slug}`} class="no-underline">
+                <h3 class="text-lg font-semibold text-gray-900">
+                  {post.data.title}
+                </h3>
+                {post.data.description && (
+                  <p class="text-gray-600 mt-1 text-sm">
+                    {post.data.description}
+                  </p>
+                )}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+</BaseLayout>

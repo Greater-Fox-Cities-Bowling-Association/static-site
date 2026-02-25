@@ -1,0 +1,80 @@
+---
+interface Props {
+  title: string;
+  description?: string;
+  image?: string;
+  article?: boolean;
+  publishDate?: Date;
+  author?: string;
+  canonicalURL?: string;
+}
+
+const {
+  title,
+  description = "A statically generated site powered by Astro and TinaCMS.",
+  image = "/og-default.png",
+  article = false,
+  publishDate,
+  author,
+  canonicalURL = Astro.url.href,
+} = Astro.props;
+
+const siteUrl = Astro.site?.toString() ?? "";
+const fullImageUrl = image.startsWith("http") ? image : `${siteUrl}${image}`;
+---
+
+<!-- Primary Meta Tags -->
+<title>{title}</title>
+<meta name="title" content={title} />
+<meta name="description" content={description} />
+<link rel="canonical" href={canonicalURL} />
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content={article ? "article" : "website"} />
+<meta property="og:url" content={canonicalURL} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={fullImageUrl} />
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image" />
+<meta property="twitter:url" content={canonicalURL} />
+<meta property="twitter:title" content={title} />
+<meta property="twitter:description" content={description} />
+<meta property="twitter:image" content={fullImageUrl} />
+
+<!-- Article-specific meta -->
+{
+  article && publishDate && (
+    <meta
+      property="article:published_time"
+      content={publishDate.toISOString()}
+    />
+  )
+}
+{article && author && <meta property="article:author" content={author} />}
+
+<!-- Schema.org JSON-LD -->
+<script
+  type="application/ld+json"
+  set:html={JSON.stringify(
+    article
+      ? {
+          "@context": "https://schema.org",
+          "@type": "BlogPosting",
+          headline: title,
+          description,
+          image: fullImageUrl,
+          author: { "@type": "Person", name: author ?? "Unknown" },
+          datePublished: publishDate?.toISOString(),
+          url: canonicalURL,
+        }
+      : {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          name: title,
+          description,
+          url: canonicalURL,
+        }
+  )}
+/>

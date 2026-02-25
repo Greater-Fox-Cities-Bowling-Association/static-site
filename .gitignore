@@ -1,0 +1,38 @@
+# build output
+dist/
+.output/
+
+# generated types
+.astro/
+
+# dependencies
+node_modules/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# environment variables (keep examples, ignore actuals with secrets)
+.env
+.env.local
+# NOTE: .env.development and .env.production are committed (no secrets)
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Editor directories and files
+.vscode/settings.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# TinaCMS local database
+.tina/__generated__/
+tina/__generated__/
+.tina/

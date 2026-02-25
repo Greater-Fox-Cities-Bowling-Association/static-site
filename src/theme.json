@@ -1,0 +1,8 @@
+{
+  "primaryColor": "#2563eb",
+  "secondaryColor": "#7c3aed",
+  "fontFamily": "Inter",
+  "fontScale": 1,
+  "borderRadius": "md",
+  "layoutStyle": "centered"
+}

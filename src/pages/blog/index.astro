@@ -1,0 +1,56 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+let posts: Awaited<ReturnType<typeof getCollection<"posts">>> = [];
+try {
+  posts = await getCollection("posts");
+  posts = posts.sort(
+    (a, b) =>
+      (b.data.publishDate?.valueOf() ?? 0) -
+      (a.data.publishDate?.valueOf() ?? 0)
+  );
+} catch {
+  // content collection not yet built
+}
+---
+
+<BaseLayout title="Blog — My Site" description="All posts from My Site.">
+  <h1 class="text-3xl font-bold mb-8">Blog</h1>
+
+  {
+    posts.length === 0 ? (
+      <p class="text-gray-500">
+        No posts yet. Start adding content via the{" "}
+        <a href="/admin/">admin panel</a>.
+      </p>
+    ) : (
+      <ul class="space-y-6">
+        {posts.map((post) => (
+          <li class="border border-gray-200 rounded-lg p-6">
+            <a href={`/blog/${post.slug}`} class="no-underline group">
+              <h2 class="text-2xl font-semibold group-hover:underline">
+                {post.data.title}
+              </h2>
+              {post.data.description && (
+                <p class="text-gray-600 mt-2">{post.data.description}</p>
+              )}
+              {post.data.publishDate && (
+                <time
+                  class="text-sm text-gray-400 mt-2 block"
+                  datetime={post.data.publishDate.toISOString()}
+                >
+                  {post.data.publishDate.toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </time>
+              )}
+            </a>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</BaseLayout>

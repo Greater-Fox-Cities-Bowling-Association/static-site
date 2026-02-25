@@ -1,0 +1,27 @@
+{
+  "name": "static-site",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "tinacms dev -c \"astro dev\"",
+    "start": "tinacms dev -c \"astro dev\"",
+    "build": "tinacms build && astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "tina:build": "tinacms build",
+    "tina:dev": "tinacms dev"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.0",
+    "@astrojs/tailwind": "^6.0.2",
+    "@tinacms/toolkit": "^1.0.0",
+    "astro": "^5.17.3",
+    "tailwindcss": "^3.4.19",
+    "tinacms": "^3.5.1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.0",
+    "@types/react": "^19.2.14",
+    "typescript": "^5.9.3"
+  }
+}
