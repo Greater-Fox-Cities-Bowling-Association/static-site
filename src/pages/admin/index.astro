@@ -13,6 +13,7 @@ const siteUrl       = import.meta.env.PUBLIC_SITE_URL        ?? '';
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CMS Admin</title>
     <meta name="robots" content="noindex, nofollow" />
+    <link rel="cms-config-url" type="application/json" href="/admin/config.yml" />
     <style>
       #auth-loading {
         display: flex;
@@ -28,7 +29,7 @@ const siteUrl       = import.meta.env.PUBLIC_SITE_URL        ?? '';
     </style>
   </head>
   <body>
-    <div id="auth-loading">
+    <div id="auth-loading" style="display:none">
       <h2>Checking authentication…</h2>
       <p>You will be redirected to login if needed.</p>
     </div>
@@ -50,8 +51,11 @@ const siteUrl       = import.meta.env.PUBLIC_SITE_URL        ?? '';
 
     <!-- Load Decap CMS only after auth0:ready fires -->
     <script is:inline>
-      window.addEventListener('auth0:ready', function (e) {
-        var githubToken = e.detail.token;
+      console.log('[index.astro] addEventListener for auth0:ready registered');
+
+      function onAuthReady(token) {
+        console.log('[index.astro] onAuthReady called, token present:', !!token);
+        var githubToken = token;
 
         // Fetch the GitHub user profile with the PAT first.
         // Decap's LocalStorageAuthStore.retrieve() checks that backendName === 'github'
@@ -63,6 +67,7 @@ const siteUrl       = import.meta.env.PUBLIC_SITE_URL        ?? '';
         })
         .then(function (res) { return res.json(); })
         .then(function (ghUser) {
+          console.log('[index.astro] GitHub user fetched:', ghUser.login);
           window.localStorage.setItem('decap-cms-user', JSON.stringify({
             token:       githubToken,
             backendName: 'github',
@@ -72,24 +77,44 @@ const siteUrl       = import.meta.env.PUBLIC_SITE_URL        ?? '';
             url:         ghUser.url,
           }));
 
-          document.getElementById('auth-loading').remove();
+          var loadingEl = document.getElementById('auth-loading');
+          if (loadingEl) loadingEl.remove();
+          console.log('[index.astro] loading Decap CMS script');
 
           var decap = document.createElement('script');
           decap.src = 'https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js';
           document.body.appendChild(decap);
 
           decap.onload = function () {
+            console.log('[index.astro] Decap CMS loaded, loading csv-import widget');
             var widget = document.createElement('script');
             widget.src = '/admin/widgets/csv-import.js';
             document.body.appendChild(widget);
           };
         })
         .catch(function (err) {
-          document.getElementById('auth-loading').innerHTML =
-            '<h2 style="color:#dc2626">GitHub API error</h2>' +
-            '<p>Could not fetch GitHub user with the provided PAT: ' + err.message + '</p>';
+          console.error('[index.astro] GitHub API error:', err);
+          var el = document.getElementById('auth-loading');
+          if (el) {
+            el.style.display = 'flex';
+            el.innerHTML =
+              '<h2 style="color:#dc2626">GitHub API error</h2>' +
+              '<p>Could not fetch GitHub user with the provided PAT: ' + err.message + '</p>';
+          }
         });
-      });
+      }
+
+      // If auth.js already ran and set the token before this script registered,
+      // call onAuthReady immediately; otherwise wait for the event.
+      if (window.__auth0Token) {
+        console.log('[index.astro] window.__auth0Token already set, calling onAuthReady immediately');
+        onAuthReady(window.__auth0Token);
+      } else {
+        window.addEventListener('auth0:ready', function (e) {
+          console.log('[index.astro] auth0:ready event received');
+          onAuthReady(e.detail.token);
+        });
+      }
     </script>
   </body>
 </html>
