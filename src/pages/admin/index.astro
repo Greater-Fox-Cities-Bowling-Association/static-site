@@ -1,21 +1,31 @@
 ---
 // Auth0 values are read from .env.development / .env.production at build/dev time
 // and injected directly into the page as JS literals — no meta tag indirection needed.
-const AUTH0_DOMAIN    = import.meta.env.AUTH0_DOMAIN    ?? '';
-const AUTH0_CLIENT_ID = import.meta.env.AUTH0_CLIENT_ID ?? '';
+const AUTH0_DOMAIN = import.meta.env.AUTH0_DOMAIN ?? "";
+const AUTH0_CLIENT_ID = import.meta.env.AUTH0_CLIENT_ID ?? "";
 ---
-<!DOCTYPE html>
+
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin — Loading…</title>
-    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js"></script>
+    <script
+      src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js"
+    ></script>
     <style>
-      *, *::before, *::after { box-sizing: border-box; }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
       body {
         margin: 0;
-        font-family: system-ui, -apple-system, sans-serif;
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
         background: #f4f5f7;
         display: flex;
         align-items: center;
@@ -26,35 +36,47 @@ const AUTH0_CLIENT_ID = import.meta.env.AUTH0_CLIENT_ID ?? '';
         background: #fff;
         border-radius: 8px;
         padding: 2.5rem;
-        box-shadow: 0 4px 24px rgba(0,0,0,.08);
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
         max-width: 400px;
         width: 100%;
         text-align: center;
       }
-      h1 { font-size: 1.5rem; margin: 0 0 0.5rem; }
-      p  { color: #555; margin: 0 0 1.5rem; }
+      h1 {
+        font-size: 1.5rem;
+        margin: 0 0 0.5rem;
+      }
+      p {
+        color: #555;
+        margin: 0 0 1.5rem;
+      }
       button {
         background: #2563eb;
         color: #fff;
         border: none;
         border-radius: 6px;
-        padding: .75rem 2rem;
+        padding: 0.75rem 2rem;
         font-size: 1rem;
         cursor: pointer;
         width: 100%;
-        transition: background .15s;
+        transition: background 0.15s;
       }
-      button:hover { background: #1d4ed8; }
+      button:hover {
+        background: #1d4ed8;
+      }
       .error {
         background: #fee2e2;
         color: #9b1c1c;
         border-radius: 6px;
-        padding: .75rem 1rem;
+        padding: 0.75rem 1rem;
         margin-top: 1rem;
         display: none;
-        font-size: .875rem;
+        font-size: 0.875rem;
       }
-      #status { color: #6b7280; font-size: .875rem; margin-top: 1rem; }
+      #status {
+        color: #6b7280;
+        font-size: 0.875rem;
+        margin-top: 1rem;
+      }
     </style>
   </head>
   <body>
@@ -68,30 +90,49 @@ const AUTH0_CLIENT_ID = import.meta.env.AUTH0_CLIENT_ID ?? '';
 
     <script is:inline define:vars={{ AUTH0_DOMAIN, AUTH0_CLIENT_ID }}>
       // AUTH0_DOMAIN and AUTH0_CLIENT_ID are injected by Astro from the .env file.
-      const REDIRECT_URI       = window.location.origin + '/admin/';
-      const GITHUB_TOKEN_CLAIM = 'https://gfcba.com/github_token';
+      const REDIRECT_URI = window.location.origin + "/admin/";
+      const GITHUB_TOKEN_CLAIM = "https://gfcba.com/github_token";
 
       let auth0Client = null;
 
+      console.log("[Admin] Auth0 config check:", {
+        AUTH0_DOMAIN: AUTH0_DOMAIN || "(empty)",
+        AUTH0_CLIENT_ID: AUTH0_CLIENT_ID
+          ? AUTH0_CLIENT_ID.slice(0, 6) + "…"
+          : "(empty)",
+      });
+
       async function initAuth0() {
-        setStatus('Initialising…');
+        setStatus("Initialising…");
+        if (!AUTH0_DOMAIN || !AUTH0_CLIENT_ID) {
+          showError(
+            "Auth0 is not configured. Set AUTH0_DOMAIN and AUTH0_CLIENT_ID in your .env file.",
+          );
+          console.error(
+            "[Admin] Missing env vars — AUTH0_DOMAIN:",
+            AUTH0_DOMAIN,
+            "| AUTH0_CLIENT_ID:",
+            AUTH0_CLIENT_ID,
+          );
+          return;
+        }
         try {
           auth0Client = await auth0.createAuth0Client({
-            domain:   AUTH0_DOMAIN,
+            domain: AUTH0_DOMAIN,
             clientId: AUTH0_CLIENT_ID,
             authorizationParams: {
               redirect_uri: REDIRECT_URI,
             },
-            cacheLocation: 'localstorage',
+            cacheLocation: "localstorage",
             useRefreshTokens: true,
           });
 
           // Handle redirect callback after Auth0 login
           const query = window.location.search;
-          if (query.includes('code=') && query.includes('state=')) {
-            setStatus('Completing sign-in…');
+          if (query.includes("code=") && query.includes("state=")) {
+            setStatus("Completing sign-in…");
             await auth0Client.handleRedirectCallback();
-            window.history.replaceState({}, document.title, '/admin/');
+            window.history.replaceState({}, document.title, "/admin/");
           }
 
           const isAuthenticated = await auth0Client.isAuthenticated();
@@ -99,17 +140,17 @@ const AUTH0_CLIENT_ID = import.meta.env.AUTH0_CLIENT_ID ?? '';
           if (isAuthenticated) {
             await onAuthenticated();
           } else {
-            setStatus('');
-            document.getElementById('login-btn').style.display = '';
+            setStatus("");
+            document.getElementById("login-btn").style.display = "";
           }
         } catch (err) {
-          console.error('Auth0 init error:', err);
-          showError('Failed to initialise authentication: ' + err.message);
+          console.error("Auth0 init error:", err);
+          showError("Failed to initialise authentication: " + err.message);
         }
       }
 
       async function onAuthenticated() {
-        setStatus('Loading CMS…');
+        setStatus("Loading CMS…");
         try {
           // Get the raw ID token to extract custom claims
           const claims = await auth0Client.getIdTokenClaims();
@@ -120,65 +161,74 @@ const AUTH0_CLIENT_ID = import.meta.env.AUTH0_CLIENT_ID ?? '';
             try {
               const accessToken = await auth0Client.getTokenSilently();
               // Decode JWT payload to get custom claims
-              const payload = JSON.parse(atob(accessToken.split('.')[1]));
+              const payload = JSON.parse(atob(accessToken.split(".")[1]));
               githubToken = payload[GITHUB_TOKEN_CLAIM] || null;
             } catch (_) {}
           }
 
           if (githubToken) {
             // Store for TinaCMS auth provider to pick up
-            localStorage.setItem('tinacms-github-token', githubToken);
-            sessionStorage.setItem('tinacms-github-token', githubToken);
+            localStorage.setItem("tinacms-github-token", githubToken);
+            sessionStorage.setItem("tinacms-github-token", githubToken);
           } else {
-            console.warn('No GitHub token claim found at', GITHUB_TOKEN_CLAIM);
+            console.warn("No GitHub token claim found at", GITHUB_TOKEN_CLAIM);
           }
 
           // Store the Auth0 user info
           const user = await auth0Client.getUser();
           if (user) {
-            localStorage.setItem('tinacms-auth-user', JSON.stringify(user));
+            localStorage.setItem("tinacms-auth-user", JSON.stringify(user));
           }
 
           // Hide the auth card and load TinaCMS admin
-          document.getElementById('auth-card').innerHTML =
+          document.getElementById("auth-card").innerHTML =
             '<p style="color:#6b7280">Loading admin panel…</p>';
 
           loadTinaCMS();
         } catch (err) {
-          console.error('Post-auth error:', err);
-          showError('Failed to load CMS: ' + err.message);
+          console.error("Post-auth error:", err);
+          showError("Failed to load CMS: " + err.message);
         }
       }
 
       function loadTinaCMS() {
-        const script = document.createElement('script');
-        script.src = '/admin/cms.js';
+        const script = document.createElement("script");
+        script.src = "/admin/cms.js";
         script.onerror = () => {
-          document.getElementById('auth-card').innerHTML =
-            '<h1>Admin</h1><p>CMS bundle not found. Run <code>npm run tina:build</code> first, or use <code>npm run dev</code> for development.</p>';
+          document.getElementById("auth-card").innerHTML =
+            "<h1>Admin</h1><p>CMS bundle not found. Run <code>npm run tina:build</code> first, or use <code>npm run dev</code> for development.</p>";
         };
         document.body.appendChild(script);
       }
 
       function login() {
+        console.log(
+          "[Admin] login() called — AUTH0_DOMAIN:",
+          AUTH0_DOMAIN || "(empty)",
+          "| auth0Client:",
+          auth0Client ? "ready" : "null",
+        );
         if (!AUTH0_DOMAIN || !AUTH0_CLIENT_ID) {
-          showError('Auth0 is not configured. Set AUTH0_DOMAIN and AUTH0_CLIENT_ID in your .env file.');
+          showError(
+            "Auth0 is not configured. Set AUTH0_DOMAIN and AUTH0_CLIENT_ID in your .env file.",
+          );
+          console.error("[Admin] login() blocked — env vars not injected.");
           return;
         }
         auth0Client
           ? auth0Client.loginWithRedirect()
-          : showError('Auth0 client not ready yet. Please wait.');
+          : showError("Auth0 client not ready yet. Please wait.");
       }
 
       function setStatus(msg) {
-        document.getElementById('status').textContent = msg;
+        document.getElementById("status").textContent = msg;
       }
 
       function showError(msg) {
-        const el = document.getElementById('error-msg');
-        el.style.display = 'block';
+        const el = document.getElementById("error-msg");
+        el.style.display = "block";
         el.textContent = msg;
-        setStatus('');
+        setStatus("");
       }
 
       initAuth0();
