@@ -22,7 +22,7 @@ export default defineConfig({
   authProvider: auth0Provider,
 
   build: {
-    outputFolder: "admin",
+    outputFolder: "admin/cms",
     publicFolder: "public",
   },
 

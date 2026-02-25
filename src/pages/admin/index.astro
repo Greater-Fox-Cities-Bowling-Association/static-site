@@ -3,6 +3,7 @@
 // and injected directly into the page as JS literals — no meta tag indirection needed.
 const AUTH0_DOMAIN = import.meta.env.AUTH0_DOMAIN ?? "";
 const AUTH0_CLIENT_ID = import.meta.env.AUTH0_CLIENT_ID ?? "";
+const IS_DEV = import.meta.env.DEV;
 ---
 
 <!doctype html>
@@ -92,9 +93,10 @@ const AUTH0_CLIENT_ID = import.meta.env.AUTH0_CLIENT_ID ?? "";
 
     <!-- Inject env vars onto window so the logic script below (which is NOT
          wrapped in a closure) can access them globally. -->
-    <script is:inline define:vars={{ AUTH0_DOMAIN, AUTH0_CLIENT_ID }}>
+    <script is:inline define:vars={{ AUTH0_DOMAIN, AUTH0_CLIENT_ID, IS_DEV }}>
       window._AUTH0_DOMAIN = AUTH0_DOMAIN;
       window._AUTH0_CLIENT_ID = AUTH0_CLIENT_ID;
+      window._IS_DEV = IS_DEV;
     </script>
 
     <script is:inline>
@@ -213,13 +215,14 @@ const AUTH0_CLIENT_ID = import.meta.env.AUTH0_CLIENT_ID ?? "";
       }
 
       function loadTinaCMS() {
-        const script = document.createElement("script");
-        script.src = "/admin/cms.js";
-        script.onerror = () => {
-          document.getElementById("auth-card").innerHTML =
-            "<h1>Admin</h1><p>CMS bundle not found. Run <code>npm run tina:build</code> first, or use <code>npm run dev</code> for development.</p>";
-        };
-        document.body.appendChild(script);
+        if (window._IS_DEV) {
+          // Development: TinaCMS Vite dev server runs on port 4001.
+          // Token is already in localStorage — just navigate there.
+          window.location.href = "http://localhost:4001/";
+        } else {
+          // Production: redirect to the built TinaCMS bundle at /admin/cms/
+          window.location.href = "/admin/cms/";
+        }
       }
 
       function login() {
