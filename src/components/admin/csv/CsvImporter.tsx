@@ -76,14 +76,15 @@ function buildPageJson(
       ctaLabel: get("heroCta") || "Learn more",
       ctaHref: get("heroCtaHref") || "#",
     },
+    slots: {},
   };
 
   return {
+    id: slug,
     slug,
     title: get("title") || slug,
-    layout: {
-      root: { id: "root", componentId: "box", props: {}, children: [heroNode] },
-    },
+    description: "",
+    layout: [heroNode],
   };
 }
 
@@ -341,8 +342,7 @@ export function CsvImporter({ token }: Props) {
                       </TableCell>
                       <TableCell>{p.title}</TableCell>
                       <TableCell>
-                        {(p.layout.root.children?.[0]?.props
-                          ?.headline as string) ?? ""}
+                        {(p.layout[0]?.props?.headline as string) ?? ""}
                       </TableCell>
                     </TableRow>
                   ))}
