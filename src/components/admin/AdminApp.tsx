@@ -13,16 +13,27 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
+import ArticleIcon from "@mui/icons-material/Article";
 import EditIcon from "@mui/icons-material/Edit";
 import ExtensionIcon from "@mui/icons-material/Extension";
 import PaletteIcon from "@mui/icons-material/Palette";
 import TableChartIcon from "@mui/icons-material/TableChart";
 import { useState } from "react";
 
+import { useGitHubToken } from "./useGitHubToken";
+import { PageList } from "./pages/PageList";
+import { PageEditor } from "./editor/PageEditor";
+import { ComponentBuilder } from "./builder/ComponentBuilder";
+import { ThemeEditorPanel } from "./theme/ThemeEditorPanel";
+import { CsvImporter } from "./csv/CsvImporter";
+import type { PageContent } from "../../../cms/editor/layoutSchema";
+
 const DRAWER_WIDTH = 240;
 
-const navItems = [
-  { label: "Visual Editor", icon: <EditIcon /> },
+type Section = "Pages" | "Editor" | "Components" | "Theme" | "CSV Importer";
+
+const navItems: { label: Section; icon: JSX.Element }[] = [
+  { label: "Pages", icon: <ArticleIcon /> },
   { label: "Components", icon: <ExtensionIcon /> },
   { label: "Theme", icon: <PaletteIcon /> },
   { label: "CSV Importer", icon: <TableChartIcon /> },
@@ -30,7 +41,55 @@ const navItems = [
 
 function AdminDashboard() {
   const { user, logout } = useAuth0();
-  const [activeSection, setActiveSection] = useState("Visual Editor");
+  const token = useGitHubToken();
+  const [activeSection, setActiveSection] = useState<Section>("Pages");
+  const [editingPage, setEditingPage] = useState<PageContent | null>(null);
+
+  function openPage(page: PageContent) {
+    setEditingPage(page);
+    setActiveSection("Editor");
+  }
+
+  function closeEditor() {
+    setEditingPage(null);
+    setActiveSection("Pages");
+  }
+
+  function renderSection() {
+    switch (activeSection) {
+      case "Pages":
+        return <PageList token={token} onEditPage={openPage} />;
+      case "Editor":
+        if (!editingPage)
+          return (
+            <Box sx={{ p: 4 }}>
+              <Typography variant="h6">No page selected.</Typography>
+              <Button onClick={() => setActiveSection("Pages")} sx={{ mt: 1 }}>
+                ← Back to Pages
+              </Button>
+            </Box>
+          );
+        return (
+          <PageEditor
+            key={editingPage.slug}
+            initialPage={editingPage}
+            token={token}
+            onBack={closeEditor}
+          />
+        );
+      case "Components":
+        return <ComponentBuilder token={token} />;
+      case "Theme":
+        return <ThemeEditorPanel token={token} />;
+      case "CSV Importer":
+        return <CsvImporter token={token} />;
+    }
+  }
+
+  // Editor is full-viewport — hide shell chrome
+  if (activeSection === "Editor" && editingPage) {
+    return renderSection();
+  }
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -42,6 +101,11 @@ function AdminDashboard() {
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
             Site Admin
           </Typography>
+          {!token && (
+            <Typography variant="body2" sx={{ mr: 2, opacity: 0.7 }}>
+              (GitHub token not configured)
+            </Typography>
+          )}
           <Typography variant="body2" sx={{ mr: 2 }}>
             {user?.email}
           </Typography>
@@ -91,14 +155,18 @@ function AdminDashboard() {
         </Box>
       </Drawer>
 
-      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          height: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+        }}
+      >
         <Toolbar />
-        <Typography variant="h5" gutterBottom>
-          {activeSection}
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          {activeSection} — implementation coming in Phase 2.
-        </Typography>
+        <Box sx={{ flex: 1, overflow: "hidden" }}>{renderSection()}</Box>
       </Box>
     </Box>
   );

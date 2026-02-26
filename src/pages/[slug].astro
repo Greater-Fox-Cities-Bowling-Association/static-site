@@ -1,0 +1,33 @@
+---
+import type { GetStaticPaths } from "astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PageContent from "../components/renderer/PageContent";
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  // Load all page JSON files from src/content/pages/
+  const pages = await import.meta.glob<{
+    default: import("../../cms/editor/layoutSchema").PageContent;
+  }>("/src/content/pages/*.json");
+
+  const paths = await Promise.all(
+    Object.values(pages).map(async (load) => {
+      const mod = await load();
+      const page = mod.default;
+      return {
+        params: { slug: page.slug },
+        props: { page },
+      };
+    }),
+  );
+
+  return paths;
+};
+
+const { page } = Astro.props as {
+  page: import("../../cms/editor/layoutSchema").PageContent;
+};
+---
+
+<BaseLayout title={page.title} description={page.description}>
+  <PageContent layout={page.layout} client:only="react" />
+</BaseLayout>

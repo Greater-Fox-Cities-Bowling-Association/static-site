@@ -1,0 +1,25 @@
+{
+  "id": "featureList",
+  "name": "Feature List",
+  "category": "composite",
+  "props": {
+    "heading": { "type": "string", "default": "Our Features" },
+    "features": { "type": "string", "default": [] },
+    "columns": { "type": "number", "default": 3 }
+  },
+  "slots": {},
+  "events": {},
+  "theme": {
+    "usesColors": true,
+    "usesTypography": true,
+    "usesSpacing": true,
+    "usesRadius": false,
+    "usesShadow": false
+  },
+  "editor": {
+    "icon": "view_list",
+    "previewHeight": 280,
+    "draggable": true,
+    "resizable": false
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "id": "navbar",
+  "name": "Navbar",
+  "category": "composite",
+  "props": {
+    "logo": { "type": "string", "default": "Site Name" },
+    "links": { "type": "string", "default": [] },
+    "sticky": { "type": "boolean", "default": false },
+    "colorScheme": { "type": "string", "options": ["primary", "default", "transparent"], "default": "primary" }
+  },
+  "slots": {},
+  "events": {},
+  "theme": {
+    "usesColors": true,
+    "usesTypography": true,
+    "usesSpacing": false,
+    "usesRadius": false,
+    "usesShadow": true
+  },
+  "editor": {
+    "icon": "menu",
+    "previewHeight": 64,
+    "draggable": true,
+    "resizable": false
+  }
+}

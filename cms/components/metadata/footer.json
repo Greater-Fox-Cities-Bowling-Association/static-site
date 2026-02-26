@@ -1,0 +1,24 @@
+{
+  "id": "footer",
+  "name": "Footer",
+  "category": "composite",
+  "props": {
+    "columns": { "type": "string", "default": [] },
+    "copyright": { "type": "string", "default": "© 2026 All rights reserved." }
+  },
+  "slots": {},
+  "events": {},
+  "theme": {
+    "usesColors": true,
+    "usesTypography": true,
+    "usesSpacing": true,
+    "usesRadius": false,
+    "usesShadow": false
+  },
+  "editor": {
+    "icon": "web_asset",
+    "previewHeight": 200,
+    "draggable": true,
+    "resizable": false
+  }
+}

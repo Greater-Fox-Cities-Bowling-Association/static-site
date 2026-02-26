@@ -9,8 +9,16 @@ import image from './metadata/image.json' assert { type: 'json' };
 import icon from './metadata/icon.json' assert { type: 'json' };
 import spacer from './metadata/spacer.json' assert { type: 'json' };
 import card from './metadata/card.json' assert { type: 'json' };
+import hero from './metadata/hero.json' assert { type: 'json' };
+import navbar from './metadata/navbar.json' assert { type: 'json' };
+import footer from './metadata/footer.json' assert { type: 'json' };
+import featureList from './metadata/featureList.json' assert { type: 'json' };
+import pricingTable from './metadata/pricingTable.json' assert { type: 'json' };
 
-const allComponents = [box, stack, grid, typography, button, divider, paper, image, icon, spacer, card];
+const allComponents = [
+  box, stack, grid, typography, button, divider, paper, image, icon, spacer,
+  card, hero, navbar, footer, featureList, pricingTable,
+];
 
 /**
  * componentRegistry — Map<id, componentMetadata>

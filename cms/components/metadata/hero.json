@@ -1,0 +1,29 @@
+{
+  "id": "hero",
+  "name": "Hero",
+  "category": "composite",
+  "props": {
+    "heading": { "type": "string", "default": "Your Headline Here" },
+    "subheading": { "type": "string", "default": "A short supporting sentence goes here." },
+    "primaryCtaLabel": { "type": "string", "default": "Get Started" },
+    "primaryCtaHref": { "type": "string", "default": "#" },
+    "secondaryCtaLabel": { "type": "string", "default": "Learn More" },
+    "secondaryCtaHref": { "type": "string", "default": "#" },
+    "backgroundColor": { "type": "color", "default": "background.paper" }
+  },
+  "slots": {},
+  "events": {},
+  "theme": {
+    "usesColors": true,
+    "usesTypography": true,
+    "usesSpacing": true,
+    "usesRadius": false,
+    "usesShadow": false
+  },
+  "editor": {
+    "icon": "web",
+    "previewHeight": 320,
+    "draggable": true,
+    "resizable": false
+  }
+}

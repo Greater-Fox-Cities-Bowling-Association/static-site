@@ -1,0 +1,67 @@
+{
+  "id": "home",
+  "slug": "home",
+  "title": "Home",
+  "description": "Welcome to our website.",
+  "layout": [
+    {
+      "id": "node-navbar-1",
+      "componentId": "navbar",
+      "props": {
+        "logo": "My Site",
+        "links": [
+          { "label": "Home", "href": "/" },
+          { "label": "About", "href": "/about" }
+        ],
+        "sticky": false,
+        "colorScheme": "primary"
+      },
+      "slots": {}
+    },
+    {
+      "id": "node-hero-1",
+      "componentId": "hero",
+      "props": {
+        "heading": "Welcome to Our Site",
+        "subheading": "Edit this page in the admin panel and publish to deploy.",
+        "primaryCtaLabel": "Go to Admin",
+        "primaryCtaHref": "/admin/",
+        "secondaryCtaLabel": "Learn More",
+        "secondaryCtaHref": "#features",
+        "backgroundColor": "background.paper"
+      },
+      "slots": {}
+    },
+    {
+      "id": "node-features-1",
+      "componentId": "featureList",
+      "props": {
+        "heading": "Why Choose Us",
+        "columns": 3,
+        "features": [
+          { "icon": "speed", "title": "Fast", "body": "Fully static site — loads instantly everywhere." },
+          { "icon": "lock", "title": "Secure", "body": "No database. No server. Minimal attack surface." },
+          { "icon": "edit", "title": "Easy to edit", "body": "Visual drag-and-drop editor in the admin panel." }
+        ]
+      },
+      "slots": {}
+    },
+    {
+      "id": "node-footer-1",
+      "componentId": "footer",
+      "props": {
+        "columns": [
+          {
+            "heading": "Site",
+            "links": [
+              { "label": "Home", "href": "/" },
+              { "label": "Admin", "href": "/admin/" }
+            ]
+          }
+        ],
+        "copyright": "© 2026 My Site. All rights reserved."
+      },
+      "slots": {}
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "id": "pricingTable",
+  "name": "Pricing Table",
+  "category": "composite",
+  "props": {
+    "heading": { "type": "string", "default": "Pricing" },
+    "plans": { "type": "string", "default": [] }
+  },
+  "slots": {},
+  "events": {},
+  "theme": {
+    "usesColors": true,
+    "usesTypography": true,
+    "usesSpacing": true,
+    "usesRadius": true,
+    "usesShadow": true
+  },
+  "editor": {
+    "icon": "attach_money",
+    "previewHeight": 400,
+    "draggable": true,
+    "resizable": false
+  }
+}
