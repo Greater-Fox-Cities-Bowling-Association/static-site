@@ -1,0 +1,28 @@
+{
+  "id": "paper",
+  "name": "Paper",
+  "category": "primitive",
+  "props": {
+    "elevation": { "type": "number", "default": 1 },
+    "variant": { "type": "string", "options": ["elevation","outlined"], "default": "elevation" },
+    "padding": { "type": "spacing", "default": 2 },
+    "borderRadius": { "type": "radius", "default": "md" }
+  },
+  "slots": {
+    "children": { "allowedTypes": ["*"], "max": 50 }
+  },
+  "events": {},
+  "theme": {
+    "usesColors": true,
+    "usesTypography": false,
+    "usesSpacing": true,
+    "usesRadius": true,
+    "usesShadow": true
+  },
+  "editor": {
+    "icon": "layers",
+    "previewHeight": 120,
+    "draggable": true,
+    "resizable": true
+  }
+}

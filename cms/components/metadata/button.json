@@ -1,0 +1,31 @@
+{
+  "id": "button",
+  "name": "Button",
+  "category": "primitive",
+  "props": {
+    "label": { "type": "string", "default": "Click Me" },
+    "variant": { "type": "string", "options": ["contained","outlined","text"], "default": "contained" },
+    "color": { "type": "string", "options": ["primary","secondary","error","warning","info","success"], "default": "primary" },
+    "size": { "type": "string", "options": ["small","medium","large"], "default": "medium" },
+    "href": { "type": "string", "default": "" },
+    "disabled": { "type": "boolean", "default": false },
+    "fullWidth": { "type": "boolean", "default": false }
+  },
+  "slots": {},
+  "events": {
+    "onClick": { "type": "action", "default": null }
+  },
+  "theme": {
+    "usesColors": true,
+    "usesTypography": true,
+    "usesSpacing": true,
+    "usesRadius": true,
+    "usesShadow": false
+  },
+  "editor": {
+    "icon": "smart_button",
+    "previewHeight": 48,
+    "draggable": true,
+    "resizable": false
+  }
+}

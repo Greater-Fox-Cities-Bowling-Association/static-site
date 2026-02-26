@@ -1,0 +1,8 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Hero from "../components/public/Hero";
+---
+
+<BaseLayout title="Home" description="Welcome to our website.">
+  <Hero client:only="react" />
+</BaseLayout>

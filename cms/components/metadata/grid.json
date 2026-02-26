@@ -1,0 +1,28 @@
+{
+  "id": "grid",
+  "name": "Grid",
+  "category": "primitive",
+  "props": {
+    "columns": { "type": "number", "default": 12 },
+    "spacing": { "type": "spacing", "default": 2 },
+    "rowSpacing": { "type": "spacing", "default": 2 },
+    "columnSpacing": { "type": "spacing", "default": 2 }
+  },
+  "slots": {
+    "children": { "allowedTypes": ["*"], "max": 50 }
+  },
+  "events": {},
+  "theme": {
+    "usesColors": false,
+    "usesSpacing": true,
+    "usesRadius": false,
+    "usesTypography": false,
+    "usesShadow": false
+  },
+  "editor": {
+    "icon": "grid_view",
+    "previewHeight": 160,
+    "draggable": true,
+    "resizable": true
+  }
+}

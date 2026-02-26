@@ -1,0 +1,31 @@
+{
+  "id": "card",
+  "name": "Card",
+  "category": "composite",
+  "props": {
+    "padding": { "type": "spacing", "default": 2 },
+    "radius": { "type": "radius", "default": "md" },
+    "shadow": { "type": "shadow", "default": 1 }
+  },
+  "slots": {
+    "header": { "allowedTypes": ["Typography", "Icon"], "max": 1 },
+    "body": { "allowedTypes": ["Typography", "Image", "Button"], "max": 10 },
+    "actions": { "allowedTypes": ["Button"], "max": 5 }
+  },
+  "events": {
+    "onClick": { "type": "action", "default": null }
+  },
+  "theme": {
+    "usesColors": true,
+    "usesTypography": true,
+    "usesSpacing": true,
+    "usesRadius": true,
+    "usesShadow": true
+  },
+  "editor": {
+    "icon": "credit_card",
+    "previewHeight": 240,
+    "draggable": true,
+    "resizable": true
+  }
+}
