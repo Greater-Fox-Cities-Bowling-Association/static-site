@@ -16,6 +16,9 @@ export default defineConfig({
   // The authProvider reads it from there via getToken().
   clientId: null as any,
 
+  // Skip the Tina Cloud generated client — we use the GitHub backend directly.
+  client: { skip: true },
+
   // Auth0-based authentication provider.
   // The GitHub PAT is always retrieved from the Auth0 claim (https://gfcba.com/github_token)
   // and stored in localStorage by public/admin/index.html after a successful login.

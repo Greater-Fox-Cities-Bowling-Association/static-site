@@ -3,7 +3,6 @@
 // and injected directly into the page as JS literals — no meta tag indirection needed.
 const AUTH0_DOMAIN = import.meta.env.AUTH0_DOMAIN ?? "";
 const AUTH0_CLIENT_ID = import.meta.env.AUTH0_CLIENT_ID ?? "";
-const IS_DEV = import.meta.env.DEV;
 ---
 
 <!doctype html>
@@ -93,10 +92,9 @@ const IS_DEV = import.meta.env.DEV;
 
     <!-- Inject env vars onto window so the logic script below (which is NOT
          wrapped in a closure) can access them globally. -->
-    <script is:inline define:vars={{ AUTH0_DOMAIN, AUTH0_CLIENT_ID, IS_DEV }}>
+    <script is:inline define:vars={{ AUTH0_DOMAIN, AUTH0_CLIENT_ID }}>
       window._AUTH0_DOMAIN = AUTH0_DOMAIN;
       window._AUTH0_CLIENT_ID = AUTH0_CLIENT_ID;
-      window._IS_DEV = IS_DEV;
     </script>
 
     <script is:inline>
@@ -190,9 +188,15 @@ const IS_DEV = import.meta.env.DEV;
           }
 
           if (githubToken) {
-            // Store for TinaCMS auth provider to pick up
+            // Store for TinaCMS auth provider to pick up.
+            // Cookies are domain-scoped (not port-scoped), so this cookie is
+            // readable by the TinaCMS dev server on port 4001 as well.
             localStorage.setItem("tinacms-github-token", githubToken);
             sessionStorage.setItem("tinacms-github-token", githubToken);
+            document.cookie =
+              "tinacms-github-token=" +
+              encodeURIComponent(githubToken) +
+              "; path=/; SameSite=Lax";
           } else {
             console.warn("No GitHub token claim found at", GITHUB_TOKEN_CLAIM);
           }
@@ -201,6 +205,10 @@ const IS_DEV = import.meta.env.DEV;
           const user = await auth0Client.getUser();
           if (user) {
             localStorage.setItem("tinacms-auth-user", JSON.stringify(user));
+            document.cookie =
+              "tinacms-auth-user=" +
+              encodeURIComponent(JSON.stringify(user)) +
+              "; path=/; SameSite=Lax";
           }
 
           // Hide the auth card and load TinaCMS admin
@@ -215,14 +223,8 @@ const IS_DEV = import.meta.env.DEV;
       }
 
       function loadTinaCMS() {
-        if (window._IS_DEV) {
-          // Development: TinaCMS Vite dev server runs on port 4001.
-          // Token is already in localStorage — just navigate there.
-          window.location.href = "http://localhost:4001/";
-        } else {
-          // Production: redirect to the built TinaCMS bundle at /admin/cms/
-          window.location.href = "/admin/cms/";
-        }
+        // TinaCMS bundle is always at /admin/cms/admin/ — same origin in both dev and prod.
+        window.location.href = "/admin/cms/admin/";
       }
 
       function login() {

@@ -3,12 +3,12 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "dev": "tinacms dev -c \"astro dev\"",
-    "start": "tinacms dev -c \"astro dev\"",
-    "build": "tinacms build && astro build",
+    "dev": "dotenv -e .env.development -- tinacms build --local --skip-cloud-checks && astro dev",
+    "start": "dotenv -e .env.development -- tinacms build --local --skip-cloud-checks && astro dev",
+    "build": "dotenv -e .env.production -- tinacms build --local --skip-cloud-checks && astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "tina:build": "tinacms build",
+    "tina:build": "tinacms build --local --skip-cloud-checks",
     "tina:dev": "tinacms dev"
   },
   "dependencies": {
@@ -27,6 +27,7 @@
     "@types/node": "^25.3.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "dotenv-cli": "^11.0.0",
     "typescript": "^5.9.3"
   }
 }

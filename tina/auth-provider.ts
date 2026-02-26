@@ -13,13 +13,26 @@
 const TOKEN_STORAGE_KEY = "tinacms-github-token";
 const USER_STORAGE_KEY = "tinacms-auth-user";
 
+
+/**
+ * Read a cookie value by name.
+ */
+function getCookie(name: string): string | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(new RegExp("(?:^|; )" + name + "=([^;]*)"));
+  return match?.[1] ? decodeURIComponent(match[1]) : null;
+}
+
 /**
  * Reads the token that the public/admin/index.html Auth0 wrapper stored
- * in localStorage after a successful Auth0 login.
+ * in localStorage or cookie after a successful Auth0 login.
+ * Cookies are domain-scoped (not port-scoped), so this works across
+ * localhost:4321 (Astro) and localhost:4001 (TinaCMS dev server).
  */
 export function getStoredToken(): string | null {
   if (typeof window === "undefined") return null;
   return (
+    getCookie(TOKEN_STORAGE_KEY) ||
     sessionStorage.getItem(TOKEN_STORAGE_KEY) ||
     localStorage.getItem(TOKEN_STORAGE_KEY) ||
     null
@@ -41,6 +54,9 @@ export function clearStoredAuth(): void {
   localStorage.removeItem(TOKEN_STORAGE_KEY);
   sessionStorage.removeItem(TOKEN_STORAGE_KEY);
   localStorage.removeItem(USER_STORAGE_KEY);
+  // Clear cookies
+  document.cookie = TOKEN_STORAGE_KEY + "=; path=/; max-age=0";
+  document.cookie = USER_STORAGE_KEY + "=; path=/; max-age=0";
 }
 
 /**
@@ -62,7 +78,6 @@ export const auth0Provider = {
   },
 
   async authenticate(_props?: Record<string, any>) {
-    // Redirect to the admin wrapper which handles Auth0 login
     if (typeof window !== 'undefined') {
       window.location.href = '/admin/';
     }
@@ -86,7 +101,8 @@ export const auth0Provider = {
   },
 
   async isAuthenticated(): Promise<boolean> {
-    return !!getStoredUser();
+    // A valid token is sufficient — don't require a stored user object.
+    return !!getStoredToken();
   },
 
   getLoginStrategy() {
@@ -121,13 +137,11 @@ export const auth0Provider = {
   },
 
   async authorize() {
-    // If we already have a token, we're authorized
     const token = getStoredToken();
     if (token) {
       return { id_token: token };
     }
-    // Otherwise redirect to the Admin wrapper which will handle Auth0 login
-    window.location.href = "/admin/";
+    window.location.href = '/admin/';
     return null;
   },
 };
