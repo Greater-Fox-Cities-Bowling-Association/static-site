@@ -1,7 +1,9 @@
 /**
  * PageEditor.tsx
- * Wires together: EditorProvider + DndContext + Toolbar + Palette + Canvas + PropEditor.
- * Handles drag-end to insert nodes from palette or reorder on canvas.
+ * 3-tab page editor:
+ *   Layout  — drag-and-drop template builder + design props
+ *   Content — form-based content authoring for every component
+ *   Preview — full-width chrome-free page render
  */
 import {
   DndContext,
@@ -12,27 +14,21 @@ import {
   type DragEndEvent,
 } from "@dnd-kit/core";
 import Box from "@mui/material/Box";
+import Tab from "@mui/material/Tab";
+import Tabs from "@mui/material/Tabs";
 import { useState } from "react";
 import { EditorProvider, useEditor } from "./EditorContext";
 import { EditorToolbar } from "./EditorToolbar";
 import { EditorCanvas } from "./EditorCanvas";
 import { ComponentPalette } from "./ComponentPalette";
 import { PropEditor } from "./PropEditor";
-import type {
-  ComponentMeta,
-  PageContent,
-} from "../../../../cms/editor/layoutSchema";
+import { ContentEditor } from "./ContentEditor";
+import { PagePreview } from "./PagePreview";
+import { allComponentMeta } from "./PropField";
+import type { PageContent } from "../../../../cms/editor/layoutSchema";
 import { createNode } from "../../../../cms/editor/layoutSchema";
 
-// Load all component metadata eagerly
-const metadataModules = import.meta.glob<{ default: ComponentMeta }>(
-  "/cms/components/metadata/*.json",
-  { eager: true },
-);
-const allComponentMeta: ComponentMeta[] = Object.values(metadataModules)
-  .map((m) => m.default as ComponentMeta)
-  .filter(Boolean)
-  .sort((a, b) => a.name.localeCompare(b.name));
+type EditorTab = "layout" | "content" | "preview";
 
 // ─── Inner editor (has access to EditorContext) ────────────────────────────
 
@@ -44,6 +40,7 @@ function EditorInner({
   onBack: () => void;
 }) {
   const { dispatch } = useEditor();
+  const [activeTab, setActiveTab] = useState<EditorTab>("layout");
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
 
   const sensors = useSensors(
@@ -65,7 +62,6 @@ function EditorInner({
     if (!source || !target) return;
 
     if (source.source === "palette" && source.componentId) {
-      // Insert new node from palette
       const meta = allComponentMeta.find((m) => m.id === source.componentId);
       if (!meta) return;
       const node = createNode(meta);
@@ -95,16 +91,90 @@ function EditorInner({
           overflow: "hidden",
         }}
       >
+        {/* ── Top bar: toolbar + tab switcher ── */}
         <EditorToolbar token={token} onBack={onBack} />
 
+        <Box
+          sx={{
+            borderBottom: 1,
+            borderColor: "divider",
+            bgcolor: "background.paper",
+            flexShrink: 0,
+          }}
+        >
+          <Tabs
+            value={activeTab}
+            onChange={(_, v) => setActiveTab(v as EditorTab)}
+            sx={{
+              minHeight: 38,
+              "& .MuiTab-root": { minHeight: 38, fontSize: 13 },
+            }}
+          >
+            <Tab
+              value="layout"
+              label="Layout"
+              icon={
+                <Box
+                  component="span"
+                  className="material-icons"
+                  sx={{ fontSize: 16, mr: 0.5 }}
+                >
+                  dashboard
+                </Box>
+              }
+              iconPosition="start"
+            />
+            <Tab
+              value="content"
+              label="Content"
+              icon={
+                <Box
+                  component="span"
+                  className="material-icons"
+                  sx={{ fontSize: 16, mr: 0.5 }}
+                >
+                  edit_note
+                </Box>
+              }
+              iconPosition="start"
+            />
+            <Tab
+              value="preview"
+              label="Preview"
+              icon={
+                <Box
+                  component="span"
+                  className="material-icons"
+                  sx={{ fontSize: 16, mr: 0.5 }}
+                >
+                  visibility
+                </Box>
+              }
+              iconPosition="start"
+            />
+          </Tabs>
+        </Box>
+
+        {/* ── Tab panels ── */}
         <Box sx={{ display: "flex", flex: 1, overflow: "hidden" }}>
-          <ComponentPalette components={allComponentMeta} />
-          <EditorCanvas />
-          <PropEditor />
+          {/* Layout tab */}
+          {activeTab === "layout" && (
+            <>
+              <ComponentPalette components={allComponentMeta} />
+              <EditorCanvas />
+              <PropEditor mode="design" />
+            </>
+          )}
+
+          {/* Content tab */}
+          {activeTab === "content" && <ContentEditor />}
+
+          {/* Preview tab */}
+          {activeTab === "preview" && <PagePreview />}
         </Box>
       </Box>
 
-      {/* Drag overlay — ghost element while dragging */}
+      {/* Drag overlay — only matters in Layout tab */}
       <DragOverlay>
         {activeDragId ? (
           <Box
@@ -143,7 +213,6 @@ export function PageEditor({ initialPage, token, onBack }: Props) {
 
 function EditorLoader({ initialPage, token, onBack }: Props) {
   const { dispatch } = useEditor();
-  // Load the page into context on first render
   useState(() => {
     dispatch({ type: "LOAD_PAGE", payload: initialPage });
   });

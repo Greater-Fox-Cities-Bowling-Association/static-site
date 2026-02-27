@@ -66,6 +66,38 @@ export interface EventHandler {
   href?: string;
 }
 
+// ─── Prop classification ───────────────────────────────────────────────────
+
+/**
+ * Prop types that are always structural/visual — never textual content.
+ */
+const DESIGN_PROP_TYPES = new Set<PropMeta['type']>(['spacing', 'shadow', 'radius', 'color']);
+
+/**
+ * Prop name substrings (lower-cased) that indicate a design/layout concern.
+ */
+const DESIGN_KEYWORDS = [
+  'padding', 'margin', 'spacing', 'direction', 'align', 'justify',
+  'display', 'width', 'height', 'elevation', 'border', 'background',
+  'shadow', 'radius', 'gap', 'wrap', 'overflow', 'position',
+  'variant', 'size', 'color', 'flex', 'sticky', 'scheme',
+  'gutter', 'component', 'objectfit',
+];
+
+/** Returns true when the prop governs visual design / layout structure. */
+export function isDesignProp(name: string, meta: PropMeta): boolean {
+  if (DESIGN_PROP_TYPES.has(meta.type)) return true;
+  const lower = name.toLowerCase();
+  return DESIGN_KEYWORDS.some((k) => lower.includes(k));
+}
+
+/** Returns true when the prop carries editable page content (text, links, images…). */
+export function isContentProp(name: string, meta: PropMeta): boolean {
+  return !isDesignProp(name, meta);
+}
+
+// ─── Node factory ──────────────────────────────────────────────────────────
+
 /** Creates a new LayoutNode with defaults from component metadata */
 export function createNode(meta: ComponentMeta): LayoutNode {
   const props: Record<string, unknown> = {};
