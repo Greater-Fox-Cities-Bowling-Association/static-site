@@ -39,6 +39,7 @@ export type ComponentRenderer = ComponentType<{
 
 function BoxRenderer({
   node,
+  renderSlot,
 }: {
   node: LayoutNode;
   renderSlot: (s: string) => React.ReactNode;
@@ -63,7 +64,9 @@ function BoxRenderer({
         width: width as string | undefined,
         height: height as string | undefined,
       }}
-    />
+    >
+      {renderSlot("children")}
+    </MuiBox>
   );
 }
 

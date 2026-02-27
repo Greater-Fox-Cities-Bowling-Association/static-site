@@ -10,9 +10,20 @@ interface Props {
   node: LayoutNode;
   /** Optional extra wrapper applied in the editor for selection highlighting */
   wrapNode?: (node: LayoutNode, element: React.ReactNode) => React.ReactNode;
+  /**
+   * Optional slot renderer override (editor only).
+   * When provided, it receives the parent node, slot name, and raw child
+   * LayoutNodes. The callback is responsible for rendering those children
+   * (with drop zones between them, etc.) and returning the resulting JSX.
+   */
+  wrapSlot?: (
+    parentNode: LayoutNode,
+    slotName: string,
+    children: LayoutNode[],
+  ) => React.ReactNode;
 }
 
-export function ComponentRenderer({ node, wrapNode }: Props) {
+export function ComponentRenderer({ node, wrapNode, wrapSlot }: Props) {
   const Renderer = componentMap[node.componentId];
 
   if (!Renderer) {
@@ -33,6 +44,10 @@ export function ComponentRenderer({ node, wrapNode }: Props) {
   /** Recursively renders children in a named slot */
   function renderSlot(slotName: string): React.ReactNode {
     const children = node.slots[slotName] ?? [];
+    if (wrapSlot) {
+      // Editor mode: delegate to canvas so it can inject drop zones
+      return wrapSlot(node, slotName, children);
+    }
     return children.map((child) => (
       <ComponentRenderer key={child.id} node={child} wrapNode={wrapNode} />
     ));

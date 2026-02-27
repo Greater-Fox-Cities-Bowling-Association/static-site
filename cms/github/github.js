@@ -1,81 +1,54 @@
 const GITHUB_API = 'https://api.github.com';
 
-/**
- * Fetches the current SHA of a file at `path` in the given repo/branch.
- * Returns null if the file does not exist yet.
- *
- * @param {string} token  - GitHub personal access token
- * @param {string} repo   - e.g. "owner/repo"
- * @param {string} branch - e.g. "main"
- * @param {string} path   - file path within the repo
- * @returns {Promise<string|null>}
- */
-async function getFileSha(token, repo, branch, path) {
-  const url = `${GITHUB_API}/repos/${repo}/contents/${path}?ref=${branch}`;
+/** Shared fetch helper with auth headers */
+async function ghFetch(token, url, options = {}) {
   const res = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Accept: 'application/vnd.github+json',
-    },
-  });
-  if (res.status === 404) return null;
-  if (!res.ok) throw new Error(`GitHub API error ${res.status} fetching SHA for ${path}`);
-  const data = await res.json();
-  return data.sha ?? null;
-}
-
-/**
- * Commits a single file to GitHub via the Contents API.
- *
- * @param {string} token   - GitHub PAT
- * @param {string} repo    - "owner/repo"
- * @param {string} branch  - target branch
- * @param {string} path    - file path in the repo
- * @param {string} content - raw file content (will be base64-encoded)
- * @param {string} message - commit message
- * @returns {Promise<object>} GitHub API response
- */
-async function commitSingleFile(token, repo, branch, path, content, message) {
-  const sha = await getFileSha(token, repo, branch, path);
-
-  const body = {
-    message,
-    content: btoa(unescape(encodeURIComponent(content))),
-    branch,
-    ...(sha ? { sha } : {}),
-  };
-
-  const url = `${GITHUB_API}/repos/${repo}/contents/${path}`;
-  const res = await fetch(url, {
-    method: 'PUT',
+    ...options,
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: 'application/vnd.github+json',
       'Content-Type': 'application/json',
+      ...(options.headers ?? {}),
     },
-    body: JSON.stringify(body),
   });
-
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(`GitHub commit failed for ${path}: ${res.status} ${err.message ?? ''}`);
+    throw new Error(`GitHub API error ${res.status} ${url}: ${err.message ?? ''}`);
   }
-
   return res.json();
 }
 
 /**
- * Commits one or more files to GitHub.
- *
- * Each call creates a separate commit per file. For a true multi-file atomic
- * commit use the Git Trees API (Phase 2 enhancement).
+ * Returns the latest commit SHA and tree SHA for a branch.
+ */
+async function getBranchHead(token, repo, branch) {
+  const data = await ghFetch(token, `${GITHUB_API}/repos/${repo}/git/ref/heads/${encodeURIComponent(branch)}`);
+  const commitSha = data.object.sha;
+  const commit = await ghFetch(token, `${GITHUB_API}/repos/${repo}/git/commits/${commitSha}`);
+  return { commitSha, treeSha: commit.tree.sha };
+}
+
+/**
+ * Creates a blob for a single file and returns its SHA.
+ */
+async function createBlob(token, repo, content) {
+  const data = await ghFetch(token, `${GITHUB_API}/repos/${repo}/git/blobs`, {
+    method: 'POST',
+    body: JSON.stringify({ content: btoa(unescape(encodeURIComponent(content))), encoding: 'base64' }),
+  });
+  return data.sha;
+}
+
+/**
+ * Commits one or more files to GitHub in a **single atomic commit** using the
+ * Git Trees API. All files land in the same commit, regardless of quantity.
  *
  * @param {string} token   - GitHub PAT
  * @param {string} repo    - "owner/repo"
  * @param {string} branch  - target branch
  * @param {Array<{ path: string, content: string, message?: string }>} files
- * @param {string} [defaultMessage] - fallback commit message
- * @returns {Promise<object[]>} array of GitHub API responses
+ * @param {string} [defaultMessage] - commit message (used unless each file overrides)
+ * @returns {Promise<object>} GitHub API response for the updated ref
  */
 export async function commitFiles(
   token,
@@ -87,11 +60,35 @@ export async function commitFiles(
   if (!token) throw new Error('GitHub token is required to commit files.');
   if (!files || files.length === 0) throw new Error('No files provided to commit.');
 
-  const results = [];
-  for (const file of files) {
-    const message = file.message ?? defaultMessage;
-    const result = await commitSingleFile(token, repo, branch, file.path, file.content, message);
-    results.push(result);
-  }
-  return results;
+  // Use first file's message or the default
+  const message = files[0]?.message ?? defaultMessage;
+
+  // 1. Get branch HEAD
+  const { commitSha, treeSha } = await getBranchHead(token, repo, branch);
+
+  // 2. Create a blob for each file in parallel
+  const treeItems = await Promise.all(
+    files.map(async (file) => {
+      const blobSha = await createBlob(token, repo, file.content);
+      return { path: file.path, mode: '100644', type: 'blob', sha: blobSha };
+    })
+  );
+
+  // 3. Create a new tree on top of the current one
+  const newTree = await ghFetch(token, `${GITHUB_API}/repos/${repo}/git/trees`, {
+    method: 'POST',
+    body: JSON.stringify({ base_tree: treeSha, tree: treeItems }),
+  });
+
+  // 4. Create a new commit
+  const newCommit = await ghFetch(token, `${GITHUB_API}/repos/${repo}/git/commits`, {
+    method: 'POST',
+    body: JSON.stringify({ message, tree: newTree.sha, parents: [commitSha] }),
+  });
+
+  // 5. Fast-forward the branch ref
+  return ghFetch(token, `${GITHUB_API}/repos/${repo}/git/refs/heads/${encodeURIComponent(branch)}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ sha: newCommit.sha }),
+  });
 }
