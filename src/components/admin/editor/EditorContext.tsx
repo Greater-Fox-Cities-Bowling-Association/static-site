@@ -55,6 +55,14 @@ export type EditorAction =
     }
   | { type: "REMOVE_NODE"; payload: { nodeId: string } }
   | {
+      type: "BULK_ADD_NODES";
+      payload: {
+        nodes: LayoutNode[];
+        parentId: string | null;
+        slotName: string;
+      };
+    }
+  | {
       type: "MOVE_NODE";
       payload: {
         nodeId: string;
@@ -175,6 +183,24 @@ function editorReducer(state: EditorState, action: EditorAction): EditorState {
         page: next,
         isDirty: true,
         selectedNodeId: null,
+      };
+    }
+
+    case "BULK_ADD_NODES": {
+      if (!state.page) return state;
+      const next = clone(state.page);
+      const slot = findSlot(
+        next.layout,
+        action.payload.parentId,
+        action.payload.slotName,
+      );
+      if (!slot) return state;
+      action.payload.nodes.forEach((n) => slot.push(clone(n)));
+      return {
+        ...state,
+        ...pushHistory(state),
+        page: next,
+        isDirty: true,
       };
     }
 

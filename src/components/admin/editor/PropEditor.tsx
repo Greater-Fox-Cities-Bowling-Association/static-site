@@ -13,6 +13,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { useEditor, useUpdateProps } from "./EditorContext";
 import { EventEditor } from "./EventEditor";
+import { SlotManager } from "./SlotManager";
 import type {
   ComponentMeta,
   PropMeta,
@@ -276,6 +277,10 @@ export function PropEditor() {
           <Divider />
           <EventEditor node={selectedNode} meta={meta} />
         </>
+      )}
+
+      {meta && Object.keys(meta.slots).length > 0 && (
+        <SlotManager node={selectedNode} meta={meta} />
       )}
     </Box>
   );
