@@ -4,12 +4,15 @@
  * Also exports the eagerly-loaded component metadata registry.
  */
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import FormControlLabel from "@mui/material/FormControlLabel";
+import IconButton from "@mui/material/IconButton";
 import MenuItem from "@mui/material/MenuItem";
 import Slider from "@mui/material/Slider";
 import Switch from "@mui/material/Switch";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
+import DeleteIcon from "@mui/icons-material/Delete";
 import type {
   ComponentMeta,
   PropMeta,
@@ -150,6 +153,145 @@ export function PropField({ name, meta, value, onChange }: PropFieldProps) {
           ))}
         </TextField>
       );
+
+    case "array": {
+      const arr = Array.isArray(value)
+        ? (value as Record<string, unknown>[])
+        : [];
+      const shape = meta.itemShape ?? {};
+      const shapeEntries = Object.entries(shape);
+      // Singular label by stripping trailing 's'
+      const singular = label.replace(/s$/i, "");
+
+      function addItem() {
+        const newItem: Record<string, unknown> = {};
+        for (const [k, m] of shapeEntries) newItem[k] = m.default;
+        onChange([...arr, newItem]);
+      }
+
+      return (
+        <Box sx={{ mb: 1.5 }}>
+          {/* header row */}
+          <Box sx={{ display: "flex", alignItems: "center", mb: 0.5 }}>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ flex: 1 }}
+            >
+              {label}{" "}
+              <Box component="span" sx={{ color: "text.disabled" }}>
+                ({arr.length})
+              </Box>
+            </Typography>
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={addItem}
+              sx={{
+                textTransform: "none",
+                fontSize: 11,
+                minWidth: 0,
+                px: 1,
+                py: 0.25,
+              }}
+            >
+              + Add {singular}
+            </Button>
+          </Box>
+
+          {/* item rows */}
+          {arr.length === 0 ? (
+            <Box
+              sx={{
+                border: "1px dashed",
+                borderColor: "grey.300",
+                borderRadius: 1,
+                p: 1,
+                textAlign: "center",
+              }}
+            >
+              <Typography variant="caption" color="text.disabled">
+                No {label.toLowerCase()} yet.
+              </Typography>
+            </Box>
+          ) : (
+            arr.map((item, i) => (
+              <Box
+                key={i}
+                sx={{
+                  border: "1px solid",
+                  borderColor: "grey.200",
+                  borderRadius: 1,
+                  p: 1,
+                  mb: 0.5,
+                  bgcolor: "grey.50",
+                }}
+              >
+                {/* item header */}
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    mb: shapeEntries.length > 0 ? 0.75 : 0,
+                  }}
+                >
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    fontWeight={600}
+                    sx={{ flex: 1 }}
+                  >
+                    {singular} {i + 1}
+                  </Typography>
+                  <IconButton
+                    size="small"
+                    onClick={() => onChange(arr.filter((_, j) => j !== i))}
+                    sx={{ p: 0.25 }}
+                  >
+                    <DeleteIcon sx={{ fontSize: 13 }} />
+                  </IconButton>
+                </Box>
+
+                {/* item fields */}
+                {shapeEntries.length > 0 ? (
+                  shapeEntries.map(([field, fieldMeta]) => (
+                    <PropField
+                      key={field}
+                      name={field}
+                      meta={fieldMeta}
+                      value={item[field] ?? fieldMeta.default}
+                      onChange={(v) =>
+                        onChange(
+                          arr.map((it, j) =>
+                            j === i ? { ...it, [field]: v } : it,
+                          ),
+                        )
+                      }
+                    />
+                  ))
+                ) : (
+                  // No itemShape → treat item as a plain string
+                  <TextField
+                    size="small"
+                    value={typeof item === "string" ? item : String(item ?? "")}
+                    onChange={(e) =>
+                      onChange(
+                        (arr as unknown[]).map((it, j) =>
+                          j === i ? e.target.value : it,
+                        ),
+                      )
+                    }
+                    fullWidth
+                    sx={{ mb: 0.5 }}
+                    inputProps={{ style: { fontSize: 12 } }}
+                  />
+                )}
+              </Box>
+            ))
+          )}
+        </Box>
+      );
+    }
 
     default:
       // string (with or without options)

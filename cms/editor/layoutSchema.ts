@@ -45,9 +45,14 @@ export interface ComponentMeta {
 }
 
 export interface PropMeta {
-  type: 'string' | 'boolean' | 'number' | 'spacing' | 'radius' | 'shadow' | 'color';
+  type: 'string' | 'boolean' | 'number' | 'spacing' | 'radius' | 'shadow' | 'color' | 'array';
   default: unknown;
   options?: string[];
+  /**
+   * For type 'array': describes the fields of each item object.
+   * If omitted the array is treated as a plain list of strings.
+   */
+  itemShape?: Record<string, PropMeta>;
 }
 
 export interface SlotMeta {

@@ -4,7 +4,18 @@
   "category": "composite",
   "props": {
     "heading": { "type": "string", "default": "Pricing" },
-    "plans": { "type": "string", "default": [] }
+    "plans": {
+      "type": "array",
+      "default": [],
+      "itemShape": {
+        "name": { "type": "string", "default": "Plan" },
+        "price": { "type": "string", "default": "$0" },
+        "period": { "type": "string", "default": "/month" },
+        "ctaLabel": { "type": "string", "default": "Get Started" },
+        "ctaHref": { "type": "string", "default": "#" },
+        "highlighted": { "type": "boolean", "default": false }
+      }
+    }
   },
   "slots": {},
   "events": {},

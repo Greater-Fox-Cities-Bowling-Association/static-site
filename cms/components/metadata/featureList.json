@@ -4,7 +4,15 @@
   "category": "composite",
   "props": {
     "heading": { "type": "string", "default": "Our Features" },
-    "features": { "type": "string", "default": [] },
+    "features": {
+      "type": "array",
+      "default": [],
+      "itemShape": {
+        "title": { "type": "string", "default": "Feature Title" },
+        "body": { "type": "string", "default": "Describe this feature." },
+        "icon": { "type": "string", "default": "star" }
+      }
+    },
     "columns": { "type": "number", "default": 3 }
   },
   "slots": {},

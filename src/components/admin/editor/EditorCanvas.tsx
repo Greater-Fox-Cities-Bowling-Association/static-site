@@ -10,7 +10,7 @@ import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useEditor } from "./EditorContext";
-import { ComponentRenderer } from "../../renderer/ComponentRenderer";
+import { metaByComponentId } from "./PropField";
 import type { LayoutNode } from "../../../../cms/editor/layoutSchema";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -153,6 +153,251 @@ function SlotDropZone({
         >
           Drop here
         </Typography>
+      )}
+    </Box>
+  );
+}
+
+// ─── Wireframe skeleton ─────────────────────────────────────────────────────
+
+/** Gray placeholder bars rendered inside non-container wireframe blocks. */
+function WireframeSkeleton({
+  componentId,
+  previewHeight,
+}: {
+  componentId: string;
+  previewHeight: number;
+}) {
+  if (componentId === "spacer") {
+    return (
+      <Box
+        sx={{
+          height: 32,
+          border: "1px dashed",
+          borderColor: "grey.400",
+          borderRadius: 1,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          m: 1,
+        }}
+      >
+        <Typography variant="caption" color="text.disabled">
+          Spacer
+        </Typography>
+      </Box>
+    );
+  }
+
+  if (componentId === "button") {
+    return (
+      <Box sx={{ p: 1 }}>
+        <Box
+          sx={{
+            height: 28,
+            width: 100,
+            bgcolor: "grey.300",
+            borderRadius: "14px",
+          }}
+        />
+      </Box>
+    );
+  }
+
+  if (componentId === "image") {
+    return (
+      <Box
+        sx={{
+          m: 1,
+          height: Math.max(40, previewHeight - 40),
+          bgcolor: "grey.200",
+          borderRadius: 1,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Box
+          component="span"
+          className="material-icons"
+          sx={{ color: "grey.400", fontSize: 32 }}
+        >
+          image
+        </Box>
+      </Box>
+    );
+  }
+
+  const barCount = previewHeight < 80 ? 1 : previewHeight < 160 ? 2 : 3;
+  const showCta = componentId === "hero" || previewHeight > 200;
+
+  return (
+    <Box
+      sx={{
+        p: 1.5,
+        display: "flex",
+        flexDirection: "column",
+        gap: 0.75,
+        minHeight: Math.max(32, previewHeight - 36),
+      }}
+    >
+      {/* Title bar */}
+      <Box
+        sx={{
+          height: 12,
+          width: "65%",
+          bgcolor: "grey.300",
+          borderRadius: 0.5,
+        }}
+      />
+      {barCount >= 2 && (
+        <Box
+          sx={{
+            height: 10,
+            width: "85%",
+            bgcolor: "grey.200",
+            borderRadius: 0.5,
+          }}
+        />
+      )}
+      {barCount >= 2 && (
+        <Box
+          sx={{
+            height: 10,
+            width: "70%",
+            bgcolor: "grey.200",
+            borderRadius: 0.5,
+          }}
+        />
+      )}
+      {barCount >= 3 && (
+        <Box
+          sx={{
+            height: 10,
+            width: "80%",
+            bgcolor: "grey.200",
+            borderRadius: 0.5,
+          }}
+        />
+      )}
+      {barCount >= 3 && (
+        <Box
+          sx={{
+            height: 10,
+            width: "55%",
+            bgcolor: "grey.200",
+            borderRadius: 0.5,
+          }}
+        />
+      )}
+      {showCta && (
+        <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
+          <Box
+            sx={{
+              height: 22,
+              width: 80,
+              bgcolor: "primary.light",
+              borderRadius: "11px",
+              opacity: 0.5,
+            }}
+          />
+          <Box
+            sx={{
+              height: 22,
+              width: 70,
+              bgcolor: "grey.300",
+              borderRadius: "11px",
+            }}
+          />
+        </Box>
+      )}
+    </Box>
+  );
+}
+
+// ─── Wireframe block ──────────────────────────────────────────────────────────
+
+/**
+ * Renders a labeled shadow-box outline for the Layout canvas.
+ * No real component output — purely structural / wireframe.
+ */
+function WireframeBlock({
+  node,
+  wrapNode: wrapN,
+  wrapSlot: wrapS,
+}: {
+  node: LayoutNode;
+  wrapNode: (n: LayoutNode, el: React.ReactNode) => React.ReactNode;
+  wrapSlot: (
+    parent: LayoutNode,
+    slotName: string,
+    children: LayoutNode[],
+  ) => React.ReactNode;
+}) {
+  const meta = metaByComponentId[node.componentId];
+  const slotEntries = meta ? Object.entries(meta.slots) : [];
+  const hasSlots = slotEntries.length > 0;
+  const previewHeight = meta?.editor?.previewHeight ?? 80;
+
+  return (
+    <Box
+      sx={{
+        border: "1px solid",
+        borderColor: "grey.300",
+        bgcolor: "background.paper",
+        boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+        overflow: "hidden",
+      }}
+    >
+      {/* ── Label strip ── */}
+      <Box
+        sx={{
+          bgcolor: "grey.50",
+          borderBottom: "1px solid",
+          borderColor: "grey.200",
+          px: 1.5,
+          py: 0.5,
+          display: "flex",
+          alignItems: "center",
+          gap: 0.75,
+          userSelect: "none",
+        }}
+      >
+        <Box
+          component="span"
+          className="material-icons"
+          sx={{ fontSize: 13, color: "text.secondary" }}
+        >
+          {meta?.editor?.icon ?? "widgets"}
+        </Box>
+        <Typography variant="caption" fontWeight={600} color="text.secondary">
+          {meta?.name ?? node.componentId}
+        </Typography>
+      </Box>
+
+      {/* ── Body: slots or skeleton ── */}
+      {hasSlots ? (
+        <Box sx={{ p: 0.5 }}>
+          {slotEntries.map(([slotName]) => (
+            <Box key={slotName}>
+              {slotEntries.length > 1 && (
+                <Typography
+                  variant="caption"
+                  color="text.disabled"
+                  sx={{ display: "block", px: 1, pt: 0.5 }}
+                >
+                  {slotName}
+                </Typography>
+              )}
+              {wrapS(node, slotName, node.slots[slotName] ?? [])}
+            </Box>
+          ))}
+        </Box>
+      ) : (
+        <WireframeSkeleton
+          componentId={node.componentId}
+          previewHeight={previewHeight}
+        />
       )}
     </Box>
   );
@@ -302,11 +547,14 @@ export function EditorCanvas({ scale = 1 }: Props) {
         <SlotDropZone parentId={parentNode.id} slotName={slotName} index={0} />
         {children.map((child, i) => (
           <Box key={child.id}>
-            <ComponentRenderer
-              node={child}
-              wrapNode={wrapNode}
-              wrapSlot={wrapSlot}
-            />
+            {wrapNode(
+              child,
+              <WireframeBlock
+                node={child}
+                wrapNode={wrapNode}
+                wrapSlot={wrapSlot}
+              />,
+            )}
             <SlotDropZone
               parentId={parentNode.id}
               slotName={slotName}
@@ -344,11 +592,14 @@ export function EditorCanvas({ scale = 1 }: Props) {
               {state.page.layout.map((node, i) => (
                 <Box key={node.id}>
                   <BetweenDropZone index={i} />
-                  <ComponentRenderer
-                    node={node}
-                    wrapNode={wrapNode}
-                    wrapSlot={wrapSlot}
-                  />
+                  {wrapNode(
+                    node,
+                    <WireframeBlock
+                      node={node}
+                      wrapNode={wrapNode}
+                      wrapSlot={wrapSlot}
+                    />,
+                  )}
                 </Box>
               ))}
               <BetweenDropZone index={state.page.layout.length} />

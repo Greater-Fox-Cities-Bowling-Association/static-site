@@ -4,7 +4,14 @@
   "category": "composite",
   "props": {
     "logo": { "type": "string", "default": "Site Name" },
-    "links": { "type": "string", "default": [] },
+    "links": {
+      "type": "array",
+      "default": [],
+      "itemShape": {
+        "label": { "type": "string", "default": "" },
+        "href": { "type": "string", "default": "/" }
+      }
+    },
     "sticky": { "type": "boolean", "default": false },
     "colorScheme": { "type": "string", "options": ["primary", "default", "transparent"], "default": "primary" }
   },
