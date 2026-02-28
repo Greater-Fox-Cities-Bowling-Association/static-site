@@ -1,3 +1,9 @@
+/**
+ * AdminApp.tsx
+ * Root of the CMS admin interface.
+ * Protected by Auth0 — on login, a GitHub token is retrieved via useGitHubToken.
+ * Navigation: Content (file browser + editor) | CSV Importer
+ */
 import { Auth0Provider, useAuth0 } from "@auth0/auth0-react";
 import CssBaseline from "@mui/material/CssBaseline";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
@@ -5,7 +11,6 @@ import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
-import Divider from "@mui/material/Divider";
 import Drawer from "@mui/material/Drawer";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
@@ -14,118 +19,97 @@ import ListItemText from "@mui/material/ListItemText";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import ArticleIcon from "@mui/icons-material/Article";
-import EditIcon from "@mui/icons-material/Edit";
-import ExtensionIcon from "@mui/icons-material/Extension";
-import PaletteIcon from "@mui/icons-material/Palette";
 import TableChartIcon from "@mui/icons-material/TableChart";
 import { useState } from "react";
 
 import { useGitHubToken } from "./useGitHubToken";
-import { PageList } from "./pages/PageList";
-import { PageEditor } from "./editor/PageEditor";
-import { ComponentBuilder } from "./builder/ComponentBuilder";
-import { ThemeEditorPanel } from "./theme/ThemeEditorPanel";
+import { ContentList } from "./pages/ContentList";
+import { ContentFileEditor } from "./editor/ContentFileEditor";
 import { CsvImporter } from "./csv/CsvImporter";
-import type { PageContent } from "../../../cms/editor/layoutSchema";
 
-const DRAWER_WIDTH = 240;
+const DRAWER_WIDTH = 220;
 
-type Section = "Pages" | "Editor" | "Components" | "Theme" | "CSV Importer";
+type Section = "Content" | "CSV Importer";
 
-const navItems: { label: Section; icon: JSX.Element }[] = [
-  { label: "Pages", icon: <ArticleIcon /> },
-  { label: "Components", icon: <ExtensionIcon /> },
-  { label: "Theme", icon: <PaletteIcon /> },
+const navItems: { label: Section; icon: React.ReactNode }[] = [
+  { label: "Content", icon: <ArticleIcon /> },
   { label: "CSV Importer", icon: <TableChartIcon /> },
 ];
+
+const cmsTheme = createTheme({
+  palette: { primary: { main: "#1565c0" } },
+  typography: { fontFamily: "Roboto, sans-serif" },
+});
+
+// ─── Dashboard ──────────────────────────────────────────────────────────────
 
 function AdminDashboard() {
   const { user, logout } = useAuth0();
   const token = useGitHubToken();
-  const [activeSection, setActiveSection] = useState<Section>("Pages");
-  const [editingPage, setEditingPage] = useState<PageContent | null>(null);
 
-  function openPage(page: PageContent) {
-    setEditingPage(page);
-    setActiveSection("Editor");
+  const [activeSection, setActiveSection] = useState<Section>("Content");
+  const [editingFile, setEditingFile] = useState<{
+    path: string;
+    content: string;
+  } | null>(null);
+
+  function handleEditFile(path: string, content: string) {
+    setEditingFile({ path, content });
   }
 
-  function closeEditor() {
-    setEditingPage(null);
-    setActiveSection("Pages");
+  function handleCloseEditor() {
+    setEditingFile(null);
   }
 
-  function renderSection() {
-    switch (activeSection) {
-      case "Pages":
-        return <PageList token={token} onEditPage={openPage} />;
-      case "Editor":
-        if (!editingPage)
-          return (
-            <Box sx={{ p: 4 }}>
-              <Typography variant="h6">No page selected.</Typography>
-              <Button onClick={() => setActiveSection("Pages")} sx={{ mt: 1 }}>
-                ← Back to Pages
-              </Button>
-            </Box>
-          );
+  function renderMain() {
+    if (activeSection === "Content") {
+      if (editingFile) {
         return (
-          <PageEditor
-            key={editingPage.slug}
-            initialPage={editingPage}
+          <ContentFileEditor
+            filePath={editingFile.path}
+            initialContent={editingFile.content}
             token={token}
-            onBack={closeEditor}
+            onBack={handleCloseEditor}
           />
         );
-      case "Components":
-        return <ComponentBuilder token={token} />;
-      case "Theme":
-        return <ThemeEditorPanel token={token} />;
-      case "CSV Importer":
-        return <CsvImporter token={token} />;
+      }
+      return <ContentList token={token} onEditFile={handleEditFile} />;
     }
-  }
-
-  // Editor is full-viewport — hide shell chrome
-  if (activeSection === "Editor" && editingPage) {
-    return renderSection();
+    return <CsvImporter token={token} />;
   }
 
   return (
-    <Box sx={{ display: "flex" }}>
-      <AppBar
-        position="fixed"
-        sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
-      >
+    <Box sx={{ display: "flex", height: "100vh" }}>
+      {/* App bar */}
+      <AppBar position="fixed" sx={{ zIndex: (t) => t.zIndex.drawer + 1 }}>
         <Toolbar>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            Site Admin
+          <Typography variant="h6" sx={{ flex: 1, fontWeight: 700 }}>
+            CMS Admin
           </Typography>
-          {!token && (
-            <Typography variant="body2" sx={{ mr: 2, opacity: 0.7 }}>
-              (GitHub token not configured)
+          {user && (
+            <Typography variant="body2" sx={{ mr: 2, opacity: 0.85 }}>
+              {user.email}
             </Typography>
           )}
-          <Typography variant="body2" sx={{ mr: 2 }}>
-            {user?.email}
-          </Typography>
           <Button
             color="inherit"
+            size="small"
             onClick={() =>
               logout({
                 logoutParams: {
                   returnTo:
-                    import.meta.env.PUBLIC_AUTH0_LOGOUT_URI ||
+                    (import.meta.env.PUBLIC_AUTH0_LOGOUT_URI as string) ||
                     window.location.origin,
                 },
               })
             }
           >
-            Log Out
+            Log out
           </Button>
         </Toolbar>
       </AppBar>
 
+      {/* Sidebar */}
       <Drawer
         variant="permanent"
         sx={{
@@ -139,43 +123,49 @@ function AdminDashboard() {
       >
         <Toolbar />
         <Box sx={{ overflow: "auto", mt: 1 }}>
-          <List>
-            {navItems.map((item) => (
+          <List dense>
+            {navItems.map(({ label, icon }) => (
               <ListItemButton
-                key={item.label}
-                selected={activeSection === item.label}
-                onClick={() => setActiveSection(item.label)}
+                key={label}
+                selected={activeSection === label}
+                onClick={() => {
+                  setActiveSection(label);
+                  setEditingFile(null);
+                }}
+                sx={{ borderRadius: 1, mx: 1, mb: 0.5 }}
               >
-                <ListItemIcon>{item.icon}</ListItemIcon>
-                <ListItemText primary={item.label} />
+                <ListItemIcon sx={{ minWidth: 36 }}>{icon}</ListItemIcon>
+                <ListItemText primary={label} />
               </ListItemButton>
             ))}
           </List>
-          <Divider />
         </Box>
       </Drawer>
 
+      {/* Main content */}
       <Box
         component="main"
         sx={{
-          flexGrow: 1,
-          height: "100vh",
+          flex: 1,
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
         }}
       >
         <Toolbar />
-        <Box sx={{ flex: 1, overflow: "hidden" }}>{renderSection()}</Box>
+        <Box sx={{ flex: 1, overflow: "auto" }}>{renderMain()}</Box>
       </Box>
     </Box>
   );
 }
 
-function AdminRoot() {
+// ─── Auth gate ───────────────────────────────────────────────────────────────
+
+function AuthGate() {
   const { isLoading, isAuthenticated, loginWithRedirect } = useAuth0();
 
-  if (isLoading) {
+  if (isLoading || !isAuthenticated) {
+    if (!isLoading) loginWithRedirect();
     return (
       <Box
         sx={{
@@ -190,47 +180,21 @@ function AdminRoot() {
     );
   }
 
-  if (!isAuthenticated) {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-          gap: 2,
-        }}
-      >
-        <Typography variant="h4">Site Admin</Typography>
-        <Typography variant="body1" color="text.secondary">
-          Sign in to manage your site.
-        </Typography>
-        <Button
-          variant="contained"
-          size="large"
-          onClick={() => loginWithRedirect()}
-        >
-          Log In
-        </Button>
-      </Box>
-    );
-  }
-
   return <AdminDashboard />;
 }
 
-const muiTheme = createTheme();
+// ─── Root export ─────────────────────────────────────────────────────────────
 
 export default function AdminApp() {
-  const domain = import.meta.env.PUBLIC_AUTH0_DOMAIN;
-  const clientId = import.meta.env.PUBLIC_AUTH0_CLIENT_ID;
+  const domain = import.meta.env.PUBLIC_AUTH0_DOMAIN as string;
+  const clientId = import.meta.env.PUBLIC_AUTH0_CLIENT_ID as string;
   const redirectUri =
-    import.meta.env.PUBLIC_AUTH0_REDIRECT_URI ?? window.location.origin;
+    (import.meta.env.PUBLIC_AUTH0_REDIRECT_URI as string) ??
+    window.location.origin;
 
   if (!domain || !clientId) {
     return (
-      <ThemeProvider theme={muiTheme}>
+      <ThemeProvider theme={cmsTheme}>
         <CssBaseline />
         <Box
           sx={{
@@ -245,7 +209,7 @@ export default function AdminApp() {
           <Typography variant="h5">Admin not configured</Typography>
           <Typography variant="body2" color="text.secondary">
             Set PUBLIC_AUTH0_DOMAIN and PUBLIC_AUTH0_CLIENT_ID in
-            .env.development to continue.
+            .env.development.
           </Typography>
         </Box>
       </ThemeProvider>
@@ -258,9 +222,9 @@ export default function AdminApp() {
       clientId={clientId}
       authorizationParams={{ redirect_uri: redirectUri }}
     >
-      <ThemeProvider theme={muiTheme}>
+      <ThemeProvider theme={cmsTheme}>
         <CssBaseline />
-        <AdminRoot />
+        <AuthGate />
       </ThemeProvider>
     </Auth0Provider>
   );

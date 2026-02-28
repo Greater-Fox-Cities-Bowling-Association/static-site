@@ -1,13 +1,12 @@
 ---
 import type { GetStaticPaths } from "astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
-import PageContent from "../components/renderer/PageContent";
+import type { ContentPage } from "../../cms/types";
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  // Load all page JSON files from src/content/pages/
-  const pages = await import.meta.glob<{
-    default: import("../../cms/editor/layoutSchema").PageContent;
-  }>("/src/content/pages/*.json");
+  const pages = await import.meta.glob<{ default: ContentPage }>(
+    "/src/content/pages/*.json"
+  );
 
   const paths = await Promise.all(
     Object.values(pages).map(async (load) => {
@@ -17,17 +16,21 @@ export const getStaticPaths: GetStaticPaths = async () => {
         params: { slug: page.slug },
         props: { page },
       };
-    }),
+    })
   );
 
   return paths;
 };
 
-const { page } = Astro.props as {
-  page: import("../../cms/editor/layoutSchema").PageContent;
-};
+const { page } = Astro.props as { page: ContentPage };
 ---
 
 <BaseLayout title={page.title} description={page.description}>
-  <PageContent layout={page.layout} client:only="react" />
+  <main style="max-width: 860px; margin: 2rem auto; padding: 0 1rem;">
+    {page.body ? (
+      <div set:html={page.body} />
+    ) : (
+      <h1>{page.title}</h1>
+    )}
+  </main>
 </BaseLayout>

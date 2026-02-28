@@ -1,8 +1,10 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import Hero from "../components/public/Hero";
 ---
 
 <BaseLayout title="Home" description="Welcome to our website.">
-  <Hero client:only="react" />
+  <main style="max-width: 860px; margin: 2rem auto; padding: 0 1rem;">
+    <h1>Welcome</h1>
+    <p>This site is managed via the <a href="/admin/">admin panel</a>.</p>
+  </main>
 </BaseLayout>

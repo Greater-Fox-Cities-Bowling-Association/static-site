@@ -30,11 +30,7 @@ import UploadFileIcon from "@mui/icons-material/UploadFile";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 import { commitFiles } from "../../../../cms/github/github";
-import { nanoid } from "nanoid";
-import type {
-  LayoutNode,
-  PageContent,
-} from "../../../../cms/editor/layoutSchema";
+import type { ContentPage } from "../../../../cms/types";
 
 const REPO = import.meta.env.PUBLIC_GITHUB_REPO as string;
 const BRANCH = import.meta.env.PUBLIC_GITHUB_BRANCH as string;
@@ -46,17 +42,14 @@ const PAGE_FIELDS = [
   { value: "", label: "— ignore —" },
   { value: "slug", label: "Slug (URL key) *" },
   { value: "title", label: "Page Title" },
-  { value: "heroHeadline", label: "Hero Headline" },
-  { value: "heroSubtitle", label: "Hero Subtitle" },
-  { value: "heroCta", label: "Hero CTA Button Label" },
-  { value: "heroCtaHref", label: "Hero CTA Link" },
-  { value: "featuresJson", label: "Feature List JSON (raw)" },
+  { value: "description", label: "Description / Meta" },
+  { value: "body", label: "Body (HTML)" },
 ];
 
 function buildPageJson(
   mapping: Record<string, string>,
   row: Row,
-): PageContent | null {
+): ContentPage | null {
   const get = (field: string) => {
     const col = Object.keys(mapping).find((k) => mapping[k] === field);
     return col ? (row[col] ?? "") : "";
@@ -67,24 +60,11 @@ function buildPageJson(
     .replace(/[^a-z0-9-]/g, "-");
   if (!slug) return null;
 
-  const heroNode: LayoutNode = {
-    id: nanoid(),
-    componentId: "hero",
-    props: {
-      headline: get("heroHeadline") || get("title") || "New Page",
-      subtitle: get("heroSubtitle") || "",
-      ctaLabel: get("heroCta") || "Learn more",
-      ctaHref: get("heroCtaHref") || "#",
-    },
-    slots: {},
-  };
-
   return {
-    id: slug,
     slug,
     title: get("title") || slug,
-    description: "",
-    layout: [heroNode],
+    description: get("description") || "",
+    body: get("body") || "",
   };
 }
 
@@ -100,7 +80,7 @@ export function CsvImporter({ token }: Props) {
   const [headers, setHeaders] = useState<string[]>([]);
   const [rows, setRows] = useState<Row[]>([]);
   const [mapping, setMapping] = useState<Record<string, string>>({});
-  const [preview, setPreview] = useState<PageContent[]>([]);
+  const [preview, setPreview] = useState<ContentPage[]>([]);
   const [saving, setSaving] = useState(false);
   const [done, setDone] = useState(false);
   const [snack, setSnack] = useState("");
@@ -150,7 +130,7 @@ export function CsvImporter({ token }: Props) {
   function buildPreview() {
     const pages = rows
       .map((row) => buildPageJson(mapping, row))
-      .filter(Boolean) as PageContent[];
+      .filter(Boolean) as ContentPage[];
     setPreview(pages);
     setStep(2);
   }
@@ -329,9 +309,7 @@ export function CsvImporter({ token }: Props) {
                   <TableRow>
                     <TableCell sx={{ fontWeight: 700 }}>Path</TableCell>
                     <TableCell sx={{ fontWeight: 700 }}>Title</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>
-                      Hero Headline
-                    </TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>Description</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -341,9 +319,7 @@ export function CsvImporter({ token }: Props) {
                         <code>src/content/pages/{p.slug}.json</code>
                       </TableCell>
                       <TableCell>{p.title}</TableCell>
-                      <TableCell>
-                        {(p.layout[0]?.props?.headline as string) ?? ""}
-                      </TableCell>
+                      <TableCell>{(p.description as string) ?? ""}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
