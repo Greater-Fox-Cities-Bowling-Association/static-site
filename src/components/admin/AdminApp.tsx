@@ -5,42 +5,40 @@ import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
+import Collapse from "@mui/material/Collapse";
 import Divider from "@mui/material/Divider";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
+import Skeleton from "@mui/material/Skeleton";
+import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import ArticleIcon from "@mui/icons-material/Article";
-import TableChartIcon from "@mui/icons-material/TableChart";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import LogoutIcon from "@mui/icons-material/Logout";
-import { useState } from "react";
+import SchemaIcon from "@mui/icons-material/Schema";
+import TableChartIcon from "@mui/icons-material/TableChart";
+import { useEffect, useState } from "react";
 
 import { useGitHubToken } from "./useGitHubToken";
 import { ContentList } from "./pages/ContentList";
 import { ContentFileEditor } from "./editor/ContentFileEditor";
 import { CsvImporter } from "./csv/CsvImporter";
+import { SchemaList } from "./schema/SchemaList";
+import { listSchemas } from "../../../cms/github/githubSchemas";
+import type { CmsSchema } from "../../../cms/types";
 
-const DRAWER_WIDTH = 260;
+const REPO = import.meta.env.PUBLIC_GITHUB_REPO as string;
+const BRANCH = import.meta.env.PUBLIC_GITHUB_BRANCH as string;
 
-type Section = "Pages" | "CSV Import";
+const DRAWER_WIDTH = 268;
 
-const navItems: {
-  label: Section;
-  icon: React.ReactNode;
-  description: string;
-}[] = [
-  {
-    label: "Pages",
-    icon: <ArticleIcon />,
-    description: "Edit your website pages",
-  },
-  {
-    label: "CSV Import",
-    icon: <TableChartIcon />,
-    description: "Bulk import from a spreadsheet",
-  },
-];
+// Section key format:
+//   "schema:<id>"    → content list for that schema
+//   "content-models" → schema builder UI
+//   "csv"            → CSV importer
 
 const cmsTheme = createTheme({
   palette: {
@@ -62,14 +60,46 @@ function AdminDashboard() {
   const { user, logout } = useAuth0();
   const token = useGitHubToken();
 
-  const [activeSection, setActiveSection] = useState<Section>("Pages");
+  const [schemas, setSchemas] = useState<CmsSchema[]>([]);
+  const [schemasLoading, setSchemasLoading] = useState(false);
+  const [contentOpen, setContentOpen] = useState(true);
+  const [activeSection, setActiveSection] = useState<string>("content-models");
   const [editingFile, setEditingFile] = useState<{
     path: string;
     content: string;
+    schema?: CmsSchema;
   } | null>(null);
 
+  useEffect(() => {
+    if (!token) return;
+    setSchemasLoading(true);
+    listSchemas(token, REPO, BRANCH)
+      .then((list) => {
+        setSchemas(list);
+        if (list.length > 0) {
+          setActiveSection((prev) =>
+            prev === "content-models" ? `schema:${list[0].id}` : prev,
+          );
+        }
+      })
+      .catch(() => {})
+      .finally(() => setSchemasLoading(false));
+  }, [token]);
+
+  function schemaForSection(section: string): CmsSchema | null {
+    if (!section.startsWith("schema:")) return null;
+    const id = section.slice("schema:".length);
+    return schemas.find((s) => s.id === id) ?? null;
+  }
+
+  function navigate(section: string) {
+    setActiveSection(section);
+    setEditingFile(null);
+  }
+
   function handleEditFile(path: string, content: string) {
-    setEditingFile({ path, content });
+    const schema = schemaForSection(activeSection) ?? undefined;
+    setEditingFile({ path, content, schema });
   }
 
   function handleCloseEditor() {
@@ -77,20 +107,48 @@ function AdminDashboard() {
   }
 
   function renderMain() {
-    if (activeSection === "Pages") {
-      if (editingFile) {
-        return (
-          <ContentFileEditor
-            filePath={editingFile.path}
-            initialContent={editingFile.content}
-            token={token}
-            onBack={handleCloseEditor}
-          />
-        );
-      }
-      return <ContentList token={token} onEditFile={handleEditFile} />;
+    if (editingFile) {
+      return (
+        <ContentFileEditor
+          filePath={editingFile.path}
+          initialContent={editingFile.content}
+          token={token}
+          schema={editingFile.schema}
+          onBack={handleCloseEditor}
+        />
+      );
     }
-    return <CsvImporter token={token} />;
+    if (activeSection === "csv") return <CsvImporter token={token} />;
+    if (activeSection === "content-models") {
+      return (
+        <SchemaList
+          token={token}
+          onSaved={() => {
+            if (!token) return;
+            listSchemas(token, REPO, BRANCH)
+              .then(setSchemas)
+              .catch(() => {});
+          }}
+        />
+      );
+    }
+    const schema = schemaForSection(activeSection);
+    if (schema) {
+      return (
+        <ContentList
+          token={token}
+          schema={schema}
+          onEditFile={handleEditFile}
+        />
+      );
+    }
+    return (
+      <Box sx={{ p: 6, textAlign: "center" }}>
+        <Typography color="text.secondary">
+          Select a section from the sidebar.
+        </Typography>
+      </Box>
+    );
   }
 
   const initials = user?.name
@@ -118,6 +176,7 @@ function AdminDashboard() {
           left: 0,
           top: 0,
           zIndex: 100,
+          overflowY: "auto",
         }}
       >
         {/* Brand */}
@@ -141,16 +200,105 @@ function AdminDashboard() {
 
         {/* Nav */}
         <List sx={{ px: 1.5, pt: 1.5, flex: 1 }}>
-          {navItems.map(({ label, icon, description }) => {
-            const selected = activeSection === label;
+          {/* CONTENT section header (collapsible) */}
+          <ListItemButton
+            onClick={() => setContentOpen((o) => !o)}
+            sx={{
+              borderRadius: 2,
+              mb: 0.5,
+              py: 0.8,
+              "&:hover": { bgcolor: "rgba(255,255,255,0.05)" },
+            }}
+          >
+            <ListItemText
+              primary="CONTENT"
+              primaryTypographyProps={{
+                fontSize: 10,
+                fontWeight: 700,
+                letterSpacing: 1,
+                color: "#64748b",
+              }}
+            />
+            {contentOpen ? (
+              <ExpandLessIcon sx={{ fontSize: 16, color: "#64748b" }} />
+            ) : (
+              <ExpandMoreIcon sx={{ fontSize: 16, color: "#64748b" }} />
+            )}
+          </ListItemButton>
+
+          <Collapse in={contentOpen}>
+            {schemasLoading &&
+              [0, 1].map((i) => (
+                <Skeleton
+                  key={i}
+                  variant="rounded"
+                  height={40}
+                  sx={{ mb: 0.5, bgcolor: "rgba(255,255,255,0.05)" }}
+                />
+              ))}
+            {!schemasLoading &&
+              schemas.map((schema) => {
+                const key = `schema:${schema.id}`;
+                const selected = activeSection === key;
+                return (
+                  <ListItemButton
+                    key={key}
+                    selected={selected}
+                    onClick={() => navigate(key)}
+                    sx={{
+                      borderRadius: 2,
+                      mb: 0.5,
+                      py: 1,
+                      pl: 2.5,
+                      "&.Mui-selected": {
+                        bgcolor: "rgba(37,99,235,0.85)",
+                        "&:hover": { bgcolor: "rgba(37,99,235,0.95)" },
+                      },
+                      "&:hover": { bgcolor: "rgba(255,255,255,0.07)" },
+                      color: selected ? "#fff" : "#cbd5e1",
+                    }}
+                  >
+                    <ListItemIcon
+                      sx={{
+                        minWidth: 34,
+                        color: "inherit",
+                        opacity: selected ? 1 : 0.7,
+                      }}
+                    >
+                      <ArticleIcon fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={schema.name}
+                      primaryTypographyProps={{
+                        fontWeight: 600,
+                        fontSize: 13,
+                        color: "inherit",
+                      }}
+                    />
+                  </ListItemButton>
+                );
+              })}
+            {!schemasLoading && schemas.length === 0 && (
+              <Typography
+                variant="caption"
+                sx={{ pl: 3, color: "#475569", display: "block", py: 1 }}
+              >
+                No content types yet
+              </Typography>
+            )}
+          </Collapse>
+
+          <Divider sx={{ borderColor: "rgba(255,255,255,0.06)", my: 1 }} />
+
+          {/* Content Models */}
+          {(["content-models", "csv"] as const).map((key) => {
+            const isModels = key === "content-models";
+            const selected = activeSection === key;
             return (
               <ListItemButton
-                key={label}
+                key={key}
                 selected={selected}
-                onClick={() => {
-                  setActiveSection(label);
-                  setEditingFile(null);
-                }}
+                onClick={() => navigate(key)}
                 sx={{
                   borderRadius: 2,
                   mb: 0.5,
@@ -170,11 +318,15 @@ function AdminDashboard() {
                     opacity: selected ? 1 : 0.7,
                   }}
                 >
-                  {icon}
+                  {isModels ? <SchemaIcon /> : <TableChartIcon />}
                 </ListItemIcon>
                 <ListItemText
-                  primary={label}
-                  secondary={description}
+                  primary={isModels ? "Content Models" : "CSV Import"}
+                  secondary={
+                    isModels
+                      ? "Define your content types"
+                      : "Bulk import from a spreadsheet"
+                  }
                   primaryTypographyProps={{
                     fontWeight: 600,
                     fontSize: 14,
@@ -228,27 +380,28 @@ function AdminDashboard() {
               Logged in
             </Typography>
           </Box>
-          <Button
-            size="small"
-            onClick={() =>
-              logout({
-                logoutParams: {
-                  returnTo:
-                    (import.meta.env.PUBLIC_AUTH0_LOGOUT_URI as string) ||
-                    window.location.origin,
-                },
-              })
-            }
-            sx={{
-              minWidth: 0,
-              p: 0.75,
-              color: "#64748b",
-              "&:hover": { color: "#f1f5f9" },
-            }}
-            title="Log out"
-          >
-            <LogoutIcon fontSize="small" />
-          </Button>
+          <Tooltip title="Log out">
+            <Button
+              size="small"
+              onClick={() =>
+                logout({
+                  logoutParams: {
+                    returnTo:
+                      (import.meta.env.PUBLIC_AUTH0_LOGOUT_URI as string) ||
+                      window.location.origin,
+                  },
+                })
+              }
+              sx={{
+                minWidth: 0,
+                p: 0.75,
+                color: "#64748b",
+                "&:hover": { color: "#f1f5f9" },
+              }}
+            >
+              <LogoutIcon fontSize="small" />
+            </Button>
+          </Tooltip>
         </Box>
       </Box>
 

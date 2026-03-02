@@ -1,9 +1,8 @@
 /**
- * ContentFileEditor — friendly form editor for CMS content pages.
+ * ContentFileEditor — form editor for CMS entries.
  *
- * For .json files that match the ContentPage schema, show labelled fields.
- * An "Advanced" section at the bottom gives raw JSON access for power users.
- * Other file types get a plain text area.
+ * When a CmsSchema is provided the entry is rendered via DynamicForm.
+ * For plain JSON files without a schema, a raw JSON text-area is shown.
  */
 import { useState } from "react";
 import Alert from "@mui/material/Alert";
@@ -14,8 +13,6 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Collapse from "@mui/material/Collapse";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
-import Snackbar from "@mui/material/Snackbar";
-import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -24,7 +21,9 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CodeIcon from "@mui/icons-material/Code";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { commitFiles } from "../../../../cms/github/github";
-import type { ContentPage } from "../../../../cms/types";
+import type { CmsSchema, CmsEntry } from "../../../../cms/types";
+import { validateEntry, validationErrorMap } from "../../../../cms/validation";
+import { DynamicForm } from "./DynamicForm";
 
 const REPO = import.meta.env.PUBLIC_GITHUB_REPO as string;
 const BRANCH = import.meta.env.PUBLIC_GITHUB_BRANCH as string;
@@ -34,73 +33,65 @@ interface Props {
   initialContent: string;
   token: string | null;
   onBack: () => void;
+  /** When provided, the entry is rendered via DynamicForm */
+  schema?: CmsSchema;
 }
 
-/** Try to parse JSON and detect if it's a ContentPage (has slug + title) */
-function parseContentPage(raw: string): ContentPage | null {
+/** Try to parse raw string into a CmsEntry (must be a non-null JSON object) */
+function parseEntry(raw: string): CmsEntry | null {
   try {
     const obj = JSON.parse(raw);
-    if (typeof obj === "object" && obj !== null && "slug" in obj)
-      return obj as ContentPage;
+    if (typeof obj === "object" && obj !== null && !Array.isArray(obj))
+      return obj as CmsEntry;
     return null;
   } catch {
     return null;
   }
 }
 
-// ─── Form editor for ContentPage JSON ────────────────────────────────────────
+// ─── Schema-driven form editor ────────────────────────────────────────────────
 
-function PageForm({ filePath, initialContent, token, onBack }: Props) {
-  const initial = parseContentPage(initialContent)!;
-
-  const [title, setTitle] = useState(initial.title ?? "");
-  const [slug, setSlug] = useState(initial.slug ?? "");
-  const [description, setDescription] = useState(
-    (initial.description as string) ?? "",
+function SchemaForm({
+  filePath,
+  initialContent,
+  token,
+  onBack,
+  schema,
+}: Props & { schema: CmsSchema }) {
+  const [entry, setEntry] = useState<CmsEntry>(
+    () => parseEntry(initialContent) ?? {},
   );
-  const [body, setBody] = useState((initial.body as string) ?? "");
-
-  // Extra fields not handled by the form
-  const knownKeys = new Set(["slug", "title", "description", "body"]);
-  const extraFields = Object.fromEntries(
-    Object.entries(initial).filter(([k]) => !knownKeys.has(k)),
-  );
-
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [showRaw, setShowRaw] = useState(false);
 
-  // Raw JSON derived from form state
-  function buildJson() {
-    return JSON.stringify(
-      { slug, title, description, body, ...extraFields },
-      null,
-      2,
-    );
-  }
-
-  const fileName = filePath.split("/").pop() ?? filePath;
+  const displayName =
+    (entry["title"] as string) ||
+    (entry["name"] as string) ||
+    filePath.split("/").pop() ||
+    "Entry";
+  const slugVal = (entry["slug"] as string) ?? "";
 
   async function handleSave() {
     if (!token) return;
-    if (!slug.trim()) {
-      setError("URL slug is required.");
+    const errs = validateEntry(schema, entry);
+    if (errs.length) {
+      setFieldErrors(validationErrorMap(errs));
+      setError("Please fix the errors below before saving.");
       return;
     }
-    if (!title.trim()) {
-      setError("Page title is required.");
-      return;
-    }
-    setSaving(true);
+    setFieldErrors({});
     setError("");
+    setSaving(true);
     setSaved(false);
     try {
       await commitFiles(token, REPO, BRANCH, [
         {
           path: filePath,
-          content: buildJson(),
-          message: `content: update "${title}"`,
+          content: JSON.stringify(entry, null, 2),
+          message: `content: update "${displayName}"`,
         },
       ]);
       setSaved(true);
@@ -129,18 +120,20 @@ function PageForm({ filePath, initialContent, token, onBack }: Props) {
           zIndex: 10,
         }}
       >
-        <Tooltip title="Back to all pages">
+        <Tooltip title={`Back to ${schema.name}`}>
           <IconButton size="small" onClick={onBack}>
             <ArrowBackIcon />
           </IconButton>
         </Tooltip>
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography variant="subtitle1" fontWeight={700} noWrap>
-            {title || fileName}
+            {displayName}
           </Typography>
-          <Typography variant="caption" color="text.secondary">
-            Editing /{slug}
-          </Typography>
+          {slugVal && (
+            <Typography variant="caption" color="text.secondary">
+              /{slugVal}
+            </Typography>
+          )}
         </Box>
         <Chip
           label={`Branch: ${BRANCH}`}
@@ -158,9 +151,7 @@ function PageForm({ filePath, initialContent, token, onBack }: Props) {
           />
         )}
         <Tooltip
-          title={
-            !token ? "You must be logged in to save" : `Publish to ${BRANCH}`
-          }
+          title={!token ? "You must be logged in to save" : `Save to ${BRANCH}`}
         >
           <span>
             <Button
@@ -176,7 +167,7 @@ function PageForm({ filePath, initialContent, token, onBack }: Props) {
               }
               sx={{ borderRadius: 2, px: 3 }}
             >
-              {saving ? "Saving…" : "Publish changes"}
+              {saving ? "Saving…" : "Save changes"}
             </Button>
           </span>
         </Tooltip>
@@ -193,137 +184,21 @@ function PageForm({ filePath, initialContent, token, onBack }: Props) {
         </Alert>
       )}
 
-      {/* ── Form ── */}
+      {/* ── Dynamic form ── */}
       <Box sx={{ flex: 1, overflowY: "auto", p: { xs: 2, sm: 4 } }}>
-        <Box
-          sx={{
-            maxWidth: 760,
-            mx: "auto",
-            display: "flex",
-            flexDirection: "column",
-            gap: 3,
-          }}
-        >
-          {/* Title */}
-          <Box>
-            <Typography
-              variant="overline"
-              color="text.secondary"
-              sx={{ fontWeight: 700, letterSpacing: 1 }}
-            >
-              Page Title
-            </Typography>
-            <TextField
-              value={title}
-              onChange={(e) => {
-                setTitle(e.target.value);
-                setSaved(false);
-              }}
-              placeholder="e.g. About Our Club"
-              fullWidth
-              variant="outlined"
-              size="medium"
-              helperText="This shows in the browser tab and at the top of the page."
-              sx={{ mt: 0.5 }}
-            />
-          </Box>
+        <Box sx={{ maxWidth: 760, mx: "auto" }}>
+          <DynamicForm
+            fields={schema.fields}
+            value={entry}
+            onChange={(updated) => {
+              setEntry(updated);
+              setSaved(false);
+              setFieldErrors({});
+            }}
+            errors={fieldErrors}
+          />
 
-          {/* Slug */}
-          <Box>
-            <Typography
-              variant="overline"
-              color="text.secondary"
-              sx={{ fontWeight: 700, letterSpacing: 1 }}
-            >
-              Page URL
-            </Typography>
-            <TextField
-              value={slug}
-              onChange={(e) => {
-                setSlug(
-                  e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"),
-                );
-                setSaved(false);
-              }}
-              fullWidth
-              size="medium"
-              variant="outlined"
-              helperText={`Your page lives at: /${slug}`}
-              InputProps={{
-                startAdornment: (
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ mr: 0.5, userSelect: "none" }}
-                  >
-                    /
-                  </Typography>
-                ),
-              }}
-              sx={{ mt: 0.5 }}
-            />
-          </Box>
-
-          {/* Description */}
-          <Box>
-            <Typography
-              variant="overline"
-              color="text.secondary"
-              sx={{ fontWeight: 700, letterSpacing: 1 }}
-            >
-              Short Description
-            </Typography>
-            <TextField
-              value={description}
-              onChange={(e) => {
-                setDescription(e.target.value);
-                setSaved(false);
-              }}
-              placeholder="A brief sentence about this page (used for search engines)."
-              fullWidth
-              multiline
-              rows={2}
-              size="medium"
-              variant="outlined"
-              helperText="Appears in Google search results. Keep it under 160 characters."
-              sx={{ mt: 0.5 }}
-            />
-          </Box>
-
-          {/* Body */}
-          <Box>
-            <Typography
-              variant="overline"
-              color="text.secondary"
-              sx={{ fontWeight: 700, letterSpacing: 1 }}
-            >
-              Page Content
-            </Typography>
-            <TextField
-              value={body}
-              onChange={(e) => {
-                setBody(e.target.value);
-                setSaved(false);
-              }}
-              placeholder="Write the page content here. You can use basic HTML like <b>bold</b>, <a href='...'>links</a>, <p>paragraphs</p>."
-              fullWidth
-              multiline
-              rows={12}
-              size="medium"
-              variant="outlined"
-              helperText="Supports HTML. Use <p> for paragraphs, <b> for bold, <a href='…'> for links."
-              sx={{
-                mt: 0.5,
-                "& .MuiInputBase-input": {
-                  fontFamily: "inherit",
-                  fontSize: 15,
-                  lineHeight: 1.7,
-                },
-              }}
-            />
-          </Box>
-
-          <Divider />
+          <Divider sx={{ my: 4 }} />
 
           {/* Advanced — raw JSON */}
           <Box>
@@ -347,12 +222,11 @@ function PageForm({ filePath, initialContent, token, onBack }: Props) {
             </Button>
             <Collapse in={showRaw}>
               <Alert severity="info" sx={{ mb: 1.5 }}>
-                Advanced users only. Editing here will override the fields above
-                on next save.
+                Read-only view of what will be committed to GitHub.
               </Alert>
               <Box
                 component="textarea"
-                value={buildJson()}
+                value={JSON.stringify(entry, null, 2)}
                 readOnly
                 sx={{
                   width: "100%",
@@ -509,10 +383,12 @@ function RawEditor({ filePath, initialContent, token, onBack }: Props) {
 // ─── Entry point ─────────────────────────────────────────────────────────────
 
 export function ContentFileEditor(props: Props) {
-  const isPageJson =
+  const isStructuredJson =
     props.filePath.endsWith(".json") &&
-    parseContentPage(props.initialContent) !== null;
+    parseEntry(props.initialContent) !== null;
 
-  if (isPageJson) return <PageForm {...props} />;
+  if (isStructuredJson && props.schema) {
+    return <SchemaForm {...props} schema={props.schema} />;
+  }
   return <RawEditor {...props} />;
 }

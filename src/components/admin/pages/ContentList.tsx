@@ -1,9 +1,9 @@
 /**
- * ContentList — page card grid for the CMS.
- * Shows all JSON pages in src/content/pages/ as friendly cards.
+ * ContentList — schema-driven content entry grid for the CMS.
+ * Shows all JSON entries in the schema's directory as friendly cards.
  * Create/delete actions use MUI dialogs (no browser prompt/confirm).
  */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -34,14 +34,14 @@ import {
   type GitHubFile,
 } from "../../../../cms/github/githubContent";
 import { commitFiles } from "../../../../cms/github/github";
-import type { ContentPage } from "../../../../cms/types";
+import type { CmsSchema, CmsEntry } from "../../../../cms/types";
 
 const REPO = import.meta.env.PUBLIC_GITHUB_REPO as string;
 const BRANCH = import.meta.env.PUBLIC_GITHUB_BRANCH as string;
-const PAGES_PATH = "src/content/pages";
 
 interface Props {
   token: string | null;
+  schema: CmsSchema;
   onEditFile: (path: string, content: string) => void;
 }
 
@@ -165,19 +165,21 @@ function DeleteDialog({
   onConfirm,
   deleting,
 }: {
-  page: ContentPage | null;
+  page: (CmsEntry & { _path: string }) | null;
   onClose: () => void;
   onConfirm: () => void;
   deleting: boolean;
 }) {
+  const label = page ? String(page["title"] ?? page["name"] ?? page["slug"] ?? page._path) : "";
+  const slugLabel = page ? String(page["slug"] ?? page._path) : "";
   return (
     <Dialog open={!!page} onClose={onClose} maxWidth="xs" fullWidth>
       <DialogTitle sx={{ fontWeight: 700 }}>
-        Delete "{page?.title}"?
+        Delete "{label}"?
       </DialogTitle>
       <DialogContent>
         <Typography variant="body2" color="text.secondary">
-          This will permanently remove the page <strong>{page?.slug}</strong>{" "}
+          This will permanently remove <strong>{slugLabel}</strong>{" "}
           from your site. This cannot be undone.
         </Typography>
       </DialogContent>
@@ -205,18 +207,21 @@ function DeleteDialog({
   );
 }
 
-// ─── Page card ────────────────────────────────────────────────────────────────
+// ─── Entry card ────────────────────────────────────────────────────────────────
 
-function PageCard({
-  page,
+function EntryCard({
+  entry,
   onEdit,
   onDelete,
 }: {
-  page: ContentPage & { _path: string };
+  entry: CmsEntry & { _path: string };
   onEdit: () => void;
   onDelete: () => void;
 }) {
-  const liveUrl = `/${page.slug === "home" ? "" : page.slug}`;
+  const slug = (entry["slug"] as string) ?? "";
+  const title = (entry["title"] as string) || (entry["name"] as string) || slug || "Untitled";
+  const description = (entry["description"] as string) ?? "";
+  const liveUrl = `/${slug === "home" ? "" : slug}`;
 
   return (
     <Card
@@ -259,10 +264,10 @@ function PageCard({
               variant="subtitle1"
               fontWeight={700}
             >
-              {page.title || <em style={{ opacity: 0.5 }}>Untitled</em>}
+              {title || <em style={{ opacity: 0.5 }}>Untitled</em>}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              /{page.slug}
+              /{slug}
             </Typography>
           </Box>
         </Box>
@@ -279,7 +284,7 @@ function PageCard({
             mt: 0.5,
           }}
         >
-          {page.description || <em>No description yet.</em>}
+          {description || <em>No description yet.</em>}
         </Typography>
       </CardContent>
       <CardActions sx={{ px: 2, pb: 1.5, pt: 1, gap: 0.5 }}>
@@ -315,8 +320,8 @@ function PageCard({
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export function ContentList({ token, onEditFile }: Props) {
-  const [pages, setPages] = useState<(ContentPage & { _path: string })[]>([]);
+export function ContentList({ token, schema, onEditFile }: Props) {
+  const [entries, setEntries] = useState<(CmsEntry & { _path: string })[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [snack, setSnack] = useState("");
@@ -326,28 +331,33 @@ export function ContentList({ token, onEditFile }: Props) {
   const [creating, setCreating] = useState(false);
 
   // Delete dialog
-  const [deleteTarget, setDeleteTarget] = useState<
-    (ContentPage & { _path: string }) | null
-  >(null);
+  const [deleteTarget, setDeleteTarget] = useState<(CmsEntry & { _path: string }) | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  async function loadPages() {
+  async function loadEntries() {
     if (!token) return;
     setLoading(true);
     setError("");
     try {
-      const files = await listDirectory(token, REPO, BRANCH, PAGES_PATH);
+      const files = await listDirectory(token, REPO, BRANCH, schema.directory);
       const jsonFiles = files.filter(
         (f): f is GitHubFile => f.type === "file" && f.name.endsWith(".json"),
       );
       const loaded = await Promise.all(
         jsonFiles.map(async (f) => {
           const raw = await fetchFileContent(token, REPO, BRANCH, f.path);
-          const parsed = JSON.parse(raw) as ContentPage;
+          const parsed = JSON.parse(raw) as CmsEntry;
           return { ...parsed, _path: f.path };
         }),
       );
-      setPages(loaded.sort((a, b) => a.slug.localeCompare(b.slug)));
+      const sorted = loaded.sort((a, b) => {
+        const ae = a as CmsEntry;
+        const be = b as CmsEntry;
+        const aKey = String(ae["slug"] ?? ae["title"] ?? ae["name"] ?? "");
+        const bKey = String(be["slug"] ?? be["title"] ?? be["name"] ?? "");
+        return aKey.localeCompare(bKey);
+      });
+      setEntries(sorted);
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -356,29 +366,33 @@ export function ContentList({ token, onEditFile }: Props) {
   }
 
   useEffect(() => {
-    loadPages();
-  }, [token]);
+    loadEntries();
+  }, [token, schema.id]);
 
   async function handleCreate(title: string, slug: string) {
     if (!token) return;
     setCreating(true);
-    const newPage: ContentPage = {
-      slug,
-      title,
-      description: "",
-      body: "",
-    };
+    // Build a minimal entry with defaults for all schema fields
+    const newEntry: CmsEntry = { slug, title };
+    for (const field of schema.fields) {
+      if (!(field.name in newEntry)) {
+        newEntry[field.name] = field.type === "boolean" ? false
+          : field.type === "number" ? 0
+          : field.type === "array" ? []
+          : "";
+      }
+    }
     try {
       await commitFiles(token, REPO, BRANCH, [
         {
-          path: `${PAGES_PATH}/${slug}.json`,
-          content: JSON.stringify(newPage, null, 2),
-          message: `content: create page "${slug}"`,
+          path: `${schema.directory}/${slug}.json`,
+          content: JSON.stringify(newEntry, null, 2),
+          message: `content: create ${schema.name.toLowerCase()} "${slug}"`,
         },
       ]);
       setCreateOpen(false);
-      setSnack(`Page "${title}" created!`);
-      await loadPages();
+      setSnack(`"${title}" created!`);
+      await loadEntries();
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -401,25 +415,23 @@ export function ContentList({ token, onEditFile }: Props) {
         },
       );
       const data = await res.json();
-      await fetch(
-        `${GITHUB_API}/repos/${REPO}/contents/${deleteTarget._path}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: "application/vnd.github+json",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            message: `content: delete page "${deleteTarget.slug}"`,
-            sha: data.sha,
-            branch: BRANCH,
-          }),
+      const entryLabel = String(deleteTarget["slug"] ?? deleteTarget["title"] ?? deleteTarget._path);
+      await fetch(`${GITHUB_API}/repos/${REPO}/contents/${deleteTarget._path}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/vnd.github+json",
+          "Content-Type": "application/json",
         },
-      );
-      setSnack(`"${deleteTarget.title}" deleted.`);
+        body: JSON.stringify({
+          message: `content: delete ${schema.name.toLowerCase()} "${entryLabel}"`,
+          sha: data.sha,
+          branch: BRANCH,
+        }),
+      });
+      setSnack(`"${entryLabel}" deleted.`);
       setDeleteTarget(null);
-      await loadPages();
+      await loadEntries();
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -427,17 +439,17 @@ export function ContentList({ token, onEditFile }: Props) {
     }
   }
 
-  async function handleEdit(page: ContentPage & { _path: string }) {
+  async function handleEdit(entry: CmsEntry & { _path: string }) {
     if (!token) return;
-    const raw = await fetchFileContent(token, REPO, BRANCH, page._path);
-    onEditFile(page._path, raw);
+    const raw = await fetchFileContent(token, REPO, BRANCH, entry._path);
+    onEditFile(entry._path, raw);
   }
 
   if (!token) {
     return (
       <Box sx={{ p: 6, textAlign: "center" }}>
         <Typography variant="h6" color="text.secondary">
-          Please log in to manage your pages.
+          Please log in to manage {schema.name.toLowerCase()}.
         </Typography>
       </Box>
     );
@@ -446,27 +458,19 @@ export function ContentList({ token, onEditFile }: Props) {
   return (
     <Box sx={{ p: { xs: 2, sm: 4 }, maxWidth: 1100, mx: "auto", width: "100%", boxSizing: "border-box" }}>
       {/* Header */}
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          mb: 4,
-          gap: 2,
-          flexWrap: "wrap",
-        }}
-      >
+      <Box sx={{ display: "flex", alignItems: "center", mb: 4, gap: 2, flexWrap: "wrap" }}>
         <Box sx={{ flex: 1 }}>
           <Typography variant="h5" fontWeight={700}>
-            Your Pages
+            {schema.name}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
             {loading
               ? "Loading…"
-              : `${pages.length} page${pages.length !== 1 ? "s" : ""} · branch: ${BRANCH}`}
+              : `${entries.length} entr${entries.length !== 1 ? "ies" : "y"} · branch: ${BRANCH}`}
           </Typography>
         </Box>
-        <Tooltip title="Reload pages from GitHub">
-          <IconButton onClick={loadPages} disabled={loading} size="small">
+        <Tooltip title={`Reload ${schema.name} from GitHub`}>
+          <IconButton onClick={loadEntries} disabled={loading} size="small">
             <RefreshIcon />
           </IconButton>
         </Tooltip>
@@ -477,7 +481,7 @@ export function ContentList({ token, onEditFile }: Props) {
           size="large"
           sx={{ borderRadius: 2, px: 3 }}
         >
-          New page
+          New entry
         </Button>
       </Box>
 
@@ -493,56 +497,42 @@ export function ContentList({ token, onEditFile }: Props) {
         <Grid container spacing={2}>
           {[0, 1, 2].map((i) => (
             <Grid item xs={12} sm={6} md={4} key={i}>
-              <Skeleton
-                variant="rounded"
-                height={180}
-                sx={{ borderRadius: 3 }}
-              />
+              <Skeleton variant="rounded" height={180} sx={{ borderRadius: 3 }} />
             </Grid>
           ))}
         </Grid>
       )}
 
       {/* Empty state */}
-      {!loading && pages.length === 0 && !error && (
+      {!loading && entries.length === 0 && !error && (
         <Box
           sx={{
-            textAlign: "center",
-            py: 10,
-            px: 4,
-            border: "2px dashed",
-            borderColor: "grey.200",
-            borderRadius: 4,
+            textAlign: "center", py: 10, px: 4,
+            border: "2px dashed", borderColor: "grey.200", borderRadius: 4,
           }}
         >
-          <ArticleOutlinedIcon
-            sx={{ fontSize: 56, color: "grey.300", mb: 2 }}
-          />
+          <ArticleOutlinedIcon sx={{ fontSize: 56, color: "grey.300", mb: 2 }} />
           <Typography variant="h6" fontWeight={600} gutterBottom>
-            No pages yet
+            No {schema.name.toLowerCase()} yet
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Create your first page to get started.
+            Create your first entry to get started.
           </Typography>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => setCreateOpen(true)}
-          >
-            Create your first page
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreateOpen(true)}>
+            Create your first entry
           </Button>
         </Box>
       )}
 
-      {/* Page cards */}
-      {!loading && pages.length > 0 && (
+      {/* Entry cards */}
+      {!loading && entries.length > 0 && (
         <Grid container spacing={2}>
-          {pages.map((page) => (
-            <Grid item xs={12} sm={6} md={4} key={page.slug}>
-              <PageCard
-                page={page}
-                onEdit={() => handleEdit(page)}
-                onDelete={() => setDeleteTarget(page)}
+          {entries.map((entry, idx) => (
+            <Grid item xs={12} sm={6} md={4} key={String(entry["slug"] ?? entry["_path"] ?? idx)}>
+              <EntryCard
+                entry={entry}
+                onEdit={() => handleEdit(entry)}
+                onDelete={() => setDeleteTarget(entry)}
               />
             </Grid>
           ))}
@@ -557,7 +547,7 @@ export function ContentList({ token, onEditFile }: Props) {
         saving={creating}
       />
       <DeleteDialog
-        page={deleteTarget}
+        page={deleteTarget as any}
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleDeleteConfirm}
         deleting={deleting}
