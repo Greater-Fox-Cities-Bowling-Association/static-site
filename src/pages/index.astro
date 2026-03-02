@@ -1,10 +1,28 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { isVersioned, resolvePublished } from "../../cms/types";
+import homeRaw from "../content/home/home.json";
+
+// Resolve the published version if the file uses versioning; otherwise use raw.
+const home = isVersioned(homeRaw)
+  ? resolvePublished(homeRaw)
+  : (homeRaw as Record<string, unknown>);
+const title = (home["title"] as string | undefined) ?? "Home";
+const description = (home["description"] as string | undefined) ?? undefined;
+const hero_text = home["hero_text"] as string | undefined;
+const body = home["body"] as string | undefined;
 ---
 
-<BaseLayout title="Home" description="Welcome to our website.">
+<BaseLayout title={title} description={description}>
   <main style="max-width: 860px; margin: 2rem auto; padding: 0 1rem;">
-    <h1>Welcome</h1>
-    <p>This site is managed via the <a href="/admin/">admin panel</a>.</p>
+    {
+      body ? (
+        <div set:html={body} />
+      ) : hero_text ? (
+        <h1 set:html={hero_text} />
+      ) : (
+        <h1>{title}</h1>
+      )
+    }
   </main>
 </BaseLayout>

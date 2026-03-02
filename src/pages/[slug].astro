@@ -2,21 +2,24 @@
 import type { GetStaticPaths } from "astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import type { ContentPage } from "../../cms/types";
+import { isVersioned, resolvePublished } from "../../cms/types";
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const pages = await import.meta.glob<{ default: ContentPage }>(
-    "/src/content/pages/*.json"
+  const pages = await import.meta.glob<{ default: Record<string, unknown> }>(
+    "/src/content/pages/*.json",
   );
 
   const paths = await Promise.all(
     Object.values(pages).map(async (load) => {
       const mod = await load();
-      const page = mod.default;
+      const raw = mod.default;
+      // Resolve versioned entries to their published snapshot; pass legacy entries through.
+      const page = isVersioned(raw) ? resolvePublished(raw) : raw;
       return {
-        params: { slug: page.slug },
+        params: { slug: page.slug as string },
         props: { page },
       };
-    })
+    }),
   );
 
   return paths;
@@ -27,10 +30,6 @@ const { page } = Astro.props as { page: ContentPage };
 
 <BaseLayout title={page.title} description={page.description}>
   <main style="max-width: 860px; margin: 2rem auto; padding: 0 1rem;">
-    {page.body ? (
-      <div set:html={page.body} />
-    ) : (
-      <h1>{page.title}</h1>
-    )}
+    {page.body ? <div set:html={page.body} /> : <h1>{page.title}</h1>}
   </main>
 </BaseLayout>

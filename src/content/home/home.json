@@ -1,0 +1,15 @@
+{
+  "slug": "home",
+  "_schemaId": "home",
+  "_publishedVersion": 1,
+  "_versions": [
+    {
+      "version": 1,
+      "createdAt": "2026-03-01T00:00:00.000Z",
+      "label": "Initial",
+      "data": {
+        "hero_text": "Welcome to our website."
+      }
+    }
+  ]
+}

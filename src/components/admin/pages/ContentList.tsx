@@ -1,5 +1,5 @@
-/**
- * ContentList — schema-driven content entry grid for the CMS.
+﻿/**
+ * ContentList â€” schema-driven content entry grid for the CMS.
  * Shows all JSON entries in the schema's directory as friendly cards.
  * Create/delete actions use MUI dialogs (no browser prompt/confirm).
  */
@@ -24,6 +24,7 @@ import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import AddIcon from "@mui/icons-material/Add";
 import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
@@ -34,7 +35,8 @@ import {
   type GitHubFile,
 } from "../../../../cms/github/githubContent";
 import { commitFiles } from "../../../../cms/github/github";
-import type { CmsSchema, CmsEntry } from "../../../../cms/types";
+import type { CmsSchema, CmsEntry, ContentVersion, VersionedCmsEntry } from "../../../../cms/types";
+import { isVersioned } from "../../../../cms/types";
 
 const REPO = import.meta.env.PUBLIC_GITHUB_REPO as string;
 const BRANCH = import.meta.env.PUBLIC_GITHUB_BRANCH as string;
@@ -45,18 +47,21 @@ interface Props {
   onEditFile: (path: string, content: string) => void;
 }
 
-// ─── New Page Dialog ─────────────────────────────────────────────────────────
 
-function NewPageDialog({
+// --- New Entry Dialog ---
+
+function NewEntryDialog({
   open,
   onClose,
   onConfirm,
   saving,
+  schemaName,
 }: {
   open: boolean;
   onClose: () => void;
   onConfirm: (title: string, slug: string) => void;
   saving: boolean;
+  schemaName: string;
 }) {
   const [title, setTitle] = useState("");
   const [slugEdited, setSlugEdited] = useState(false);
@@ -94,7 +99,7 @@ function NewPageDialog({
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
-      <DialogTitle sx={{ fontWeight: 700 }}>Create a new page</DialogTitle>
+      <DialogTitle sx={{ fontWeight: 700 }}>New {schemaName} entry</DialogTitle>
       <DialogContent
         sx={{
           pt: "12px !important",
@@ -120,7 +125,7 @@ function NewPageDialog({
           onChange={(e) => handleSlugChange(e.target.value)}
           fullWidth
           size="small"
-          helperText={`Your page will be at /${slug || "…"}`}
+          helperText={`Your page will be at /${slug || "â€¦"}`}
           InputProps={{
             startAdornment: (
               <Typography
@@ -150,14 +155,88 @@ function NewPageDialog({
             )
           }
         >
-          {saving ? "Creating…" : "Create page"}
+          {saving ? "Creatingâ€¦" : "Create entry"}
         </Button>
       </DialogActions>
     </Dialog>
   );
 }
 
-// ─── Delete Confirm Dialog ────────────────────────────────────────────────────
+// â”€â”€â”€ Duplicate Dialog â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+function DuplicateDialog({
+  source,
+  onClose,
+  onConfirm,
+  duplicating,
+}: {
+  source: (CmsEntry & { _path: string }) | null;
+  onClose: () => void;
+  onConfirm: (newSlug: string) => void;
+  duplicating: boolean;
+}) {
+  const [slug, setSlug] = useState("");
+  const sourceLabel = source
+    ? String(source["slug"] ?? source["title"] ?? source._path)
+    : "";
+
+  function toSlug(s: string) {
+    return s
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-");
+  }
+
+  function handleClose() {
+    setSlug("");
+    onClose();
+  }
+
+  return (
+    <Dialog open={!!source} onClose={handleClose} maxWidth="xs" fullWidth>
+      <DialogTitle sx={{ fontWeight: 700 }}>Duplicate â€œ{sourceLabel}â€</DialogTitle>
+      <DialogContent
+        sx={{ pt: "12px !important", display: "flex", flexDirection: "column", gap: 2 }}
+      >
+        <Typography variant="body2" color="text.secondary">
+          Creates an independent copy. The original entry is untouched.
+        </Typography>
+        <TextField
+          label="New entry slug"
+          placeholder={`${sourceLabel}-copy`}
+          value={slug}
+          onChange={(e) => setSlug(toSlug(e.target.value))}
+          autoFocus
+          fullWidth
+          size="small"
+          helperText="Used as the filename for the copy (e.g. home-spring-2026)."
+        />
+      </DialogContent>
+      <DialogActions sx={{ px: 3, pb: 2 }}>
+        <Button onClick={handleClose} disabled={duplicating}>
+          Cancel
+        </Button>
+        <Button
+          variant="contained"
+          onClick={() => onConfirm(slug.trim())}
+          disabled={!slug.trim() || duplicating}
+          startIcon={
+            duplicating ? (
+              <CircularProgress size={14} color="inherit" />
+            ) : (
+              <ContentCopyIcon />
+            )
+          }
+        >
+          {duplicating ? "Duplicatingâ€¦" : "Duplicate"}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
+// â”€â”€â”€ Delete Confirm Dialog â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function DeleteDialog({
   page,
@@ -200,22 +279,24 @@ function DeleteDialog({
             )
           }
         >
-          {deleting ? "Deleting…" : "Yes, delete"}
+          {deleting ? "Deletingâ€¦" : "Yes, delete"}
         </Button>
       </DialogActions>
     </Dialog>
   );
 }
 
-// ─── Entry card ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Entry card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function EntryCard({
   entry,
   onEdit,
+  onDuplicate,
   onDelete,
 }: {
   entry: CmsEntry & { _path: string };
   onEdit: () => void;
+  onDuplicate: () => void;
   onDelete: () => void;
 }) {
   const slug = (entry["slug"] as string) ?? "";
@@ -297,6 +378,11 @@ function EntryCard({
         >
           Edit
         </Button>
+        <Tooltip title="Duplicate entry">
+          <IconButton size="small" onClick={onDuplicate}>
+            <ContentCopyIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
         <Tooltip title={`View live page: ${liveUrl}`}>
           <IconButton
             size="small"
@@ -318,7 +404,7 @@ function EntryCard({
   );
 }
 
-// ─── Main component ───────────────────────────────────────────────────────────
+// â”€â”€â”€ Main component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export function ContentList({ token, schema, onEditFile }: Props) {
   const [entries, setEntries] = useState<(CmsEntry & { _path: string })[]>([]);
@@ -326,9 +412,13 @@ export function ContentList({ token, schema, onEditFile }: Props) {
   const [error, setError] = useState("");
   const [snack, setSnack] = useState("");
 
-  // Create dialog
+  // Create dialog (collections only)
   const [createOpen, setCreateOpen] = useState(false);
   const [creating, setCreating] = useState(false);
+
+  // Duplicate dialog
+  const [duplicateTarget, setDuplicateTarget] = useState<(CmsEntry & { _path: string }) | null>(null);
+  const [duplicating, setDuplicating] = useState(false);
 
   // Delete dialog
   const [deleteTarget, setDeleteTarget] = useState<(CmsEntry & { _path: string }) | null>(null);
@@ -369,11 +459,11 @@ export function ContentList({ token, schema, onEditFile }: Props) {
     loadEntries();
   }, [token, schema.id]);
 
-  async function handleCreate(title: string, slug: string) {
+  async function handleCreate(slug: string) {
     if (!token) return;
     setCreating(true);
-    // Build a minimal entry with defaults for all schema fields
-    const newEntry: CmsEntry = { slug, title };
+    // Stub out all schema fields with empty defaults — editor fills them in.
+    const newEntry: CmsEntry = { slug };
     for (const field of schema.fields) {
       if (!(field.name in newEntry)) {
         newEntry[field.name] = field.type === "boolean" ? false
@@ -391,7 +481,7 @@ export function ContentList({ token, schema, onEditFile }: Props) {
         },
       ]);
       setCreateOpen(false);
-      setSnack(`"${title}" created!`);
+      setSnack(`"${slug}" created!`);
       await loadEntries();
     } catch (err) {
       setError((err as Error).message);
@@ -445,6 +535,52 @@ export function ContentList({ token, schema, onEditFile }: Props) {
     onEditFile(entry._path, raw);
   }
 
+  /** Copies an entry to a new slug. Resets versioned entries to v1. */
+  async function handleDuplicate(newSlug: string) {
+    if (!token || !duplicateTarget) return;
+    setDuplicating(true);
+    try {
+      const sourceRaw = await fetchFileContent(token, REPO, BRANCH, duplicateTarget._path);
+      const sourceParsed = JSON.parse(sourceRaw);
+      let copyContent: string;
+      if (isVersioned(sourceParsed)) {
+        const pub = sourceParsed._versions.find(
+          (v: ContentVersion) => v.version === sourceParsed._publishedVersion
+        );
+        const copyDoc: VersionedCmsEntry = {
+          slug: newSlug,
+          _schemaId: sourceParsed._schemaId,
+          _publishedVersion: 1,
+          _versions: [
+            {
+              version: 1,
+              createdAt: new Date().toISOString(),
+              label: `Copied from â€œ${String(duplicateTarget["slug"] ?? duplicateTarget._path)}â€`,
+              data: pub?.data ?? {},
+            } as ContentVersion,
+          ],
+        };
+        copyContent = JSON.stringify(copyDoc, null, 2);
+      } else {
+        copyContent = JSON.stringify({ ...sourceParsed, slug: newSlug }, null, 2);
+      }
+      await commitFiles(token, REPO, BRANCH, [
+        {
+          path: `${schema.directory}/${newSlug}.json`,
+          content: copyContent,
+          message: `content: duplicate ${schema.name.toLowerCase()} â€œ${String(duplicateTarget["slug"] ?? duplicateTarget._path)}â€ â†’ â€œ${newSlug}â€`,
+        },
+      ]);
+      setDuplicateTarget(null);
+      setSnack(`Copied to â€œ${newSlug}â€!`);
+      await loadEntries();
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setDuplicating(false);
+    }
+  }
+
   if (!token) {
     return (
       <Box sx={{ p: 6, textAlign: "center" }}>
@@ -455,6 +591,7 @@ export function ContentList({ token, schema, onEditFile }: Props) {
     );
   }
 
+  // â”€â”€ Collection rendering â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   return (
     <Box sx={{ p: { xs: 2, sm: 4 }, maxWidth: 1100, mx: "auto", width: "100%", boxSizing: "border-box" }}>
       {/* Header */}
@@ -465,8 +602,8 @@ export function ContentList({ token, schema, onEditFile }: Props) {
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
             {loading
-              ? "Loading…"
-              : `${entries.length} entr${entries.length !== 1 ? "ies" : "y"} · branch: ${BRANCH}`}
+              ? "Loadingâ€¦"
+              : `${entries.length} entr${entries.length !== 1 ? "ies" : "y"} Â· branch: ${BRANCH}`}
           </Typography>
         </Box>
         <Tooltip title={`Reload ${schema.name} from GitHub`}>
@@ -532,6 +669,7 @@ export function ContentList({ token, schema, onEditFile }: Props) {
               <EntryCard
                 entry={entry}
                 onEdit={() => handleEdit(entry)}
+                onDuplicate={() => setDuplicateTarget(entry)}
                 onDelete={() => setDeleteTarget(entry)}
               />
             </Grid>
@@ -540,11 +678,18 @@ export function ContentList({ token, schema, onEditFile }: Props) {
       )}
 
       {/* Dialogs */}
-      <NewPageDialog
+      <NewEntryDialog
         open={createOpen}
         onClose={() => setCreateOpen(false)}
         onConfirm={handleCreate}
         saving={creating}
+        schemaName={schema.name}
+      />
+      <DuplicateDialog
+        source={duplicateTarget}
+        onClose={() => setDuplicateTarget(null)}
+        onConfirm={handleDuplicate}
+        duplicating={duplicating}
       />
       <DeleteDialog
         page={deleteTarget as any}
