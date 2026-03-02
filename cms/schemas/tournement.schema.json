@@ -1,0 +1,31 @@
+{
+  "id": "tournement",
+  "name": "Tournement",
+  "directory": "src/content/tournement",
+  "fields": [
+    {
+      "name": "title",
+      "label": "Field 1",
+      "type": "text",
+      "required": false
+    },
+    {
+      "name": "dates",
+      "label": "Field 2",
+      "type": "text",
+      "required": false
+    },
+    {
+      "name": "link",
+      "label": "Field 3",
+      "type": "text",
+      "required": false
+    },
+    {
+      "name": "results_link",
+      "label": "Field 4",
+      "type": "text",
+      "required": false
+    }
+  ]
+}
