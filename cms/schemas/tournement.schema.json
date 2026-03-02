@@ -5,25 +5,25 @@
   "fields": [
     {
       "name": "title",
-      "label": "Field 1",
+      "label": "Title",
       "type": "text",
       "required": false
     },
     {
       "name": "dates",
-      "label": "Field 2",
+      "label": "Dates",
       "type": "text",
       "required": false
     },
     {
-      "name": "link",
-      "label": "Field 3",
+      "name": "rules_link",
+      "label": "Form Rules",
       "type": "text",
       "required": false
     },
     {
       "name": "results_link",
-      "label": "Field 4",
+      "label": "Results",
       "type": "text",
       "required": false
     }
