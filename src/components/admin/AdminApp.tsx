@@ -1,25 +1,19 @@
-/**
- * AdminApp.tsx
- * Root of the CMS admin interface.
- * Protected by Auth0 — on login, a GitHub token is retrieved via useGitHubToken.
- * Navigation: Content (file browser + editor) | CSV Importer
- */
 import { Auth0Provider, useAuth0 } from "@auth0/auth0-react";
 import CssBaseline from "@mui/material/CssBaseline";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import AppBar from "@mui/material/AppBar";
+import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
-import Drawer from "@mui/material/Drawer";
+import Divider from "@mui/material/Divider";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import ArticleIcon from "@mui/icons-material/Article";
 import TableChartIcon from "@mui/icons-material/TableChart";
+import LogoutIcon from "@mui/icons-material/Logout";
 import { useState } from "react";
 
 import { useGitHubToken } from "./useGitHubToken";
@@ -27,18 +21,39 @@ import { ContentList } from "./pages/ContentList";
 import { ContentFileEditor } from "./editor/ContentFileEditor";
 import { CsvImporter } from "./csv/CsvImporter";
 
-const DRAWER_WIDTH = 220;
+const DRAWER_WIDTH = 260;
 
-type Section = "Content" | "CSV Importer";
+type Section = "Pages" | "CSV Import";
 
-const navItems: { label: Section; icon: React.ReactNode }[] = [
-  { label: "Content", icon: <ArticleIcon /> },
-  { label: "CSV Importer", icon: <TableChartIcon /> },
+const navItems: {
+  label: Section;
+  icon: React.ReactNode;
+  description: string;
+}[] = [
+  {
+    label: "Pages",
+    icon: <ArticleIcon />,
+    description: "Edit your website pages",
+  },
+  {
+    label: "CSV Import",
+    icon: <TableChartIcon />,
+    description: "Bulk import from a spreadsheet",
+  },
 ];
 
 const cmsTheme = createTheme({
-  palette: { primary: { main: "#1565c0" } },
+  palette: {
+    primary: { main: "#2563eb" },
+    background: { default: "#f1f5f9" },
+  },
+  shape: { borderRadius: 10 },
   typography: { fontFamily: "Roboto, sans-serif" },
+  components: {
+    MuiButton: {
+      styleOverrides: { root: { textTransform: "none", fontWeight: 600 } },
+    },
+  },
 });
 
 // ─── Dashboard ──────────────────────────────────────────────────────────────
@@ -47,7 +62,7 @@ function AdminDashboard() {
   const { user, logout } = useAuth0();
   const token = useGitHubToken();
 
-  const [activeSection, setActiveSection] = useState<Section>("Content");
+  const [activeSection, setActiveSection] = useState<Section>("Pages");
   const [editingFile, setEditingFile] = useState<{
     path: string;
     content: string;
@@ -62,7 +77,7 @@ function AdminDashboard() {
   }
 
   function renderMain() {
-    if (activeSection === "Content") {
+    if (activeSection === "Pages") {
       if (editingFile) {
         return (
           <ContentFileEditor
@@ -78,21 +93,142 @@ function AdminDashboard() {
     return <CsvImporter token={token} />;
   }
 
+  const initials = user?.name
+    ? user.name
+        .split(" ")
+        .map((n: string) => n[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase()
+    : (user?.email?.[0] ?? "?").toUpperCase();
+
   return (
     <Box sx={{ display: "flex", height: "100vh" }}>
-      {/* App bar */}
-      <AppBar position="fixed" sx={{ zIndex: (t) => t.zIndex.drawer + 1 }}>
-        <Toolbar>
-          <Typography variant="h6" sx={{ flex: 1, fontWeight: 700 }}>
-            CMS Admin
+      {/* ── Dark sidebar ── */}
+      <Box
+        sx={{
+          width: DRAWER_WIDTH,
+          flexShrink: 0,
+          bgcolor: "#0f172a",
+          color: "#f1f5f9",
+          display: "flex",
+          flexDirection: "column",
+          height: "100vh",
+          position: "fixed",
+          left: 0,
+          top: 0,
+          zIndex: 100,
+        }}
+      >
+        {/* Brand */}
+        <Box
+          sx={{
+            px: 3,
+            py: 3,
+            borderBottom: "1px solid rgba(255,255,255,0.08)",
+          }}
+        >
+          <Typography
+            variant="subtitle1"
+            sx={{ fontWeight: 700, color: "#fff", lineHeight: 1.2 }}
+          >
+            Website Admin
           </Typography>
-          {user && (
-            <Typography variant="body2" sx={{ mr: 2, opacity: 0.85 }}>
-              {user.email}
+          <Typography variant="caption" sx={{ color: "#94a3b8" }}>
+            Content Manager
+          </Typography>
+        </Box>
+
+        {/* Nav */}
+        <List sx={{ px: 1.5, pt: 1.5, flex: 1 }}>
+          {navItems.map(({ label, icon, description }) => {
+            const selected = activeSection === label;
+            return (
+              <ListItemButton
+                key={label}
+                selected={selected}
+                onClick={() => {
+                  setActiveSection(label);
+                  setEditingFile(null);
+                }}
+                sx={{
+                  borderRadius: 2,
+                  mb: 0.5,
+                  py: 1.2,
+                  "&.Mui-selected": {
+                    bgcolor: "rgba(37,99,235,0.85)",
+                    "&:hover": { bgcolor: "rgba(37,99,235,0.95)" },
+                  },
+                  "&:hover": { bgcolor: "rgba(255,255,255,0.07)" },
+                  color: selected ? "#fff" : "#cbd5e1",
+                }}
+              >
+                <ListItemIcon
+                  sx={{
+                    minWidth: 38,
+                    color: "inherit",
+                    opacity: selected ? 1 : 0.7,
+                  }}
+                >
+                  {icon}
+                </ListItemIcon>
+                <ListItemText
+                  primary={label}
+                  secondary={description}
+                  primaryTypographyProps={{
+                    fontWeight: 600,
+                    fontSize: 14,
+                    color: "inherit",
+                  }}
+                  secondaryTypographyProps={{
+                    fontSize: 11,
+                    color: selected ? "rgba(255,255,255,0.7)" : "#64748b",
+                  }}
+                />
+              </ListItemButton>
+            );
+          })}
+        </List>
+
+        <Divider sx={{ borderColor: "rgba(255,255,255,0.08)" }} />
+
+        {/* User footer */}
+        <Box
+          sx={{ px: 2, py: 2, display: "flex", alignItems: "center", gap: 1.5 }}
+        >
+          <Avatar
+            sx={{
+              width: 34,
+              height: 34,
+              bgcolor: "#2563eb",
+              fontSize: 13,
+              fontWeight: 700,
+            }}
+          >
+            {initials}
+          </Avatar>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography
+              variant="caption"
+              sx={{
+                display: "block",
+                color: "#e2e8f0",
+                fontWeight: 600,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {user?.name ?? user?.email ?? "User"}
             </Typography>
-          )}
+            <Typography
+              variant="caption"
+              sx={{ color: "#64748b", fontSize: 10 }}
+            >
+              Logged in
+            </Typography>
+          </Box>
           <Button
-            color="inherit"
             size="small"
             onClick={() =>
               logout({
@@ -103,57 +239,33 @@ function AdminDashboard() {
                 },
               })
             }
+            sx={{
+              minWidth: 0,
+              p: 0.75,
+              color: "#64748b",
+              "&:hover": { color: "#f1f5f9" },
+            }}
+            title="Log out"
           >
-            Log out
+            <LogoutIcon fontSize="small" />
           </Button>
-        </Toolbar>
-      </AppBar>
-
-      {/* Sidebar */}
-      <Drawer
-        variant="permanent"
-        sx={{
-          width: DRAWER_WIDTH,
-          flexShrink: 0,
-          "& .MuiDrawer-paper": {
-            width: DRAWER_WIDTH,
-            boxSizing: "border-box",
-          },
-        }}
-      >
-        <Toolbar />
-        <Box sx={{ overflow: "auto", mt: 1 }}>
-          <List dense>
-            {navItems.map(({ label, icon }) => (
-              <ListItemButton
-                key={label}
-                selected={activeSection === label}
-                onClick={() => {
-                  setActiveSection(label);
-                  setEditingFile(null);
-                }}
-                sx={{ borderRadius: 1, mx: 1, mb: 0.5 }}
-              >
-                <ListItemIcon sx={{ minWidth: 36 }}>{icon}</ListItemIcon>
-                <ListItemText primary={label} />
-              </ListItemButton>
-            ))}
-          </List>
         </Box>
-      </Drawer>
+      </Box>
 
-      {/* Main content */}
+      {/* ── Main content ── */}
       <Box
         component="main"
         sx={{
+          ml: `${DRAWER_WIDTH}px`,
           flex: 1,
           display: "flex",
           flexDirection: "column",
-          overflow: "hidden",
+          minHeight: "100vh",
+          bgcolor: "#f1f5f9",
+          overflow: "auto",
         }}
       >
-        <Toolbar />
-        <Box sx={{ flex: 1, overflow: "auto" }}>{renderMain()}</Box>
+        {renderMain()}
       </Box>
     </Box>
   );
