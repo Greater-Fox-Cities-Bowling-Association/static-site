@@ -36,8 +36,11 @@ const BRANCH = import.meta.env.PUBLIC_GITHUB_BRANCH as string;
 
 interface Props {
   token: string | null;
-  /** Called after any schema save or delete so the parent can refresh its schema list. */
-  onSaved?: () => void;
+  /**
+   * Called after a schema is saved (with the saved schema's id) or deleted (no id).
+   * The parent can use this to refresh its nav and navigate to the new schema.
+   */
+  onSaved?: (savedId?: string) => void;
 }
 
 export function SchemaList({ token, onSaved }: Props) {
@@ -119,7 +122,7 @@ export function SchemaList({ token, onSaved }: Props) {
         onSaved={(saved) => {
           setEditing(null);
           loadSchemas();
-          onSaved?.();
+          onSaved?.(saved.id);
         }}
       />
     );

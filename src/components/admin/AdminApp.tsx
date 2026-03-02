@@ -123,10 +123,14 @@ function AdminDashboard() {
       return (
         <SchemaList
           token={token}
-          onSaved={() => {
+          onSaved={(savedId) => {
             if (!token) return;
             listSchemas(token, REPO, BRANCH)
-              .then(setSchemas)
+              .then((list) => {
+                setSchemas(list);
+                // Auto-navigate to the schema that was just saved
+                if (savedId) navigate(`schema:${savedId}`);
+              })
               .catch(() => {});
           }}
         />
