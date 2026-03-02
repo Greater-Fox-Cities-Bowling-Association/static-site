@@ -1,0 +1,13 @@
+{
+  "id": "association-tournaments",
+  "name": "Association Tournaments",
+  "directory": "src/content/association-tournaments",
+  "fields": [
+    {
+      "name": "tournaments_ield1list",
+      "label": "tournaments",
+      "type": "array",
+      "required": false
+    }
+  ]
+}
