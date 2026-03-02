@@ -18,13 +18,13 @@
     {
       "name": "rules_link",
       "label": "Form Rules",
-      "type": "text",
+      "type": "slug",
       "required": false
     },
     {
       "name": "results_link",
       "label": "Results",
-      "type": "text",
+      "type": "slug",
       "required": false
     }
   ]
