@@ -1,0 +1,13 @@
+{
+  "id": "home",
+  "name": "home",
+  "directory": "src/content/home",
+  "fields": [
+    {
+      "name": "hero_text",
+      "label": "Hero Text",
+      "type": "text",
+      "required": false
+    }
+  ]
+}
