@@ -258,12 +258,10 @@ function PageCard({
             <Typography
               variant="subtitle1"
               fontWeight={700}
-              noWrap
-              title={page.title}
             >
               {page.title || <em style={{ opacity: 0.5 }}>Untitled</em>}
             </Typography>
-            <Typography variant="caption" color="text.secondary" noWrap>
+            <Typography variant="caption" color="text.secondary">
               /{page.slug}
             </Typography>
           </Box>
@@ -446,7 +444,7 @@ export function ContentList({ token, onEditFile }: Props) {
   }
 
   return (
-    <Box sx={{ p: { xs: 2, sm: 4 }, maxWidth: 1100, mx: "auto" }}>
+    <Box sx={{ p: { xs: 2, sm: 4 }, maxWidth: 1100, mx: "auto", width: "100%", boxSizing: "border-box" }}>
       {/* Header */}
       <Box
         sx={{
