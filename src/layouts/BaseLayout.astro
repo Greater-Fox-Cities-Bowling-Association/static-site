@@ -22,8 +22,37 @@ const siteName = "Greater Fox Cities Bowling Association";
 
 const navLinks = [
   { label: "News", href: "/news/" },
-  { label: "Tournaments", href: "/tournaments/" },
-  { label: "Honors", href: "/honors/" },
+  {
+    label: "Tournaments",
+    href: "/tournaments/",
+    children: [
+      { label: "Association Tournaments", href: "/tournaments/" },
+      { label: "Tournament History", href: "/tournament-history/" },
+    ],
+  },
+  {
+    label: "Honors",
+    href: "/honors/",
+    children: [
+      { label: "Hall of Fame", href: "/honors/hall-of-fame/" },
+      { label: "Bowler of the Year", href: "/honors/bowler-of-the-year/" },
+      {
+        label: "All Association Teams",
+        href: "/honors/all-association-teams/",
+      },
+      { label: "High Average", href: "/honors/high-average/" },
+      { label: "High Series", href: "/honors/high-series/" },
+      {
+        label: "Assoc Tourn Champions",
+        href: "/honors/assoc-tourn-champions/",
+      },
+      { label: "Match Play Champions", href: "/honors/match-play-champions/" },
+      { label: "Team Records", href: "/honors/team-records/" },
+      { label: "Career Honor Scores", href: "/honors/career-honor-scores/" },
+      { label: "Career Total Pins", href: "/honors/career-total-pins/" },
+      { label: "Career Total Games", href: "/honors/career-total-games/" },
+    ],
+  },
   { label: "Awards", href: "/awards/" },
   { label: "Scholarships", href: "/scholarships/" },
   { label: "Centers", href: "/centers/" },
@@ -184,6 +213,73 @@ const currentPath = Astro.url.pathname;
         background: var(--navy-light);
       }
 
+      /* ── Dropdown ── */
+      .site-nav li {
+        position: relative;
+      }
+
+      .site-nav li a.has-dropdown {
+        padding-right: 1.5rem;
+      }
+
+      .site-nav li a.has-dropdown::after {
+        content: "";
+        display: inline-block;
+        margin-left: 0.35rem;
+        vertical-align: middle;
+        border: 4px solid transparent;
+        border-top-color: currentColor;
+        position: relative;
+        top: -1px;
+      }
+
+      .site-nav__dropdown {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        min-width: 200px;
+        background: var(--navy-mid);
+        border: 1px solid var(--navy-light);
+        border-top: 3px solid var(--lane-tan);
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        z-index: 100;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+      }
+
+      .site-nav li:hover > .site-nav__dropdown,
+      .site-nav li:focus-within > .site-nav__dropdown {
+        display: block;
+      }
+
+      .site-nav__dropdown li a {
+        display: block;
+        padding: 0.55rem 1rem;
+        font-size: 0.8rem;
+        white-space: nowrap;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        border-left: 3px solid transparent;
+        margin-bottom: 0;
+      }
+
+      .site-nav__dropdown li:last-child a {
+        border-bottom: none;
+      }
+
+      .site-nav__dropdown li a:hover {
+        background: var(--navy-light);
+        border-left-color: var(--lane-tan);
+        border-bottom-color: rgba(255, 255, 255, 0.07);
+      }
+
+      .site-nav__dropdown li a[aria-current="page"] {
+        border-left-color: var(--red);
+        background: var(--navy-light);
+        color: #fff;
+      }
+
       /* ── Main content ── */
       .site-main {
         flex: 1;
@@ -255,10 +351,11 @@ const currentPath = Astro.url.pathname;
       <div class="site-nav-bar__inner">
         <ul class="site-nav">
           {
-            navLinks.map(({ label, href }) => (
+            navLinks.map(({ label, href, children }) => (
               <li>
                 <a
                   href={href}
+                  class={children ? "has-dropdown" : undefined}
                   aria-current={
                     currentPath === href ||
                     currentPath.startsWith(href.replace(/\/$/, ""))
@@ -268,6 +365,27 @@ const currentPath = Astro.url.pathname;
                 >
                   {label}
                 </a>
+                {children && (
+                  <ul class="site-nav__dropdown">
+                    {children.map((child: { label: string; href: string }) => (
+                      <li>
+                        <a
+                          href={child.href}
+                          aria-current={
+                            currentPath === child.href ||
+                            currentPath.startsWith(
+                              child.href.replace(/\/$/, ""),
+                            )
+                              ? "page"
+                              : undefined
+                          }
+                        >
+                          {child.label}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </li>
             ))
           }
