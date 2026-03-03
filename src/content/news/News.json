@@ -1,0 +1,34 @@
+{
+  "slug": "News",
+  "heading": "News",
+  "sub_heading_1": "New Wisconsin State Hall of Famers!",
+  "body_1": "Congrats to our association’s own Pam Haertl (GFCUSBC Hall-of-Fame Class of 1992), Rob Schuh (GFCUSBC Hall-of-Fame Class of 2015), and Melissa Lang for their well-deserved induction into the Wisconsin State Bowling Hall of Fame! Read more about their accomplishments",
+  "sub_heading_2": "2025-2026 Association Tournament Schedule",
+  "body_2_list": [
+    {
+      "heading": "Youth Association Tournament",
+      "dates": "November 1-2 / 8-9 / 15-16, 2025",
+      "location": "Electric City Lanes, Kaukauna"
+    },
+    {
+      "heading": "Match Play (Masters)",
+      "dates": "January 3, 2026",
+      "location": "TBD"
+    },
+    {
+      "heading": "Match Play (Seniors)",
+      "dates": "January 4, 2026",
+      "location": "TBD"
+    },
+    {
+      "heading": "Open Association Tournament",
+      "dates": "January 10-11 / 17-18, 2026",
+      "location": "Rolling Thunder Lanes, Neenah"
+    },
+    {
+      "heading": "Women’s Association Tournament",
+      "dates": "January 10-11 / 17-18, 2026",
+      "location": "Rolling Thunder Lanes, Neenah"
+    }
+  ]
+}
