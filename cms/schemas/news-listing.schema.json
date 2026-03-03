@@ -1,0 +1,25 @@
+{
+  "id": "news-listing",
+  "name": "News Listing",
+  "directory": "src/content/news-listing",
+  "fields": [
+    {
+      "name": "heading",
+      "label": "Heading",
+      "type": "text",
+      "required": false
+    },
+    {
+      "name": "dates",
+      "label": "Dates",
+      "type": "text",
+      "required": false
+    },
+    {
+      "name": "location",
+      "label": "Location",
+      "type": "text",
+      "required": false
+    }
+  ]
+}
