@@ -87,119 +87,199 @@ const currentPath = Astro.url.pathname;
         box-sizing: border-box;
       }
 
+      :root {
+        --navy: #0d1b3e;
+        --navy-mid: #1a2f5e;
+        --navy-light: #243a72;
+        --red: #c8102e;
+        --red-dark: #a00d24;
+        --cream: #f7f3ec;
+        --lane-tan: #d4a84b;
+        --text: #1a1a1a;
+        --text-muted: #555;
+        --border: #ddd;
+        --max-w: 960px;
+      }
+
       body {
         margin: 0;
         font-family: "Roboto", sans-serif;
         font-size: 16px;
-        color: #222;
+        color: var(--text);
         background: #fff;
       }
 
-      /* ── Site header ── */
-      .site-header {
-        background: #1a2744;
-        color: #fff;
+      /* ── Logo bar ── */
+      .site-logo-bar {
+        background: var(--navy);
+        border-bottom: 4px solid var(--red);
         padding: 0.75rem 1rem;
       }
 
-      .site-header__inner {
-        max-width: 900px;
+      .site-logo-bar__inner {
+        max-width: var(--max-w);
         margin: 0 auto;
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
       }
 
-      .site-header__name {
-        font-size: 1.25rem;
-        font-weight: 700;
-        text-decoration: none;
-        color: #fff;
+      .site-logo-bar__link {
+        display: inline-block;
+        line-height: 0;
+      }
+
+      .site-logo-bar__img {
+        height: 60px;
+        width: auto;
+        display: block;
+      }
+
+      /* ── Nav bar ── */
+      .site-nav-bar {
+        background: var(--navy-mid);
+        border-bottom: 3px solid var(--lane-tan);
+      }
+
+      .site-nav-bar__inner {
+        max-width: var(--max-w);
+        margin: 0 auto;
+        padding: 0 1rem;
       }
 
       .site-nav {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.25rem 0;
         list-style: none;
         margin: 0;
         padding: 0;
+        gap: 0;
       }
 
       .site-nav li a {
-        color: #ccd6f6;
+        display: block;
+        color: #c8d6f5;
         text-decoration: none;
-        font-size: 0.9rem;
-        padding: 0.2rem 0.6rem;
-        border-radius: 3px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        letter-spacing: 0.02em;
+        padding: 0.65rem 0.9rem;
+        border-bottom: 3px solid transparent;
+        margin-bottom: -3px;
         transition:
-          background 0.15s,
-          color 0.15s;
+          color 0.15s,
+          border-color 0.15s,
+          background 0.15s;
       }
 
-      .site-nav li a:hover,
-      .site-nav li a[aria-current="page"] {
-        background: #2e4080;
+      .site-nav li a:hover {
         color: #fff;
+        background: var(--navy-light);
+        border-bottom-color: var(--lane-tan);
+      }
+
+      .site-nav li a[aria-current="page"] {
+        color: #fff;
+        border-bottom-color: var(--red);
+        background: var(--navy-light);
       }
 
       /* ── Main content ── */
       .site-main {
-        max-width: 900px;
-        margin: 2rem auto;
+        max-width: var(--max-w);
+        margin: 2.25rem auto;
         padding: 0 1rem;
+      }
+
+      .site-main h1 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--navy);
+        border-left: 5px solid var(--red);
+        padding-left: 0.75rem;
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+      }
+
+      .site-main h2 {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--navy);
+        margin-top: 1.5rem;
+        margin-bottom: 0.4rem;
+      }
+
+      .site-main p {
+        line-height: 1.75;
+        color: var(--text);
       }
 
       /* ── Footer ── */
       .site-footer {
-        border-top: 1px solid #e0e0e0;
+        background: var(--navy);
+        border-top: 4px solid var(--red);
         text-align: center;
         padding: 1.25rem 1rem;
         font-size: 0.85rem;
-        color: #666;
-        margin-top: 3rem;
+        color: #8fa0c8;
+        margin-top: 4rem;
       }
 
       .site-footer a {
-        color: #1a2744;
+        color: #c8d6f5;
         text-decoration: none;
+      }
+
+      .site-footer a:hover {
+        color: #fff;
       }
     </style>
   </head>
   <body>
-    <header class="site-header">
-      <div class="site-header__inner">
-        <a href="/" class="site-header__name">{siteName}</a>
-        <nav aria-label="Primary navigation">
-          <ul class="site-nav">
-            {
-              navLinks.map(({ label, href }) => (
-                <li>
-                  <a
-                    href={href}
-                    aria-current={
-                      currentPath === href ||
-                      currentPath.startsWith(href.replace(/\/$/, ""))
-                        ? "page"
-                        : undefined
-                    }
-                  >
-                    {label}
-                  </a>
-                </li>
-              ))
-            }
-          </ul>
-        </nav>
+    <div class="site-logo-bar">
+      <div class="site-logo-bar__inner">
+        <a href="/" class="site-logo-bar__link" aria-label={siteName}>
+          <img
+            src="/Logo-768x230.png"
+            alt={siteName}
+            class="site-logo-bar__img"
+            width="200"
+            height="60"
+          />
+        </a>
       </div>
-    </header>
+    </div>
+
+    <nav class="site-nav-bar" aria-label="Primary navigation">
+      <div class="site-nav-bar__inner">
+        <ul class="site-nav">
+          {
+            navLinks.map(({ label, href }) => (
+              <li>
+                <a
+                  href={href}
+                  aria-current={
+                    currentPath === href ||
+                    currentPath.startsWith(href.replace(/\/$/, ""))
+                      ? "page"
+                      : undefined
+                  }
+                >
+                  {label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </nav>
 
     <main class="site-main">
       <slot />
     </main>
 
     <footer class="site-footer">
-      <a href="/">{siteName}</a>
+      <p>
+        &copy; {new Date().getFullYear()}
+        <a href="/">{siteName}</a>. All rights reserved.
+      </p>
     </footer>
   </body>
 </html>

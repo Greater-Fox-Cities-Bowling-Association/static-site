@@ -95,21 +95,27 @@ const pageTitle = news.heading ?? "News";
   .tournament-item {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 0.1rem;
-    padding: 0.75rem 1rem;
-    border-left: 4px solid #1a2744;
-    background: #f5f7fc;
+    gap: 0.15rem;
+    padding: 0.8rem 1rem;
+    border-left: 5px solid #c8102e;
+    background: #f7f3ec;
     border-radius: 0 4px 4px 0;
   }
 
   .tournament-name {
     font-size: 1rem;
-    color: #1a2744;
+    font-weight: 700;
+    color: #0d1b3e;
   }
 
-  .tournament-dates,
+  .tournament-dates {
+    font-size: 0.875rem;
+    color: #333;
+  }
+
   .tournament-location {
-    font-size: 0.9rem;
-    color: #444;
+    font-size: 0.875rem;
+    color: #555;
+    font-style: italic;
   }
 </style>
