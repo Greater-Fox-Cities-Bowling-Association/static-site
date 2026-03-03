@@ -89,6 +89,7 @@ function ArrayField({ field, value, onChange, error, allSchemas }: FieldProps) {
   const items: unknown[] = Array.isArray(value) ? (value as unknown[]) : [];
 
   function defaultValue(): unknown {
+    if (referencedSchema) return {};
     switch (itemType) {
       case "number":
         return 0;
@@ -113,6 +114,64 @@ function ArrayField({ field, value, onChange, error, allSchemas }: FieldProps) {
     onChange(items.filter((_, i) => i !== index));
   }
 
+  // ── Object items (schema-typed) ───────────────────────────────────────────
+  if (referencedSchema) {
+    const objectItems: Record<string, unknown>[] = items.map((item) =>
+      typeof item === "object" && item !== null && !Array.isArray(item)
+        ? (item as Record<string, unknown>)
+        : {},
+    );
+    return (
+      <Box>
+        {objectItems.map((obj, idx) => (
+          <Paper
+            key={idx}
+            variant="outlined"
+            sx={{ p: 2, mb: 2, borderRadius: 2 }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", mb: 1.5 }}>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ flex: 1, fontWeight: 600 }}
+              >
+                {referencedSchema.name} #{idx + 1}
+              </Typography>
+              <IconButton
+                size="small"
+                color="error"
+                onClick={() => remove(idx)}
+                title="Remove"
+              >
+                <DeleteOutlineIcon fontSize="small" />
+              </IconButton>
+            </Box>
+            <DynamicForm
+              fields={referencedSchema.fields}
+              value={obj}
+              onChange={(updated) => update(idx, updated)}
+              allSchemas={allSchemas}
+            />
+          </Paper>
+        ))}
+        {error && (
+          <FormHelperText error sx={{ mb: 1 }}>
+            {error}
+          </FormHelperText>
+        )}
+        <Button
+          size="small"
+          startIcon={<AddIcon />}
+          onClick={add}
+          variant="outlined"
+        >
+          Add {referencedSchema.name}
+        </Button>
+      </Box>
+    );
+  }
+
+  // ── Primitive items ───────────────────────────────────────────────────────
   function renderItemInput(item: unknown, idx: number) {
     switch (itemType) {
       case "boolean":
