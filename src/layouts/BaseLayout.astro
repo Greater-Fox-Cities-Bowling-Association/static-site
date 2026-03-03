@@ -80,7 +80,7 @@ const currentPath = Astro.url.pathname;
       )
     }
 
-    <style>
+    <style is:global>
       *,
       *::before,
       *::after {
@@ -107,6 +107,9 @@ const currentPath = Astro.url.pathname;
         font-size: 16px;
         color: var(--text);
         background: #fff;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
       }
 
       /* ── Logo bar ── */
@@ -183,7 +186,9 @@ const currentPath = Astro.url.pathname;
 
       /* ── Main content ── */
       .site-main {
+        flex: 1;
         max-width: var(--max-w);
+        width: 100%;
         margin: 2.25rem auto;
         padding: 0 1rem;
       }
@@ -219,7 +224,6 @@ const currentPath = Astro.url.pathname;
         padding: 1.25rem 1rem;
         font-size: 0.85rem;
         color: #8fa0c8;
-        margin-top: 4rem;
       }
 
       .site-footer a {
