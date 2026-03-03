@@ -31,7 +31,8 @@
       "name": "body_2_list",
       "label": "Body 2 List",
       "type": "array",
-      "required": false
+      "required": false,
+      "ofSchema": "news-listing"
     }
   ]
 }
