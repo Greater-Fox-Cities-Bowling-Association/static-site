@@ -1,0 +1,115 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import newsRaw from "../content/news/News.json";
+
+interface TournamentEntry {
+  heading?: string;
+  dates?: string;
+  location?: string;
+}
+
+const news = newsRaw as {
+  slug?: string;
+  heading?: string;
+  sub_heading_1?: string;
+  body_1?: string;
+  sub_heading_2?: string;
+  body_2_list?: TournamentEntry[];
+};
+
+const pageTitle = news.heading ?? "News";
+---
+
+<BaseLayout
+  title={pageTitle}
+  description="Association news, tournament schedule, and updates from the Greater Fox Cities Bowling Association."
+>
+  <h1>{pageTitle}</h1>
+
+  {
+    (news.sub_heading_1 || news.body_1) && (
+      <section class="news-section">
+        {news.sub_heading_1 && <h2>{news.sub_heading_1}</h2>}
+        {news.body_1 && <p>{news.body_1}</p>}
+      </section>
+    )
+  }
+
+  {
+    (news.sub_heading_2 ||
+      (news.body_2_list && news.body_2_list.length > 0)) && (
+      <section class="news-section">
+        {news.sub_heading_2 && <h2>{news.sub_heading_2}</h2>}
+        {news.body_2_list && news.body_2_list.length > 0 && (
+          <ul class="tournament-list">
+            {news.body_2_list.map((item) => (
+              <li class="tournament-item">
+                {item.heading && (
+                  <strong class="tournament-name">{item.heading}</strong>
+                )}
+                {item.dates && (
+                  <span class="tournament-dates">{item.dates}</span>
+                )}
+                {item.location && (
+                  <span class="tournament-location">{item.location}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    )
+  }
+</BaseLayout>
+
+<style>
+  h1 {
+    font-size: 1.9rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .news-section {
+    margin-bottom: 2rem;
+  }
+
+  .news-section h2 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .news-section p {
+    line-height: 1.7;
+    margin: 0;
+  }
+
+  .tournament-list {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .tournament-item {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.1rem;
+    padding: 0.75rem 1rem;
+    border-left: 4px solid #1a2744;
+    background: #f5f7fc;
+    border-radius: 0 4px 4px 0;
+  }
+
+  .tournament-name {
+    font-size: 1rem;
+    color: #1a2744;
+  }
+
+  .tournament-dates,
+  .tournament-location {
+    font-size: 0.9rem;
+    color: #444;
+  }
+</style>

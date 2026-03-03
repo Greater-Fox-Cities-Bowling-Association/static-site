@@ -19,6 +19,19 @@ const {
 } = Astro.props;
 
 const siteName = "Greater Fox Cities Bowling Association";
+
+const navLinks = [
+  { label: "News", href: "/news/" },
+  { label: "Tournaments", href: "/tournaments/" },
+  { label: "Honors", href: "/honors/" },
+  { label: "Awards", href: "/awards/" },
+  { label: "Scholarships", href: "/scholarships/" },
+  { label: "Centers", href: "/centers/" },
+  { label: "Committees", href: "/committees/" },
+  { label: "Contact Us", href: "/contacts/" },
+];
+
+const currentPath = Astro.url.pathname;
 ---
 
 <!doctype html>
@@ -28,7 +41,7 @@ const siteName = "Greater Fox Cities Bowling Association";
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- Primary -->
-    <title>{title}</title>
+    <title>{title} | {siteName}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalUrl} />
 
@@ -66,8 +79,127 @@ const siteName = "Greater Fox Cities Bowling Association";
         <script type="application/ld+json" set:html={JSON.stringify(schema)} />
       )
     }
+
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Roboto", sans-serif;
+        font-size: 16px;
+        color: #222;
+        background: #fff;
+      }
+
+      /* ── Site header ── */
+      .site-header {
+        background: #1a2744;
+        color: #fff;
+        padding: 0.75rem 1rem;
+      }
+
+      .site-header__inner {
+        max-width: 900px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .site-header__name {
+        font-size: 1.25rem;
+        font-weight: 700;
+        text-decoration: none;
+        color: #fff;
+      }
+
+      .site-nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem 0;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      .site-nav li a {
+        color: #ccd6f6;
+        text-decoration: none;
+        font-size: 0.9rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 3px;
+        transition:
+          background 0.15s,
+          color 0.15s;
+      }
+
+      .site-nav li a:hover,
+      .site-nav li a[aria-current="page"] {
+        background: #2e4080;
+        color: #fff;
+      }
+
+      /* ── Main content ── */
+      .site-main {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+      }
+
+      /* ── Footer ── */
+      .site-footer {
+        border-top: 1px solid #e0e0e0;
+        text-align: center;
+        padding: 1.25rem 1rem;
+        font-size: 0.85rem;
+        color: #666;
+        margin-top: 3rem;
+      }
+
+      .site-footer a {
+        color: #1a2744;
+        text-decoration: none;
+      }
+    </style>
   </head>
   <body>
-    <slot />
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a href="/" class="site-header__name">{siteName}</a>
+        <nav aria-label="Primary navigation">
+          <ul class="site-nav">
+            {
+              navLinks.map(({ label, href }) => (
+                <li>
+                  <a
+                    href={href}
+                    aria-current={
+                      currentPath === href ||
+                      currentPath.startsWith(href.replace(/\/$/, ""))
+                        ? "page"
+                        : undefined
+                    }
+                  >
+                    {label}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main class="site-main">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <a href="/">{siteName}</a>
+    </footer>
   </body>
 </html>
