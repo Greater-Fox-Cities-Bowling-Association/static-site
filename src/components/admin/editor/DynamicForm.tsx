@@ -17,7 +17,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import type { CmsField, CmsEntry } from "../../../../cms/types";
+import type { CmsField, CmsEntry, CmsSchema } from "../../../../cms/types";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -39,6 +39,8 @@ interface FieldProps {
   error?: string;
   /** The current value of the title/first-text field, used for slug auto-derive */
   titleValue?: string;
+  /** All available schemas — needed to render schema-typed array items */
+  allSchemas?: CmsSchema[];
 }
 
 function SlugField({ field, value, onChange, error, titleValue }: FieldProps) {
@@ -79,23 +81,107 @@ function SlugField({ field, value, onChange, error, titleValue }: FieldProps) {
   );
 }
 
-function ArrayField({ field, value, onChange, error }: FieldProps) {
-  const items: string[] = Array.isArray(value)
-    ? (value as string[]).map(String)
-    : [];
+function ArrayField({ field, value, onChange, error, allSchemas }: FieldProps) {
+  const referencedSchema = field.ofSchema
+    ? (allSchemas ?? []).find((s) => s.id === field.ofSchema)
+    : undefined;
+  const itemType = field.of ?? "text";
+  const items: unknown[] = Array.isArray(value) ? (value as unknown[]) : [];
 
-  function update(index: number, val: string) {
+  function defaultValue(): unknown {
+    switch (itemType) {
+      case "number":
+        return 0;
+      case "boolean":
+        return false;
+      default:
+        return "";
+    }
+  }
+
+  function update(index: number, val: unknown) {
     const next = [...items];
     next[index] = val;
     onChange(next);
   }
 
   function add() {
-    onChange([...items, ""]);
+    onChange([...items, defaultValue()]);
   }
 
   function remove(index: number) {
     onChange(items.filter((_, i) => i !== index));
+  }
+
+  function renderItemInput(item: unknown, idx: number) {
+    switch (itemType) {
+      case "boolean":
+        return (
+          <FormControlLabel
+            control={
+              <Switch
+                checked={!!item}
+                onChange={(e) => update(idx, e.target.checked)}
+                size="small"
+              />
+            }
+            label={
+              <Typography variant="body2">{item ? "Yes" : "No"}</Typography>
+            }
+            sx={{ flex: 1 }}
+          />
+        );
+      case "number":
+        return (
+          <TextField
+            value={item ?? 0}
+            onChange={(e) =>
+              update(idx, e.target.value === "" ? 0 : Number(e.target.value))
+            }
+            type="number"
+            fullWidth
+            size="small"
+            variant="outlined"
+            placeholder={`Item ${idx + 1}`}
+          />
+        );
+      case "textarea":
+        return (
+          <TextField
+            value={typeof item === "string" ? item : ""}
+            onChange={(e) => update(idx, e.target.value)}
+            fullWidth
+            multiline
+            rows={3}
+            size="small"
+            variant="outlined"
+            placeholder={`Item ${idx + 1}`}
+          />
+        );
+      case "date":
+        return (
+          <TextField
+            value={typeof item === "string" ? item : ""}
+            onChange={(e) => update(idx, e.target.value)}
+            type="date"
+            fullWidth
+            size="small"
+            variant="outlined"
+            InputLabelProps={{ shrink: true }}
+          />
+        );
+      default: // text, slug
+        return (
+          <TextField
+            value={typeof item === "string" ? item : ""}
+            onChange={(e) => update(idx, e.target.value)}
+            fullWidth
+            size="small"
+            variant="outlined"
+            placeholder={`Item ${idx + 1}`}
+          />
+        );
+    }
   }
 
   return (
@@ -103,21 +189,23 @@ function ArrayField({ field, value, onChange, error }: FieldProps) {
       {items.map((item, idx) => (
         <Box
           key={idx}
-          sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}
+          sx={{
+            display: "flex",
+            alignItems:
+              itemType === "textarea" || itemType === "boolean"
+                ? "flex-start"
+                : "center",
+            gap: 1,
+            mb: 1,
+          }}
         >
-          <TextField
-            value={item}
-            onChange={(e) => update(idx, e.target.value)}
-            fullWidth
-            size="small"
-            variant="outlined"
-            placeholder={`Item ${idx + 1}`}
-          />
+          {renderItemInput(item, idx)}
           <IconButton
             size="small"
             color="error"
             onClick={() => remove(idx)}
             title="Remove"
+            sx={itemType === "textarea" ? { mt: 0.5 } : {}}
           >
             <DeleteOutlineIcon fontSize="small" />
           </IconButton>
@@ -140,7 +228,14 @@ function ArrayField({ field, value, onChange, error }: FieldProps) {
   );
 }
 
-function FieldInput({ field, value, onChange, error, titleValue }: FieldProps) {
+function FieldInput({
+  field,
+  value,
+  onChange,
+  error,
+  titleValue,
+  allSchemas,
+}: FieldProps) {
   switch (field.type) {
     case "boolean":
       return (
@@ -179,6 +274,7 @@ function FieldInput({ field, value, onChange, error, titleValue }: FieldProps) {
           value={value}
           onChange={onChange}
           error={error}
+          allSchemas={allSchemas}
         />
       );
 
@@ -261,6 +357,8 @@ export interface DynamicFormProps {
   value: CmsEntry;
   onChange: (updated: CmsEntry) => void;
   errors?: Record<string, string>;
+  /** All available schemas — passed down so array fields can render nested sub-forms */
+  allSchemas?: CmsSchema[];
 }
 
 export function DynamicForm({
@@ -268,6 +366,7 @@ export function DynamicForm({
   value,
   onChange,
   errors = {},
+  allSchemas,
 }: DynamicFormProps) {
   function handleFieldChange(name: string, fieldValue: unknown) {
     onChange({ ...value, [name]: fieldValue });
@@ -307,6 +406,7 @@ export function DynamicForm({
             onChange={(v) => handleFieldChange(field.name, v)}
             error={errors[field.name]}
             titleValue={field.type === "slug" ? titleValue : undefined}
+            allSchemas={allSchemas}
           />
         </Box>
       ))}

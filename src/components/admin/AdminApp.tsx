@@ -69,6 +69,7 @@ function AdminDashboard() {
     content: string;
     schema?: CmsSchema;
   } | null>(null);
+  const [editorKey, setEditorKey] = useState(0);
 
   useEffect(() => {
     if (!token) return;
@@ -100,6 +101,7 @@ function AdminDashboard() {
   function handleEditFile(path: string, content: string) {
     const schema = schemaForSection(activeSection) ?? undefined;
     setEditingFile({ path, content, schema });
+    setEditorKey((k) => k + 1);
   }
 
   function handleCloseEditor() {
@@ -110,10 +112,12 @@ function AdminDashboard() {
     if (editingFile) {
       return (
         <ContentFileEditor
+          key={editorKey}
           filePath={editingFile.path}
           initialContent={editingFile.content}
           token={token}
           schema={editingFile.schema}
+          allSchemas={schemas}
           onBack={handleCloseEditor}
         />
       );

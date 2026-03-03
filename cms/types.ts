@@ -104,6 +104,11 @@ export interface CmsField {
   helpText?: string;
   /** For type 'array': the primitive type of each item */
   of?: Exclude<CmsFieldType, 'array'>;
+  /**
+   * For type 'array': the ID of a CmsSchema whose fields define each object item.
+   * Takes precedence over `of` when both are set.
+   */
+  ofSchema?: string;
   /** For type 'textarea': maximum character limit (shows counter in UI) */
   maxLength?: number;
 }

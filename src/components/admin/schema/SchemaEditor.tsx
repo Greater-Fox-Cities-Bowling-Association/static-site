@@ -46,6 +46,28 @@ const FIELD_TYPES: { value: CmsFieldType; label: string }[] = [
   { value: "array", label: "List (array of items)" },
 ];
 
+type NonArrayFieldType = Exclude<CmsFieldType, "array">;
+
+const PRIMITIVE_ITEM_TYPES: { value: NonArrayFieldType; label: string }[] = [
+  { value: "text", label: "Text" },
+  { value: "textarea", label: "Text area" },
+  { value: "number", label: "Number" },
+  { value: "boolean", label: "Boolean" },
+  { value: "slug", label: "Slug" },
+  { value: "date", label: "Date" },
+];
+
+/** Encode a schema reference as a dropdown value */
+function schemaKey(id: string) {
+  return `schema:${id}`;
+}
+
+/** Derive the current dropdown value for a field's item type */
+function itemTypeValue(field: CmsField): string {
+  if (field.ofSchema) return schemaKey(field.ofSchema);
+  return field.of ?? "text";
+}
+
 function toId(s: string): string {
   return s
     .toLowerCase()
@@ -61,9 +83,17 @@ interface Props {
   token: string | null;
   onBack: () => void;
   onSaved: (schema: CmsSchema) => void;
+  /** All currently defined schemas — used to populate the "Item type" dropdown */
+  allSchemas?: CmsSchema[];
 }
 
-export function SchemaEditor({ initialSchema, token, onBack, onSaved }: Props) {
+export function SchemaEditor({
+  initialSchema,
+  token,
+  onBack,
+  onSaved,
+  allSchemas = [],
+}: Props) {
   const isNew = initialSchema === null;
 
   const [name, setName] = useState(initialSchema?.name ?? "");
@@ -322,6 +352,7 @@ export function SchemaEditor({ initialSchema, token, onBack, onSaved }: Props) {
                       <TableCell sx={{ fontWeight: 700 }}>Field name</TableCell>
                       <TableCell sx={{ fontWeight: 700 }}>Label</TableCell>
                       <TableCell sx={{ fontWeight: 700 }}>Type</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>Item type</TableCell>
                       <TableCell sx={{ fontWeight: 700, width: 80 }}>
                         Required
                       </TableCell>
@@ -388,6 +419,10 @@ export function SchemaEditor({ initialSchema, token, onBack, onSaved }: Props) {
                             onChange={(e) =>
                               updateField(idx, {
                                 type: e.target.value as CmsFieldType,
+                                // clear 'of' when switching away from array
+                                ...(e.target.value !== "array"
+                                  ? { of: undefined }
+                                  : {}),
                               })
                             }
                             size="small"
@@ -399,6 +434,56 @@ export function SchemaEditor({ initialSchema, token, onBack, onSaved }: Props) {
                               </MenuItem>
                             ))}
                           </TextField>
+                        </TableCell>
+                        {/* Item type — only active for array fields */}
+                        <TableCell>
+                          {field.type === "array" ? (
+                            <TextField
+                              select
+                              value={itemTypeValue(field)}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                if (val.startsWith("schema:")) {
+                                  updateField(idx, {
+                                    ofSchema: val.slice(7),
+                                    of: undefined,
+                                  });
+                                } else {
+                                  updateField(idx, {
+                                    of: val as NonArrayFieldType,
+                                    ofSchema: undefined,
+                                  });
+                                }
+                              }}
+                              size="small"
+                              fullWidth
+                            >
+                              {PRIMITIVE_ITEM_TYPES.map((t) => (
+                                <MenuItem key={t.value} value={t.value}>
+                                  {t.label}
+                                </MenuItem>
+                              ))}
+                              {allSchemas.length > 0 && [
+                                <Divider key="__divider" />,
+                                ...allSchemas.map((s) => (
+                                  <MenuItem
+                                    key={schemaKey(s.id)}
+                                    value={schemaKey(s.id)}
+                                  >
+                                    {s.name}
+                                  </MenuItem>
+                                )),
+                              ]}
+                            </TextField>
+                          ) : (
+                            <Typography
+                              variant="body2"
+                              color="text.disabled"
+                              sx={{ pl: 1 }}
+                            >
+                              —
+                            </Typography>
+                          )}
                         </TableCell>
                         {/* Required */}
                         <TableCell align="center">

@@ -118,6 +118,7 @@ export function SchemaList({ token, onSaved }: Props) {
       <SchemaEditor
         initialSchema={editing === "new" ? null : editing}
         token={token}
+        allSchemas={schemas}
         onBack={() => setEditing(null)}
         onSaved={(saved) => {
           setEditing(null);

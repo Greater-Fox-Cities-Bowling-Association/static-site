@@ -495,7 +495,9 @@ export function ContentList({ token, schema, onEditFile }: Props) {
     setDeleting(true);
     try {
       const GITHUB_API = "https://api.github.com";
-      const res = await fetch(
+
+      // Fetch the file metadata to get its SHA (required by GitHub DELETE API).
+      const metaRes = await fetch(
         `${GITHUB_API}/repos/${REPO}/contents/${deleteTarget._path}?ref=${BRANCH}`,
         {
           headers: {
@@ -504,21 +506,35 @@ export function ContentList({ token, schema, onEditFile }: Props) {
           },
         },
       );
-      const data = await res.json();
+      if (!metaRes.ok) {
+        const body = await metaRes.json().catch(() => ({}));
+        throw new Error(`Could not fetch file metadata (${metaRes.status}): ${(body as any).message ?? metaRes.statusText}`);
+      }
+      const meta = await metaRes.json();
+
       const entryLabel = String(deleteTarget["slug"] ?? deleteTarget["title"] ?? deleteTarget._path);
-      await fetch(`${GITHUB_API}/repos/${REPO}/contents/${deleteTarget._path}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: "application/vnd.github+json",
-          "Content-Type": "application/json",
+
+      const deleteRes = await fetch(
+        `${GITHUB_API}/repos/${REPO}/contents/${deleteTarget._path}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/vnd.github+json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            message: `content: delete ${schema.name.toLowerCase()} "${entryLabel}"`,
+            sha: meta.sha,
+            branch: BRANCH,
+          }),
         },
-        body: JSON.stringify({
-          message: `content: delete ${schema.name.toLowerCase()} "${entryLabel}"`,
-          sha: data.sha,
-          branch: BRANCH,
-        }),
-      });
+      );
+      if (!deleteRes.ok) {
+        const body = await deleteRes.json().catch(() => ({}));
+        throw new Error(`Delete failed (${deleteRes.status}): ${(body as any).message ?? deleteRes.statusText}`);
+      }
+
       setSnack(`"${entryLabel}" deleted.`);
       setDeleteTarget(null);
       await loadEntries();

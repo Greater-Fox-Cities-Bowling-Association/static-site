@@ -49,6 +49,8 @@ interface Props {
   onBack: () => void;
   /** When provided, the entry is rendered via DynamicForm */
   schema?: CmsSchema;
+  /** All available schemas — passed to DynamicForm for schema-typed array fields */
+  allSchemas?: CmsSchema[];
 }
 
 /** Try to parse raw string into a CmsEntry (must be a non-null JSON object) */
@@ -71,6 +73,7 @@ function SchemaForm({
   token,
   onBack,
   schema,
+  allSchemas,
 }: Props & { schema: CmsSchema }) {
   // Parse raw content once at mount.
   const parsed = parseEntry(initialContent) ?? {};
@@ -289,6 +292,7 @@ function SchemaForm({
               setFieldErrors({});
             }}
             errors={fieldErrors}
+            allSchemas={allSchemas}
           />
 
           <Divider sx={{ my: 4 }} />
