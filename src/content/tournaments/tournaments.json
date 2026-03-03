@@ -1,0 +1,49 @@
+{
+  "slug": "tournaments",
+  "_schemaId": "tournaments",
+  "heading": "Association Tournaments",
+  "intro": "The Greater Fox Cities Bowling Association hosts a number of tournaments throughout the season. See below for the current schedule, dates, and locations.",
+  "current_season": "2025-2026",
+  "tournaments": [
+    {
+      "name": "Youth Association Tournament",
+      "dates": "November 1-2 / 8-9 / 15-16, 2025",
+      "location": "Electric City Lanes, Kaukauna",
+      "description": "",
+      "entry_fee": "",
+      "status": "Upcoming"
+    },
+    {
+      "name": "Match Play (Masters)",
+      "dates": "January 3, 2026",
+      "location": "TBD",
+      "description": "",
+      "entry_fee": "",
+      "status": "Upcoming"
+    },
+    {
+      "name": "Match Play (Seniors)",
+      "dates": "January 4, 2026",
+      "location": "TBD",
+      "description": "",
+      "entry_fee": "",
+      "status": "Upcoming"
+    },
+    {
+      "name": "Open Association Tournament",
+      "dates": "January 10-11 / 17-18, 2026",
+      "location": "Rolling Thunder Lanes, Neenah",
+      "description": "",
+      "entry_fee": "",
+      "status": "Upcoming"
+    },
+    {
+      "name": "Women's Association Tournament",
+      "dates": "January 10-11 / 17-18, 2026",
+      "location": "Rolling Thunder Lanes, Neenah",
+      "description": "",
+      "entry_fee": "",
+      "status": "Upcoming"
+    }
+  ]
+}

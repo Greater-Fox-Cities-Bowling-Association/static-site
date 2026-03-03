@@ -1,0 +1,34 @@
+{
+  "id": "tournaments",
+  "name": "Association Tournaments",
+  "directory": "src/content/tournaments",
+  "fields": [
+    {
+      "name": "heading",
+      "label": "Page Heading",
+      "type": "text",
+      "required": false
+    },
+    {
+      "name": "intro",
+      "label": "Intro Text",
+      "type": "textarea",
+      "required": false,
+      "helpText": "Optional paragraph shown below the heading."
+    },
+    {
+      "name": "current_season",
+      "label": "Current Season",
+      "type": "text",
+      "required": false,
+      "helpText": "e.g. 2025-2026"
+    },
+    {
+      "name": "tournaments",
+      "label": "Tournaments",
+      "type": "array",
+      "required": false,
+      "ofSchema": "tournament-entry"
+    }
+  ]
+}

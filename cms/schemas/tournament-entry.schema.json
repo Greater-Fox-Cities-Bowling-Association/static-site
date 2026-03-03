@@ -1,0 +1,47 @@
+{
+  "id": "tournament-entry",
+  "name": "Tournament Entry",
+  "directory": "src/content/tournament-entry",
+  "fields": [
+    {
+      "name": "name",
+      "label": "Tournament Name",
+      "type": "text",
+      "required": true
+    },
+    {
+      "name": "dates",
+      "label": "Dates",
+      "type": "text",
+      "required": false,
+      "helpText": "e.g. January 10-11 / 17-18, 2026"
+    },
+    {
+      "name": "location",
+      "label": "Location",
+      "type": "text",
+      "required": false,
+      "helpText": "e.g. Rolling Thunder Lanes, Neenah"
+    },
+    {
+      "name": "description",
+      "label": "Description",
+      "type": "textarea",
+      "required": false,
+      "helpText": "Optional additional details about this tournament."
+    },
+    {
+      "name": "entry_fee",
+      "label": "Entry Fee",
+      "type": "text",
+      "required": false
+    },
+    {
+      "name": "status",
+      "label": "Status",
+      "type": "text",
+      "required": false,
+      "helpText": "e.g. Registration Open, Upcoming, Completed"
+    }
+  ]
+}
