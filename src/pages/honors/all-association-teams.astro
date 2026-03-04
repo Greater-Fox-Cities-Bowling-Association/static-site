@@ -60,7 +60,10 @@ const pageTitle = data.heading ?? "All Association Teams";
         <section class="season-section">
           <h2>{season.year} All Association Teams</h2>
 
-          {(season.boty_men || season.boty_women || season.boty_boys || season.boty_girls) && (
+          {(season.boty_men ||
+            season.boty_women ||
+            season.boty_boys ||
+            season.boty_girls) && (
             <div class="boty-row">
               {season.boty_men && (
                 <span>
