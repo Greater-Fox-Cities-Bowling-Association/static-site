@@ -1,0 +1,139 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import raw from "../../content/honors/bowler-of-the-year.json";
+
+interface BotyEntry {
+  year: number;
+  men: string;
+  women?: string;
+  boys?: string;
+  girls?: string;
+}
+
+const data = raw as { heading: string; intro?: string; entries: BotyEntry[] };
+const pageTitle = data.heading ?? "Bowler of the Year";
+
+// Split into multi-division years (2019+) and single-division years
+const multiDiv = data.entries.filter((e) => e.women);
+const singleDiv = data.entries.filter((e) => !e.women);
+---
+
+<BaseLayout
+  title={pageTitle}
+  description="Annual Bowler of the Year awards for the Greater Fox Cities Bowling Association."
+>
+  <div class="honors-page">
+    <h1>{pageTitle}</h1>
+    {data.intro && <p class="honors-intro">{data.intro}</p>}
+
+    {
+      multiDiv.length > 0 && (
+        <div class="table-section">
+          <h2>2019 – Present (All Divisions)</h2>
+          <table class="honors-table">
+            <thead>
+              <tr>
+                <th>Year</th>
+                <th>Men</th>
+                <th>Women</th>
+                <th>Boys</th>
+                <th>Girls</th>
+              </tr>
+            </thead>
+            <tbody>
+              {multiDiv.map((e) => (
+                <tr>
+                  <td class="year-cell">{e.year}</td>
+                  <td>{e.men}</td>
+                  <td>{e.women ?? "—"}</td>
+                  <td>{e.boys ?? "—"}</td>
+                  <td>{e.girls ?? "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )
+    }
+
+    {
+      singleDiv.length > 0 && (
+        <div class="table-section">
+          <h2>Prior to 2019 (Men's Division)</h2>
+          <table class="honors-table honors-table--narrow">
+            <thead>
+              <tr>
+                <th>Year</th>
+                <th>Men's Bowler of the Year</th>
+              </tr>
+            </thead>
+            <tbody>
+              {singleDiv.map((e) => (
+                <tr>
+                  <td class="year-cell">{e.year}</td>
+                  <td>{e.men}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .honors-page {
+    max-width: var(--max-w, 960px);
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+  h1 {
+    color: var(--navy);
+    border-bottom: 3px solid var(--red);
+    padding-bottom: 0.4rem;
+    margin-bottom: 1.5rem;
+  }
+  h2 {
+    color: var(--navy-mid, #1a2f5e);
+    font-size: 1.1rem;
+    margin: 2rem 0 0.75rem;
+  }
+  .honors-intro {
+    font-size: 1.05rem;
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+  }
+  .table-section {
+    margin-bottom: 2.5rem;
+  }
+  .honors-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+  }
+  .honors-table--narrow {
+    max-width: 380px;
+  }
+  .honors-table thead {
+    background: var(--navy);
+    color: #fff;
+  }
+  .honors-table th {
+    padding: 0.6rem 0.8rem;
+    text-align: left;
+  }
+  .honors-table tbody tr:nth-child(even) {
+    background: var(--cream);
+  }
+  .honors-table td {
+    padding: 0.55rem 0.8rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .year-cell {
+    font-weight: 700;
+    color: var(--navy);
+    white-space: nowrap;
+    width: 5rem;
+  }
+</style>

@@ -1,0 +1,237 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import raw from "../../content/honors/team-records.json";
+
+interface Bowler {
+  name: string;
+  scores: number[];
+  total?: number;
+}
+interface TeamRecord {
+  title: string;
+  score: number;
+  team?: string;
+  league?: string;
+  center?: string;
+  date?: string;
+  game_totals?: number[];
+  bowlers: Bowler[];
+}
+
+const data = raw as { heading: string; intro?: string; records: TeamRecord[] };
+const pageTitle = data.heading ?? "Team Records";
+
+const isSeries = (r: TeamRecord) =>
+  r.bowlers.some((b) => (b.scores?.length ?? 0) > 1);
+---
+
+<BaseLayout
+  title={pageTitle}
+  description="All-time team bowling records for the Greater Fox Cities Bowling Association."
+>
+  <div class="honors-page">
+    <h1>{pageTitle}</h1>
+    {data.intro && <p class="honors-intro">{data.intro}</p>}
+
+    {
+      data.records.map((record) => (
+        <section class="record-section">
+          <div class="record-header">
+            <h2>{record.title}</h2>
+            <span class="record-score">{record.score.toLocaleString()}</span>
+          </div>
+
+          {(record.team || record.league || record.center || record.date) && (
+            <div class="record-meta">
+              {record.team && record.team !== "" && (
+                <span class="meta-team">{record.team}</span>
+              )}
+              {record.league && <span class="meta-item">{record.league}</span>}
+              {record.center && <span class="meta-item">{record.center}</span>}
+              {record.date && <span class="meta-date">{record.date}</span>}
+            </div>
+          )}
+
+          {record.bowlers.length > 0 && (
+            <div class="bowlers-wrap">
+              {isSeries(record) ? (
+                <table class="bowlers-table">
+                  <thead>
+                    <tr>
+                      <th>Bowler</th>
+                      <th class="num-col">Game 1</th>
+                      <th class="num-col">Game 2</th>
+                      <th class="num-col">Game 3</th>
+                      <th class="num-col">Series</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {record.bowlers.map((b) => (
+                      <tr>
+                        <td>{b.name}</td>
+                        <td class="num-col">{b.scores[0] ?? "—"}</td>
+                        <td class="num-col">{b.scores[1] ?? "—"}</td>
+                        <td class="num-col">{b.scores[2] ?? "—"}</td>
+                        <td class="num-col series-total">
+                          {b.total ?? b.scores.reduce((a, v) => a + v, 0)}
+                        </td>
+                      </tr>
+                    ))}
+                    {record.game_totals && (
+                      <tr class="totals-row">
+                        <td>
+                          <strong>Game Totals</strong>
+                        </td>
+                        <td class="num-col">
+                          <strong>{record.game_totals[0]}</strong>
+                        </td>
+                        <td class="num-col">
+                          <strong>{record.game_totals[1]}</strong>
+                        </td>
+                        <td class="num-col">
+                          <strong>{record.game_totals[2]}</strong>
+                        </td>
+                        <td class="num-col record-total">
+                          <strong>{record.score}</strong>
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              ) : (
+                <table class="bowlers-table bowlers-table--game">
+                  <thead>
+                    <tr>
+                      <th>Bowler</th>
+                      <th class="num-col">Score</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {record.bowlers.map((b) => (
+                      <tr>
+                        <td>{b.name}</td>
+                        <td class="num-col">{b.scores[0]}</td>
+                      </tr>
+                    ))}
+                    <tr class="totals-row">
+                      <td>
+                        <strong>Total</strong>
+                      </td>
+                      <td class="num-col record-total">
+                        <strong>{record.score}</strong>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              )}
+            </div>
+          )}
+        </section>
+      ))
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .honors-page {
+    max-width: var(--max-w, 960px);
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+  h1 {
+    color: var(--navy);
+    border-bottom: 3px solid var(--red);
+    padding-bottom: 0.4rem;
+    margin-bottom: 1.5rem;
+  }
+  .honors-intro {
+    font-size: 1.05rem;
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+  }
+  .record-section {
+    margin-bottom: 3rem;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .record-header {
+    background: var(--navy);
+    color: #fff;
+    padding: 0.75rem 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+  h2 {
+    font-size: 1.05rem;
+    margin: 0;
+    color: #fff;
+  }
+  .record-score {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--lane-tan, #d4a84b);
+    white-space: nowrap;
+  }
+  .record-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    padding: 0.6rem 1.25rem;
+    background: var(--navy-mid, #1a2f5e);
+    font-size: 0.88rem;
+    color: rgba(255, 255, 255, 0.85);
+  }
+  .meta-team {
+    font-weight: 700;
+    color: #fff;
+  }
+  .meta-date {
+    margin-left: auto;
+    font-style: italic;
+  }
+  .bowlers-wrap {
+    padding: 1rem 1.25rem;
+    overflow-x: auto;
+  }
+  .bowlers-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.93rem;
+  }
+  .bowlers-table--game {
+    max-width: 320px;
+  }
+  .bowlers-table thead {
+    background: var(--cream);
+  }
+  .bowlers-table th {
+    padding: 0.5rem 0.8rem;
+    text-align: left;
+    font-size: 0.85rem;
+    color: var(--navy);
+    border-bottom: 2px solid var(--border);
+  }
+  .bowlers-table td {
+    padding: 0.4rem 0.8rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .bowlers-table th.num-col,
+  .bowlers-table td.num-col {
+    text-align: right;
+  }
+  .series-total {
+    font-weight: 700;
+  }
+  .totals-row td {
+    background: var(--cream);
+    border-top: 2px solid var(--border);
+  }
+  .record-total {
+    color: var(--red);
+    font-size: 1.05rem;
+  }
+</style>

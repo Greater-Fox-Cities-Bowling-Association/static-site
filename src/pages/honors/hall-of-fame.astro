@@ -1,0 +1,168 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import raw from "../../content/honors/hall-of-fame.json";
+
+interface HofName {
+  name: string;
+  note?: string;
+}
+interface HofEntry {
+  year: number;
+  names: HofName[];
+}
+interface HofLink {
+  label: string;
+  url: string;
+}
+const data = raw as {
+  heading: string;
+  intro?: string;
+  notes?: string[];
+  links?: HofLink[];
+  entries: HofEntry[];
+};
+
+const pageTitle = data.heading ?? "Hall of Fame";
+---
+
+<BaseLayout
+  title={pageTitle}
+  description="The Greater Fox Cities Bowling Association Hall of Fame honors those who have made outstanding contributions to the sport of bowling in our area."
+>
+  <div class="honors-page">
+    <h1>{pageTitle}</h1>
+
+    {data.intro && <p class="honors-intro">{data.intro}</p>}
+
+    {
+      data.links && data.links.length > 0 && (
+        <div class="hof-links">
+          {data.links.map((l) => (
+            <a
+              href={l.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="hof-doc-link"
+            >
+              ↗ {l.label}
+            </a>
+          ))}
+        </div>
+      )
+    }
+
+    {
+      data.notes && data.notes.length > 0 && (
+        <ul class="hof-notes">
+          {data.notes.map((n) => (
+            <li>{n}</li>
+          ))}
+        </ul>
+      )
+    }
+
+    <table class="honors-table">
+      <thead>
+        <tr>
+          <th>Year</th>
+          <th>Inductees</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          data.entries.map((entry) => (
+            <tr>
+              <td class="year-cell">{entry.year}</td>
+              <td>
+                {entry.names.map((n, i) => (
+                  <span class="inductee">
+                    {n.name}
+                    {n.note && <sup class="inductee-note">{n.note}</sup>}
+                    {i < entry.names.length - 1 && (
+                      <span class="separator">, </span>
+                    )}
+                  </span>
+                ))}
+              </td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+</BaseLayout>
+
+<style>
+  .honors-page {
+    max-width: var(--max-w, 960px);
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+  h1 {
+    color: var(--navy);
+    border-bottom: 3px solid var(--red);
+    padding-bottom: 0.4rem;
+    margin-bottom: 1.5rem;
+  }
+  .honors-intro {
+    font-size: 1.05rem;
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+  }
+  .hof-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .hof-doc-link {
+    color: var(--red);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .hof-doc-link:hover {
+    text-decoration: underline;
+  }
+  .hof-notes {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.5rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+  .hof-notes li {
+    margin-bottom: 0.25rem;
+  }
+  .honors-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+  }
+  .honors-table thead {
+    background: var(--navy);
+    color: #fff;
+  }
+  .honors-table th {
+    padding: 0.6rem 0.8rem;
+    text-align: left;
+  }
+  .honors-table tbody tr:nth-child(even) {
+    background: var(--cream);
+  }
+  .honors-table td {
+    padding: 0.55rem 0.8rem;
+    vertical-align: top;
+    border-bottom: 1px solid var(--border);
+  }
+  .year-cell {
+    font-weight: 700;
+    color: var(--navy);
+    white-space: nowrap;
+    width: 5rem;
+  }
+  .inductee-note {
+    color: var(--red);
+    font-size: 0.75rem;
+    margin-left: 0.1rem;
+  }
+</style>

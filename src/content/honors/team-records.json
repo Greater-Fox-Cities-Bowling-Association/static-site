@@ -1,0 +1,108 @@
+{
+  "heading": "Team Records",
+  "intro": "All-time team records set in Greater Fox Cities Bowling Association league play.",
+  "records": [
+    {
+      "title": "High 5-Man Team Series",
+      "score": 3859,
+      "team": "Sabre Lanes",
+      "league": "Tri City Men's League",
+      "center": "Sabre Lanes",
+      "date": "December 22, 2009",
+      "game_totals": [1278, 1287, 1294],
+      "bowlers": [
+        { "name": "Ken Beyersdorf", "scores": [256, 267, 257], "total": 780 },
+        { "name": "Bart Kennedy", "scores": [287, 268, 268], "total": 823 },
+        { "name": "Josh Westenberger", "scores": [269, 300, 268], "total": 837 },
+        { "name": "Gary Voelker", "scores": [247, 226, 254], "total": 727 },
+        { "name": "Bryan Monday", "scores": [219, 226, 247], "total": 692 }
+      ]
+    },
+    {
+      "title": "High 5-Man Team Game",
+      "score": 1372,
+      "team": "Showtime Fab and Machine",
+      "league": "Super Bowlers League",
+      "center": "Super Bowl Bowlero",
+      "date": "February 7, 2024",
+      "bowlers": [
+        { "name": "Dan Willison", "scores": [257] },
+        { "name": "Mark Weyland", "scores": [236] },
+        { "name": "David Beilfuss", "scores": [279] },
+        { "name": "Tim Springstroh", "scores": [300] },
+        { "name": "Kurt DeBroux", "scores": [300] }
+      ]
+    },
+    {
+      "title": "High 4-Man Team Series",
+      "score": 3153,
+      "team": "Shenanigans",
+      "league": "Super Classic League",
+      "center": "Super Bowl",
+      "date": "February 23, 2010",
+      "game_totals": [1056, 977, 1120],
+      "bowlers": [
+        { "name": "Dave Rauen", "scores": [300, 267, 253], "total": 820 },
+        { "name": "Erik Gialdella", "scores": [216, 222, 300], "total": 738 },
+        { "name": "Matt Stock", "scores": [261, 276, 299], "total": 836 },
+        { "name": "Ken Kempf", "scores": [279, 212, 268], "total": 759 }
+      ]
+    },
+    {
+      "title": "High 4-Man Team Game",
+      "score": 1120,
+      "team": "Shenanigans",
+      "league": "Super Classic League",
+      "center": "Super Bowl",
+      "date": "February 23, 2010",
+      "bowlers": [
+        { "name": "Dave Rauen", "scores": [253] },
+        { "name": "Erik Gialdella", "scores": [300] },
+        { "name": "Matt Stock", "scores": [299] },
+        { "name": "Ken Kempf", "scores": [268] }
+      ]
+    },
+    {
+      "title": "High Mixed Team Series",
+      "score": 3771,
+      "team": "Welhouse Builders",
+      "league": "Super Dozen League",
+      "center": "Super Bowl",
+      "date": "March 21, 2013",
+      "game_totals": [1254, 1252, 1265],
+      "bowlers": [
+        { "name": "Traci Brown", "scores": [268, 240, 236], "total": 744 },
+        { "name": "George Brown", "scores": [237, 237, 225], "total": 699 },
+        { "name": "Corby Blansette", "scores": [214, 257, 299], "total": 770 },
+        { "name": "Diane Welhouse", "scores": [235, 230, 268], "total": 733 },
+        { "name": "Mike Van Domelen", "scores": [300, 288, 237], "total": 825 }
+      ]
+    },
+    {
+      "title": "High Mixed Team Game",
+      "score": 1315,
+      "team": "Welhouse Builders",
+      "league": "Super Dozen League",
+      "center": "Super Bowl",
+      "date": "January 9, 2014",
+      "bowlers": [
+        { "name": "Traci Brown", "scores": [279] },
+        { "name": "Corby Blansette", "scores": [223] },
+        { "name": "Pat Knapp", "scores": [247] },
+        { "name": "Diane Welhouse", "scores": [267] },
+        { "name": "Dave Rauen", "scores": [299] }
+      ]
+    },
+    {
+      "title": "Highest Association Triplicate",
+      "score": 837,
+      "team": "",
+      "league": "Super Dozen",
+      "center": "Super Bowl",
+      "date": "December 9, 2021",
+      "bowlers": [
+        { "name": "Adam Brouch", "scores": [279, 279, 279], "total": 837 }
+      ]
+    }
+  ]
+}

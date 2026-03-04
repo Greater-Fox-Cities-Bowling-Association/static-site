@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "High Series",
+  "type": "object",
+  "properties": {
+    "heading": { "type": "string" },
+    "intro": { "type": "string" },
+    "record_note": { "type": "string" },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "rank": { "type": "integer" },
+          "score": { "type": "integer" },
+          "bowler": { "type": "string" },
+          "date": { "type": "string" }
+        },
+        "required": ["score", "bowler"]
+      }
+    }
+  },
+  "required": ["heading", "entries"]
+}

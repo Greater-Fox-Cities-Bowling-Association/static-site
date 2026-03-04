@@ -1,0 +1,31 @@
+﻿---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import raw from "../../content/honors/career-honor-scores.json";
+const data = raw as { heading?: string; intro?: string };
+const pageTitle = data.heading ?? "Honors";
+---
+<BaseLayout title={pageTitle} description={data.intro ?? ""}>
+  <div class="honors-page">
+    <h1>{pageTitle}</h1>
+    {data.intro && <p class="honors-intro">{data.intro}</p>}
+  </div>
+</BaseLayout>
+
+<style>
+.honors-page {
+  max-width: var(--max-w, 960px);
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+h1 {
+  color: var(--navy);
+  border-bottom: 3px solid var(--red);
+  padding-bottom: 0.4rem;
+  margin-bottom: 1.5rem;
+}
+.honors-intro {
+  font-size: 1.05rem;
+  color: var(--text-muted);
+  margin-bottom: 2rem;
+}
+</style>

@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Bowler of the Year",
+  "type": "object",
+  "properties": {
+    "heading": { "type": "string" },
+    "intro": { "type": "string" },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "year": { "type": "integer" },
+          "men": { "type": "string" },
+          "women": { "type": "string" },
+          "boys": { "type": "string" },
+          "girls": { "type": "string" }
+        },
+        "required": ["year", "men"]
+      }
+    }
+  },
+  "required": ["heading", "entries"]
+}

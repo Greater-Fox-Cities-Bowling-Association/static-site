@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "All Association Teams",
+  "type": "object",
+  "properties": {
+    "heading": { "type": "string" },
+    "intro": { "type": "string" },
+    "links": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": { "label": { "type": "string" }, "url": { "type": "string" } },
+        "required": ["label", "url"]
+      }
+    },
+    "seasons": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "year": { "type": "string" },
+          "teams": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "division": { "type": "string" },
+                "members": { "type": "array", "items": { "type": "string" } }
+              },
+              "required": ["division", "members"]
+            }
+          }
+        },
+        "required": ["year"]
+      }
+    }
+  },
+  "required": ["heading", "seasons"]
+}

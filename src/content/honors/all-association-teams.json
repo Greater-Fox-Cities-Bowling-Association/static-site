@@ -1,0 +1,56 @@
+{
+  "heading": "All Association Teams",
+  "intro": "The All Association Teams honor the top bowlers in each division each season.",
+  "links": [
+    { "label": "Men's Bowler of the Year and All Association Team Program", "url": "https://www.greaterfoxcitiesba.com/honors/all-association-teams/mens-all-association-team-program/" },
+    { "label": "Women's/Youth Bowler of the Year and All Association Team Program", "url": "https://www.greaterfoxcitiesba.com/honors/all-association-teams/womens-and-youth-all-association-team-program/" }
+  ],
+  "seasons": [
+    {
+      "year": "2025",
+      "boty": { "boys": "Kameron Harder", "girls": "Audry Dehlinger" },
+      "teams": [
+        { "division": "1st Team (Boys)", "members": ["Kameron Harder", "Dylan Herbst", "Ayden Moseng", "Nathan Williamson", "Christopher Boldt"] },
+        { "division": "1st Team (Girls)", "members": ["Audry Dehlinger", "Miley Young", "Gracie Steffen", "Alaina Lison", "Emily Zak"] }
+      ]
+    },
+    {
+      "year": "2024",
+      "boty": { "men": "Randy Southworth", "women": "Traci Brown", "boys": "Tyler Brown", "girls": "Miley Young" },
+      "teams": [
+        { "division": "1st Team (Men)", "members": ["Randy Southworth", "Alex Leeman", "Jordan Oppelt", "Ryan Duescher", "Nick Hietpas"] },
+        { "division": "2nd Team (Men)", "members": ["Rick Green", "Jason Young", "Dan Paul", "Cody Weigel", "Drew Krueger"] },
+        { "division": "1st Team (Women)", "members": ["Traci Brown", "Melissa Kading", "Beth Kosiorek", "Denise Young", "Marn Stern"] },
+        { "division": "2nd Team (Women)", "members": ["Alyson Kandler", "Daytona Weyland", "Melissa Lang", "Dawn Zwiers", "Amy Young"] },
+        { "division": "1st Team (Boys)", "members": ["Tyler Brown", "Alex Carr", "Zach Olson", "Joshua Gaschler", "Myles Moseng"] },
+        { "division": "1st Team (Girls)", "members": ["Miley Young", "Alaina Lison", "Emily Glasheen", "Audry Dehlinger", "Kylie Vanevenhoven"] }
+      ]
+    },
+    {
+      "year": "2023",
+      "teams": [
+        { "division": "1st Team (Men)", "members": ["Nick Hietpas (BoY)", "Kyle Blaese", "Cody Weigel", "Jeff Nimke", "Ryan Duescher"] },
+        { "division": "2nd Team (Men)", "members": ["Rick Green", "Andrew Krueger", "Alex Leeman", "Dan Paul", "John Kleppen"] },
+        { "division": "1st Team (Women)", "members": ["Traci Brown (BoY)", "Melissa Lang", "Marn Stern", "Megan Salentine", "Amy Barth"] },
+        { "division": "2nd Team (Women)", "members": ["Beth Kosiorek", "Trisha Smith", "Nicole Miller", "Robin Blansette", "Amy Young"] },
+        { "division": "1st Team (Boys)", "members": ["Joshua Gaschler (BoY)", "Logan Wilson", "Dylan Hietpas", "Dylan Herbst", "Anthony Stehofsky"] },
+        { "division": "1st Team (Girls)", "members": ["Hailey Stadler (BoY)", "Alaina Lison", "Miley Young", "Nora Rohloff", "Vistoria Sheets"] }
+      ]
+    },
+    {
+      "year": "2022",
+      "teams": [
+        { "division": "1st Team (Men)", "members": ["Wes Steffen (BoY)", "Mark Weyland", "Brett Clifford", "Michael Van Domelen", "Ryan Duescher"] },
+        { "division": "2nd Team (Men)", "members": ["Jeff Nimke", "Dan Bourassa", "Randy Southworth", "Cale Rusch", "Alex Leeman"] },
+        { "division": "1st Team (Women)", "members": ["Rachel Schmaal (BoY)", "Traci Brown", "Charly Boelter", "Robin Blansette", "Amy Barth"] },
+        { "division": "2nd Team (Women)", "members": ["Brianna Erdmann", "Brianna Westenberger", "Beth Kosiorek", "Trisha Smith", "Marn Stern"] },
+        { "division": "1st Team (Boys)", "members": ["Jacob Hackbarth (BoY)", "Luke Winter", "Ian Koster", "Tyler Young", "Zach Olson"] },
+        { "division": "1st Team (Girls)", "members": ["Kate Winter (BoY)", "Alyson Kandler", "Kaila Groeschel", "Logan Lowry", "Kendal Paulbicki"] }
+      ]
+    },
+    { "year": "2021", "placeholder": true, "teams": [] },
+    { "year": "2020", "placeholder": true, "teams": [] },
+    { "year": "2019", "placeholder": true, "teams": [] },
+    { "year": "2018", "placeholder": true, "teams": [] }
+  ]
+}

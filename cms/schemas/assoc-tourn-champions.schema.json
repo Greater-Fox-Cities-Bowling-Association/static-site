@@ -1,0 +1,1 @@
+﻿{"$schema":"http://json-schema.org/draft-07/schema#","Assoc Tourn Champions":"Assoc Tourn Champions","type":"object","properties":{"heading":{"type":"string"},"intro":{"type":"string"}},"required":["heading"]}

@@ -1,0 +1,148 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import raw from "../../content/honors/high-average.json";
+
+interface AvgEntry {
+  year: string;
+  bowler: string;
+  games: number;
+  average: string;
+}
+
+const data = raw as {
+  heading: string;
+  intro?: string;
+  notes?: string[];
+  entries: AvgEntry[];
+};
+const pageTitle = data.heading ?? "High Average";
+
+// Group entries by year for display
+const yearMap = new Map<string, AvgEntry[]>();
+for (const e of data.entries) {
+  if (!yearMap.has(e.year)) yearMap.set(e.year, []);
+  yearMap.get(e.year)!.push(e);
+}
+// Build flat rows: first row for a year shows the year label; subsequent rows span blank
+interface DisplayRow {
+  year: string | null;
+  bowler: string;
+  games: number;
+  average: string;
+}
+const rows: DisplayRow[] = [];
+for (const [yr, entries] of yearMap) {
+  entries.forEach((e, i) => {
+    rows.push({
+      year: i === 0 ? yr : null,
+      bowler: e.bowler,
+      games: e.games,
+      average: e.average,
+    });
+  });
+}
+---
+
+<BaseLayout
+  title={pageTitle}
+  description="The highest individual game averages recorded in Greater Fox Cities association play each season."
+>
+  <div class="honors-page">
+    <h1>{pageTitle}</h1>
+    {data.intro && <p class="honors-intro">{data.intro}</p>}
+
+    {
+      data.notes && data.notes.length > 0 && (
+        <ul class="page-notes">
+          {data.notes.map((n) => (
+            <li>{n}</li>
+          ))}
+        </ul>
+      )
+    }
+
+    <table class="honors-table">
+      <thead>
+        <tr>
+          <th>Year</th>
+          <th>Bowler</th>
+          <th class="num-col">Games</th>
+          <th class="num-col">Average</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          rows.map((row) => (
+            <tr>
+              <td class="year-cell">{row.year ?? ""}</td>
+              <td>{row.bowler}</td>
+              <td class="num-col">{row.games}</td>
+              <td class="num-col avg-val">{row.average}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+</BaseLayout>
+
+<style>
+  .honors-page {
+    max-width: var(--max-w, 960px);
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+  h1 {
+    color: var(--navy);
+    border-bottom: 3px solid var(--red);
+    padding-bottom: 0.4rem;
+    margin-bottom: 1.5rem;
+  }
+  .honors-intro {
+    font-size: 1.05rem;
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+  }
+  .page-notes {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.5rem;
+    font-size: 0.88rem;
+    font-style: italic;
+    color: var(--text-muted);
+  }
+  .honors-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.93rem;
+  }
+  .honors-table thead {
+    background: var(--navy);
+    color: #fff;
+  }
+  .honors-table th {
+    padding: 0.6rem 0.8rem;
+    text-align: left;
+  }
+  .honors-table th.num-col,
+  .honors-table td.num-col {
+    text-align: right;
+  }
+  .honors-table tbody tr:nth-child(even) {
+    background: var(--cream);
+  }
+  .honors-table td {
+    padding: 0.45rem 0.8rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .year-cell {
+    font-weight: 700;
+    color: var(--navy);
+    white-space: nowrap;
+    width: 5rem;
+  }
+  .avg-val {
+    font-weight: 700;
+    color: var(--navy);
+  }
+</style>

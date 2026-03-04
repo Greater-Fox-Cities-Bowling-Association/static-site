@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Hall of Fame",
+  "description": "Hall of Fame inductees page",
+  "type": "object",
+  "properties": {
+    "heading": { "type": "string" },
+    "intro": { "type": "string" },
+    "notes": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": { "type": "string" },
+          "url": { "type": "string" }
+        },
+        "required": ["label", "url"]
+      }
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "year": { "type": "integer" },
+          "names": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "note": { "type": "string" }
+              },
+              "required": ["name"]
+            }
+          }
+        },
+        "required": ["year", "names"]
+      }
+    }
+  },
+  "required": ["heading", "entries"]
+}

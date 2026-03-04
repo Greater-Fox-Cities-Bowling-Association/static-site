@@ -1,0 +1,200 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import raw from "../../content/honors/all-association-teams.json";
+
+interface SeasonLink {
+  label: string;
+  url: string;
+}
+interface Team {
+  division: string;
+  members: string[];
+}
+interface Boty {
+  men?: string;
+  women?: string;
+  boys?: string;
+  girls?: string;
+}
+interface Season {
+  year: string;
+  boty?: Boty;
+  teams: Team[];
+  placeholder?: boolean;
+}
+
+const data = raw as {
+  heading: string;
+  intro?: string;
+  links?: SeasonLink[];
+  seasons: Season[];
+};
+const pageTitle = data.heading ?? "All Association Teams";
+---
+
+<BaseLayout
+  title={pageTitle}
+  description="All Association Teams honored by the Greater Fox Cities Bowling Association each season."
+>
+  <div class="honors-page">
+    <h1>{pageTitle}</h1>
+    {data.intro && <p class="honors-intro">{data.intro}</p>}
+
+    {
+      data.links && data.links.length > 0 && (
+        <div class="program-links">
+          {data.links.map((l) => (
+            <a
+              href={l.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="program-link"
+            >
+              ↗ {l.label}
+            </a>
+          ))}
+        </div>
+      )
+    }
+
+    {
+      data.seasons.map((season) => (
+        <section class="season-section">
+          <h2>{season.year} All Association Teams</h2>
+
+          {season.boty && (
+            <div class="boty-row">
+              {season.boty.men && (
+                <span>
+                  <strong>Men's BoY:</strong> {season.boty.men}
+                </span>
+              )}
+              {season.boty.women && (
+                <span>
+                  <strong>Women's BoY:</strong> {season.boty.women}
+                </span>
+              )}
+              {season.boty.boys && (
+                <span>
+                  <strong>Boys' BoY:</strong> {season.boty.boys}
+                </span>
+              )}
+              {season.boty.girls && (
+                <span>
+                  <strong>Girls' BoY:</strong> {season.boty.girls}
+                </span>
+              )}
+            </div>
+          )}
+
+          {season.placeholder ? (
+            <p class="placeholder-note">
+              Team information for this season is not yet available.
+            </p>
+          ) : (
+            <div class="teams-grid">
+              {season.teams.map((team) => (
+                <div class="team-card">
+                  <h3>{team.division}</h3>
+                  <ol class="team-list">
+                    {team.members.map((m) => (
+                      <li>{m}</li>
+                    ))}
+                  </ol>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      ))
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .honors-page {
+    max-width: var(--max-w, 960px);
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+  h1 {
+    color: var(--navy);
+    border-bottom: 3px solid var(--red);
+    padding-bottom: 0.4rem;
+    margin-bottom: 1.5rem;
+  }
+  .honors-intro {
+    font-size: 1.05rem;
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+  }
+  .program-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .program-link {
+    color: var(--red);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .program-link:hover {
+    text-decoration: underline;
+  }
+
+  .season-section {
+    margin-bottom: 3rem;
+  }
+  h2 {
+    color: var(--navy-mid, #1a2f5e);
+    font-size: 1.2rem;
+    margin: 0 0 0.75rem;
+    padding-bottom: 0.3rem;
+    border-bottom: 2px solid var(--lane-tan, #d4a84b);
+  }
+  .boty-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2rem;
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+    color: var(--text-muted);
+  }
+  .boty-row strong {
+    color: var(--navy);
+  }
+
+  .teams-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.25rem;
+  }
+  .team-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--navy);
+    border-radius: 4px;
+    padding: 0.75rem 1rem;
+  }
+  h3 {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--navy);
+    margin: 0 0 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .team-list {
+    margin: 0;
+    padding-left: 1.2rem;
+    font-size: 0.9rem;
+  }
+  .team-list li {
+    margin-bottom: 0.2rem;
+  }
+  .placeholder-note {
+    font-style: italic;
+    color: var(--text-muted);
+  }
+</style>

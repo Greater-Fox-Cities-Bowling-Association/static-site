@@ -1,0 +1,141 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import raw from "../../content/honors/high-series.json";
+
+interface SeriesEntry {
+  score: number;
+  bowler: string;
+  date?: string;
+}
+
+const data = raw as {
+  heading: string;
+  intro?: string;
+  record_note?: string;
+  entries: SeriesEntry[];
+};
+const pageTitle = data.heading ?? "High Series";
+---
+
+<BaseLayout
+  title={pageTitle}
+  description="The top 3-game series scores in Greater Fox Cities Bowling Association league play."
+>
+  <div class="honors-page">
+    <h1>{pageTitle}</h1>
+    {data.intro && <p class="honors-intro">{data.intro}</p>}
+
+    {
+      data.record_note && (
+        <div class="record-banner">
+          <span class="record-label">Record</span>
+          <span class="record-text">{data.record_note}</span>
+        </div>
+      )
+    }
+
+    <table class="honors-table">
+      <thead>
+        <tr>
+          <th class="num-col">Score</th>
+          <th>Bowler</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          data.entries.map((e, i) => (
+            <tr class:list={[{ "top-row": i === 0 }]}>
+              <td class="num-col score-val">{e.score}</td>
+              <td>{e.bowler}</td>
+              <td class="date-col">{e.date ?? "—"}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+</BaseLayout>
+
+<style>
+  .honors-page {
+    max-width: var(--max-w, 960px);
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+  h1 {
+    color: var(--navy);
+    border-bottom: 3px solid var(--red);
+    padding-bottom: 0.4rem;
+    margin-bottom: 1.5rem;
+  }
+  .honors-intro {
+    font-size: 1.05rem;
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+  }
+  .record-banner {
+    background: var(--navy);
+    color: #fff;
+    padding: 0.75rem 1rem;
+    border-radius: 4px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .record-label {
+    background: var(--red);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.15rem 0.5rem;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+  .record-text {
+    font-size: 0.95rem;
+  }
+  .honors-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.93rem;
+  }
+  .honors-table thead {
+    background: var(--navy);
+    color: #fff;
+  }
+  .honors-table th {
+    padding: 0.6rem 0.8rem;
+    text-align: left;
+  }
+  .honors-table th.num-col,
+  .honors-table td.num-col {
+    text-align: right;
+    width: 6rem;
+  }
+  .honors-table tbody tr:nth-child(even) {
+    background: var(--cream);
+  }
+  .honors-table tbody tr.top-row {
+    background: #fff7e6;
+    font-weight: 700;
+  }
+  .honors-table td {
+    padding: 0.45rem 0.8rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .score-val {
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--navy);
+  }
+  .date-col {
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    white-space: nowrap;
+  }
+</style>
