@@ -48,5 +48,7 @@ export async function fetchFileContent(
   if (!res.ok) throw new Error(`GitHub API error ${res.status} fetching ${path}`);
   const data = await res.json();
   // GitHub returns content as base64
-  return decodeURIComponent(escape(atob(data.content.replace(/\n/g, ''))));
+  const decoded = decodeURIComponent(escape(atob(data.content.replace(/\n/g, ''))));
+  // Strip UTF-8 BOM (U+FEFF) if present — some editors save files with a BOM
+  return decoded.charCodeAt(0) === 0xFEFF ? decoded.slice(1) : decoded;
 }
