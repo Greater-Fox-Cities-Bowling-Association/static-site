@@ -1,0 +1,9 @@
+{
+  "id": "award-group",
+  "name": "Award Group",
+  "directory": "src/content/award-group",
+  "fields": [
+    { "name": "title",  "label": "Group Title", "type": "text",  "required": true },
+    { "name": "awards", "label": "Awards",       "type": "array", "of": "text" }
+  ]
+}

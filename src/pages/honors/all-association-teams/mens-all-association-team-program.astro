@@ -1,18 +1,15 @@
 ---
 import BaseLayout from "../../../layouts/BaseLayout.astro";
-import raw from "../../../content/honors/mens-aat-program.json";
+import raw from "../../../content/honors/mens-aat-program/mens-aat-program.json";
 
 interface Criterion {
   title: string;
   text: string;
 }
-interface PdfLink {
-  label: string;
-  url: string;
-}
 const data = raw as {
   heading: string;
-  pdf_link?: PdfLink;
+  pdf_link_label?: string;
+  pdf_link_url?: string;
   intro?: string;
   criteria?: Criterion[];
   footer_note?: string;
@@ -28,14 +25,14 @@ const pageTitle = data.heading ?? "Men's All Association Team Program";
     <h1>{pageTitle}</h1>
 
     {
-      data.pdf_link && (
+      data.pdf_link_url && (
         <a
-          href={data.pdf_link.url}
+          href={data.pdf_link_url}
           target="_blank"
           rel="noopener noreferrer"
           class="pdf-link"
         >
-          ↗ {data.pdf_link.label}
+          ↗ {data.pdf_link_label}
         </a>
       )
     }

@@ -1,0 +1,11 @@
+{
+  "id": "high-average-entry",
+  "name": "High Average Entry",
+  "directory": "src/content/high-average-entry",
+  "fields": [
+    { "name": "year",    "label": "Year",    "type": "text",   "required": true },
+    { "name": "bowler",  "label": "Bowler",  "type": "text",   "required": true, "helpText": "Include division suffix if applicable, e.g. Rachel Schmal (w)" },
+    { "name": "games",   "label": "Games",   "type": "number" },
+    { "name": "average", "label": "Average", "type": "text",   "helpText": "Text to allow record notation, e.g. 253.87*" }
+  ]
+}

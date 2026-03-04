@@ -1,0 +1,9 @@
+{
+  "id": "link",
+  "name": "Link",
+  "directory": "src/content/link",
+  "fields": [
+    { "name": "label", "label": "Label", "type": "text", "required": true },
+    { "name": "url",   "label": "URL",   "type": "text", "required": true }
+  ]
+}

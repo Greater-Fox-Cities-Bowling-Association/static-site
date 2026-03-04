@@ -1,0 +1,10 @@
+{
+  "id": "scholarships",
+  "name": "Scholarships",
+  "directory": "src/content/scholarships",
+  "fields": [
+    { "name": "heading", "label": "Heading",        "type": "text" },
+    { "name": "intro",   "label": "Intro",          "type": "textarea" },
+    { "name": "links",   "label": "Download Links", "type": "array", "ofSchema": "link" }
+  ]
+}

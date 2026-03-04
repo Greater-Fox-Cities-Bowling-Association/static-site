@@ -1,0 +1,9 @@
+{
+  "id": "aat-criteria",
+  "name": "AAT Point Criteria",
+  "directory": "src/content/aat-criteria",
+  "fields": [
+    { "name": "title", "label": "Title", "type": "text",     "required": true },
+    { "name": "text",  "label": "Text",  "type": "textarea", "required": true }
+  ]
+}

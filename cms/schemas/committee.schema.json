@@ -1,0 +1,10 @@
+{
+  "id": "committee",
+  "name": "Committee",
+  "directory": "src/content/committee",
+  "fields": [
+    { "name": "name",    "label": "Committee Name", "type": "text",  "required": true },
+    { "name": "chair",   "label": "Chair",          "type": "text" },
+    { "name": "members", "label": "Members",        "type": "array", "of": "text" }
+  ]
+}

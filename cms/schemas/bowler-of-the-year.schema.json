@@ -1,0 +1,10 @@
+{
+  "id": "bowler-of-the-year",
+  "name": "Bowler of the Year",
+  "directory": "src/content/honors/bowler-of-the-year",
+  "fields": [
+    { "name": "heading", "label": "Heading", "type": "text" },
+    { "name": "intro",   "label": "Intro",   "type": "textarea" },
+    { "name": "entries", "label": "Entries", "type": "array", "ofSchema": "boty-entry" }
+  ]
+}

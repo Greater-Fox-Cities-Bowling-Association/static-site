@@ -1,6 +1,0 @@
-{
-  "slug": "home",
-  "title": "Home",
-  "description": "Welcome to our website.",
-  "body": "<h1>Welcome</h1><p>This is the home page. Log in to the <a href=\"/admin/\">admin panel</a> to edit content and publish changes.</p>"
-}

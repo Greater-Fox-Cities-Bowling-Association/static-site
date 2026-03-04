@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import data from "../content/contacts.json";
+import data from "../content/contacts/contacts.json";
 
 interface Officer {
   name: string;
@@ -40,11 +40,11 @@ interface Officer {
             <strong>Facebook</strong>
             <p>
               <a
-                href={data.facebook.url}
+                href={data.facebook_url}
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                {data.facebook.label}
+                {data.facebook_label}
               </a>
             </p>
           </div>
@@ -92,7 +92,7 @@ interface Officer {
     <section class="join-section">
       <p>{data.board_appeal}</p>
       <a
-        href={data.application_link.url}
+        href={data.application_link_url}
         target="_blank"
         rel="noopener noreferrer"
         class="apply-btn"

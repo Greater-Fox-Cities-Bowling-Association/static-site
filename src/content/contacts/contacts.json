@@ -1,0 +1,48 @@
+{
+    "heading":  "Contact Us",
+    "board_appeal":  "We are looking for people to join our Board of Directors and future Officer positions. Please consider applying and help make our association even better.",
+    "application_link_label":  "Application Form",
+    "application_link_url":  "https://www.greaterfoxcitiesba.com/wp-content/uploads/2024/04/Greater-Fox-Cities-BoardMemberApplication.doc",
+    "facebook_label":  "Greater Fox Cities USBC",
+    "facebook_url":  "https://www.facebook.com/groups/170723710059698",
+    "emails":  [
+                   "bethkusbc@gmail.com",
+                   "gfcba920@gmail.com"
+               ],
+    "officers":  [
+                     {
+                         "name":  "Andrew Belonger",
+                         "title":  "President"
+                     },
+                     {
+                         "name":  "Annette Zelinksi",
+                         "title":  "Vice President"
+                     },
+                     {
+                         "name":  "Becky Landgraf",
+                         "title":  "Sergeant at Arms"
+                     },
+                     {
+                         "name":  "Beth Kosiorek",
+                         "title":  "Association Manager"
+                     },
+                     {
+                         "name":  "Keith Koch \u0026 Terry Anderson",
+                         "title":  "Historian"
+                     }
+                 ],
+    "board":  [
+                  "Ryan Duescher",
+                  "Carlene Enama",
+                  "Rhonda Hansen",
+                  "Jim Kading",
+                  "Matt Mattson",
+                  "Glenn Monte",
+                  "Michele Minkebige",
+                  "Caroline Pirkola",
+                  "Holland Rittmann",
+                  "Megan Salentine",
+                  "Amy Young"
+              ],
+    "vacancies_note":  "1 spot available – apply today!"
+}

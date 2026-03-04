@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import data from "../content/awards.json";
+import data from "../content/awards/awards.json";
 ---
 
 <BaseLayout
@@ -29,11 +29,11 @@ import data from "../content/awards.json";
       <h2>Award Eligibility Rules</h2>
       <dl>
         <dt>Who</dt>
-        <dd>{data.rules.who}</dd>
+        <dd>{data.rules_who}</dd>
         <dt>When</dt>
-        <dd>{data.rules.when}</dd>
+        <dd>{data.rules_when}</dd>
         <dt>Where</dt>
-        <dd>{data.rules.where}</dd>
+        <dd>{data.rules_where}</dd>
       </dl>
     </div>
 

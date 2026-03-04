@@ -1,0 +1,9 @@
+{
+  "id": "career-total-pins",
+  "name": "Career Total Pins",
+  "directory": "src/content/honors/career-total-pins",
+  "fields": [
+    { "name": "heading", "label": "Heading", "type": "text" },
+    { "name": "intro",   "label": "Intro",   "type": "textarea" }
+  ]
+}

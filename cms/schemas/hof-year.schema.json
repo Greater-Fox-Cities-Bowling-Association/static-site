@@ -1,0 +1,9 @@
+{
+  "id": "hof-year",
+  "name": "Hall of Fame Year",
+  "directory": "src/content/hof-year",
+  "fields": [
+    { "name": "year",  "label": "Year",      "type": "number", "required": true },
+    { "name": "names", "label": "Inductees", "type": "array",  "ofSchema": "hof-inductee" }
+  ]
+}

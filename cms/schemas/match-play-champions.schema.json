@@ -1,0 +1,9 @@
+{
+  "id": "match-play-champions",
+  "name": "Match Play Champions",
+  "directory": "src/content/honors/match-play-champions",
+  "fields": [
+    { "name": "heading", "label": "Heading", "type": "text" },
+    { "name": "intro",   "label": "Intro",   "type": "textarea" }
+  ]
+}

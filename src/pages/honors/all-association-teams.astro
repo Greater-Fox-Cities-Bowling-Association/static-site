@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import raw from "../../content/honors/all-association-teams.json";
+import raw from "../../content/honors/all-association-teams/all-association-teams.json";
 
 interface SeasonLink {
   label: string;
@@ -10,15 +10,12 @@ interface Team {
   division: string;
   members: string[];
 }
-interface Boty {
-  men?: string;
-  women?: string;
-  boys?: string;
-  girls?: string;
-}
 interface Season {
   year: string;
-  boty?: Boty;
+  boty_men?: string;
+  boty_women?: string;
+  boty_boys?: string;
+  boty_girls?: string;
   teams: Team[];
   placeholder?: boolean;
 }
@@ -63,26 +60,26 @@ const pageTitle = data.heading ?? "All Association Teams";
         <section class="season-section">
           <h2>{season.year} All Association Teams</h2>
 
-          {season.boty && (
+          {(season.boty_men || season.boty_women || season.boty_boys || season.boty_girls) && (
             <div class="boty-row">
-              {season.boty.men && (
+              {season.boty_men && (
                 <span>
-                  <strong>Men's BoY:</strong> {season.boty.men}
+                  <strong>Men's BoY:</strong> {season.boty_men}
                 </span>
               )}
-              {season.boty.women && (
+              {season.boty_women && (
                 <span>
-                  <strong>Women's BoY:</strong> {season.boty.women}
+                  <strong>Women's BoY:</strong> {season.boty_women}
                 </span>
               )}
-              {season.boty.boys && (
+              {season.boty_boys && (
                 <span>
-                  <strong>Boys' BoY:</strong> {season.boty.boys}
+                  <strong>Boys' BoY:</strong> {season.boty_boys}
                 </span>
               )}
-              {season.boty.girls && (
+              {season.boty_girls && (
                 <span>
-                  <strong>Girls' BoY:</strong> {season.boty.girls}
+                  <strong>Girls' BoY:</strong> {season.boty_girls}
                 </span>
               )}
             </div>
