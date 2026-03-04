@@ -1,0 +1,21 @@
+{
+  "id": "history-tournament-group",
+  "name": "History Tournament Group",
+  "directory": "src/content/history-tournament-group",
+  "fields": [
+    {
+      "name": "tournament",
+      "label": "Tournament Name",
+      "type": "text",
+      "required": true,
+      "helpText": "e.g. Open Association Tournament"
+    },
+    {
+      "name": "years",
+      "label": "Years",
+      "type": "array",
+      "required": false,
+      "ofSchema": "history-year"
+    }
+  ]
+}

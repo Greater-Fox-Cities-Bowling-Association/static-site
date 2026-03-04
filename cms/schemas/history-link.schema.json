@@ -1,0 +1,21 @@
+{
+  "id": "history-link",
+  "name": "History Link",
+  "directory": "src/content/history-link",
+  "fields": [
+    {
+      "name": "label",
+      "label": "Link Label",
+      "type": "text",
+      "required": true,
+      "helpText": "e.g. Results, Prize List, Qualifying, Match Play, Smart Fund earnings"
+    },
+    {
+      "name": "url",
+      "label": "URL",
+      "type": "text",
+      "required": true,
+      "helpText": "Absolute URL to the PDF or page"
+    }
+  ]
+}

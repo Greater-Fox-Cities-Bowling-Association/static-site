@@ -1,0 +1,151 @@
+﻿{
+  "slug": "tournament-history",
+  "_schemaId": "tournament-history",
+  "heading": "Tournament History",
+  "intro": "A record of past Greater Fox Cities Bowling Association tournament results and prize lists, organized by tournament.",
+  "groups": [
+    {
+      "tournament": "Youth Association Tournament",
+      "years": [
+        { "season": "2025/2026", "links": [] },
+        { "season": "2024/2025", "links": [
+            { "label": "Results", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2024-Youth-Standings.pdf" },
+            { "label": "Smart Fund earnings", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2024-Youth-Scholarship-Payouts.pdf" }
+          ]
+        },
+        { "season": "2023/2024", "links": [
+            { "label": "Results", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2023/12/2023-Youth-Standings.pdf" }
+          ]
+        },
+        { "season": "2022/2023", "links": [
+            { "label": "Results", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2023/08/2022-Youth-final-standings.pdf" },
+            { "label": "Smart Fund earnings", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2023/08/2022-Yout-Scholarship-payouts.pdf" }
+          ]
+        },
+        { "season": "2021/2022", "links": [{ "label": "Results", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2023/08/2021-Youth-Final-Standings.pdf" }] },
+        { "season": "2020/2021", "links": [{ "label": "Results", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2023/08/2020-Youth-Final-standings-with-scholarships.pdf" }] },
+        { "season": "2019/2020", "links": [{ "label": "Results", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2023/08/2019-Youth-Tournament-Final-Standings.pdf" }] }
+      ]
+    },
+    {
+      "tournament": "Match Play (Masters)",
+      "years": [
+        { "season": "2025/2026", "links": [
+            { "label": "Qualifying", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2026-Masters-Qualifying-Results.pdf" },
+            { "label": "Match Play", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2026-Masters-Bracket-Results.pdf" }
+          ]
+        },
+        { "season": "2024/2025", "links": [
+            { "label": "Qualifying", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2025-Masters-Match-Play-Qualifying.pdf" },
+            { "label": "Match Play", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2025-Masters-Match-Play-Bracket.jpg" }
+          ]
+        },
+        { "season": "2023/2024", "links": [
+            { "label": "Qualifying", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2024/01/2023-2024-Masters-Match-Play-Qualify-Round.pdf" },
+            { "label": "Match Play", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2024/01/2023-2024-Masters-Bracket.jpg" }
+          ]
+        },
+        { "season": "2022/2023", "links": [
+            { "label": "Results", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2023/08/2023-Match-Play-Masters-final-results.pdf" },
+            { "label": "Prize List", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2023/08/2023-Match-Play-Masters-Tournament-Report.pdf" }
+          ]
+        },
+        { "season": "2021/2022", "links": [{ "label": "Results", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2023/08/2022-Match-Play-Masters-Report.pdf" }] },
+        { "season": "2020/2021", "links": [{ "label": "Results", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2023/08/2021-Match-Play-Masters-report.pdf" }] },
+        { "season": "2019/2020", "links": [{ "label": "Results", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2023/08/2020-Match-Play-Masters-Final-Results.pdf" }] }
+      ]
+    },
+    {
+      "tournament": "Match Play (Seniors)",
+      "years": [
+        { "season": "2025/2026", "links": [
+            { "label": "Qualifying", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2026-Senior-Qualifying-Results.pdf" },
+            { "label": "Match Play", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2026-Senior-Bracket-Results.pdf" }
+          ]
+        },
+        { "season": "2024/2025", "links": [
+            { "label": "Qualifying", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2025-Senior-Match-Play-Qualifying.pdf" },
+            { "label": "Match Play", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2025-Senior-Match-Play-Bracket.jpg" }
+          ]
+        },
+        { "season": "2023/2024", "links": [
+            { "label": "Qualifying", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2024/01/2023-2024-Seniors-Match-Play-Qualify-Round.pdf" },
+            { "label": "Match Play", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2024/01/2023-2024-Seniors-Bracket.jpg" }
+          ]
+        },
+        { "season": "2022/2023", "links": [
+            { "label": "Results", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2023/08/2023-Match-Play-Seniors-final-results.pdf" },
+            { "label": "Prize List", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2023/08/2023-Match-Play-Seniors-Tournament-Report.pdf" }
+          ]
+        },
+        { "season": "2021/2022", "links": [{ "label": "Results", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2023/08/2022-Match-Play-Seniors-Report.pdf" }] },
+        { "season": "2020/2021", "links": [{ "label": "Results", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2023/08/2021-Match-Play-Seniors-report.pdf" }] },
+        { "season": "2019/2020", "links": [{ "label": "Results", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2023/08/2020-Match-Play-Seniors-Final-Results.pdf" }] }
+      ]
+    },
+    {
+      "tournament": "Open Association Tournament",
+      "years": [
+        { "season": "2025/2026", "links": [
+            { "label": "Results", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2026-Open-Final-Standings.pdf" },
+            { "label": "Prize List", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2026-Open-Final-Prize-List.pdf" }
+          ]
+        },
+        { "season": "2024/2025", "links": [
+            { "label": "Results", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2025-Open-Final-Standings.pdf" },
+            { "label": "Prize List", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2025-Open-Final-Prize-List.pdf" }
+          ]
+        },
+        { "season": "2023/2024", "links": [
+            { "label": "Results", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2024/01/2023-2024-Open-Final-Results.pdf" },
+            { "label": "Prize List", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2024/01/2023-2024-Open-Final-Prize-List.pdf" }
+          ]
+        },
+        { "season": "2022/2023", "links": [
+            { "label": "Results", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2023/08/2023-Open-Final-Standings.pdf" },
+            { "label": "Prize List", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2024/01/2022-2023-Open-Final-Prize-Listing.pdf" }
+          ]
+        },
+        { "season": "2021/2022", "links": [{ "label": "Results", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2023/08/2022-Open-Final-Standings.pdf" }] },
+        { "season": "2020/2021", "links": [
+            { "label": "Results", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2023/08/2021-Open-Final-Standings.pdf" },
+            { "label": "Prize List", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2023/08/2021-Open-Final-Prize-Listing.pdf" }
+          ]
+        },
+        { "season": "2019/2020", "links": [{ "label": "Results", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2023/08/2020-Open-Tournament-Final-Prize-List.pdf" }] }
+      ]
+    },
+    {
+      "tournament": "Women's Association Tournament",
+      "years": [
+        { "season": "2025/2026", "links": [
+            { "label": "Results", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2026-Womens-Final-Standings.pdf" },
+            { "label": "Prize List", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2026-Womens-Final-Prize-List.pdf" }
+          ]
+        },
+        { "season": "2024/2025", "links": [
+            { "label": "Results", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2025-Womens-Final-Standings.pdf" },
+            { "label": "Prize List", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2025-Womens-Final-Prize-List.pdf" }
+          ]
+        },
+        { "season": "2023/2024", "links": [
+            { "label": "Results", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2024/01/2023-2024-Womens-Final-Results-Updated.pdf" },
+            { "label": "Prize List", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2024/01/2023-2024-Womens-Final-Prize-List-Updated.pdf" }
+          ]
+        },
+        { "season": "2022/2023", "links": [
+            { "label": "Results", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2023/08/2023-Womens-Final-Standings.pdf" },
+            { "label": "Prize List", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2023/08/2023-Womens-Final-Prize-Listing.pdf" }
+          ]
+        },
+        { "season": "2021/2022", "links": [{ "label": "Results", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2023/08/2022-Womens-Final-Standings.pdf" }] },
+        { "season": "2020/2021", "links": [
+            { "label": "Results", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2023/08/2021-Womens-Final-Standings.pdf" },
+            { "label": "Prize List", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2023/08/2021-Womens-Final-Prize-Listing.pdf" }
+          ]
+        },
+        { "season": "2019/2020", "links": [{ "label": "Results", "url": "https://www.greaterfoxcitiesba.com/wp-content/uploads/2023/08/2020-Womens-Tournament-Final-Prize-List.pdf" }] }
+      ]
+    }
+  ]
+}

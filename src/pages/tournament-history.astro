@@ -1,0 +1,166 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import historyRaw from "../content/tournament-history/tournament-history.json";
+
+interface HistoryLink {
+  label?: string;
+  url?: string;
+}
+
+interface HistoryYear {
+  season?: string;
+  links?: HistoryLink[];
+}
+
+interface TournamentGroup {
+  tournament?: string;
+  years?: HistoryYear[];
+}
+
+const data = historyRaw as {
+  slug?: string;
+  heading?: string;
+  intro?: string;
+  groups?: TournamentGroup[];
+};
+
+const pageTitle = data.heading ?? "Tournament History";
+const groups = data.groups ?? [];
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={data.intro ??
+    "Browse past Greater Fox Cities Bowling Association tournament results and prize lists."}
+>
+  <h1>{pageTitle}</h1>
+
+  {data.intro && <p class="history-intro">{data.intro}</p>}
+
+  {
+    groups.length === 0 ? (
+      <p>No historical records have been entered yet. Check back soon.</p>
+    ) : (
+      <div class="groups">
+        {groups.map((g) => (
+          <section class="group">
+            <h2 class="group__name">{g.tournament}</h2>
+            <ul class="year-list">
+              {(g.years ?? []).map((y) => (
+                <li class="year-row">
+                  <span class="year-row__season">{y.season}</span>
+                  <span class="year-row__sep">–</span>
+                  {(y.links ?? []).length === 0 ? (
+                    <span class="year-row__tbd">Results / TBD</span>
+                  ) : (
+                    <span class="year-row__links">
+                      {(y.links ?? []).map((lk, i) => (
+                        <>
+                          {i > 0 && <span class="year-row__divider"> / </span>}
+                          <a
+                            href={lk.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="year-row__link"
+                          >
+                            {lk.label}
+                          </a>
+                        </>
+                      ))}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
+      </div>
+    )
+  }
+</BaseLayout>
+
+<style>
+  .history-intro {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    margin-bottom: 1.75rem;
+  }
+
+  /* ── Tournament groups ── */
+  .groups {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .group__name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--navy);
+    border-left: 4px solid var(--red);
+    padding-left: 0.6rem;
+    margin: 0 0 0.6rem;
+  }
+
+  /* ── Year rows ── */
+  .year-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .year-row {
+    font-size: 0.9rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+    padding: 0.3rem 0.5rem;
+    border-radius: 3px;
+  }
+
+  .year-row:hover {
+    background: var(--cream);
+  }
+
+  .year-row__season {
+    font-weight: 600;
+    color: var(--navy);
+    min-width: 5.5rem;
+  }
+
+  .year-row__sep {
+    color: var(--text-muted);
+  }
+
+  .year-row__tbd {
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  .year-row__links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0;
+  }
+
+  .year-row__link {
+    color: var(--red);
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .year-row__link:hover {
+    color: var(--red-dark);
+    text-decoration: underline;
+  }
+
+  .year-row__divider {
+    color: var(--text-muted);
+    padding: 0 0.15rem;
+  }
+</style>

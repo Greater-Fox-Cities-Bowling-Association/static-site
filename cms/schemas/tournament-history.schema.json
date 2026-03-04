@@ -1,0 +1,26 @@
+{
+  "id": "tournament-history",
+  "name": "Tournament History",
+  "directory": "src/content/tournament-history",
+  "fields": [
+    {
+      "name": "heading",
+      "label": "Page Heading",
+      "type": "text",
+      "required": false
+    },
+    {
+      "name": "intro",
+      "label": "Intro Text",
+      "type": "textarea",
+      "required": false
+    },
+    {
+      "name": "groups",
+      "label": "Tournament Groups",
+      "type": "array",
+      "required": false,
+      "ofSchema": "history-tournament-group"
+    }
+  ]
+}
