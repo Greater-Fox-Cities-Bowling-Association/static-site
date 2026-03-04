@@ -1,0 +1,50 @@
+{
+  "heading": "Committees",
+  "notes": [
+    "* denotes non-board member",
+    "Bold name denotes committee chair",
+    "Association President and Association Manager are ad-hoc members of all committees"
+  ],
+  "committees": [
+    {
+      "name": "Tournament / All-Association Team",
+      "chair": "Ryan Duescher",
+      "members": ["Carlene Enama", "Becky Landgraf", "Matt Mattson", "Michele Minkebige", "Glenn Monte", "Caroline Pirkola", "Holland Rittmann", "Megan Salentine", "Amy Young"]
+    },
+    {
+      "name": "Awards",
+      "chair": "Amy Young",
+      "members": ["Carlene Enama", "Becky Landgraf", "Matt Mattson", "Holland Rittmann", "Megan Salentine", "Annette Zelinski"]
+    },
+    {
+      "name": "Hall of Fame",
+      "chair": "Annette Zelinski",
+      "members": ["Ryan Duescher", "Rhonda Hansen", "Becky Landgraf", "Holland Rittmann", "Amy Young"]
+    },
+    {
+      "name": "Audit / Finance",
+      "chair": "Beth Kosiorek",
+      "members": ["Ryan Duescher", "Rhonda Hansen", "Glenn Monte", "Megan Salentine", "Mary Jo Woods*", "Annette Zelinski"]
+    },
+    {
+      "name": "Scholarship",
+      "chair": "Carlene Enama",
+      "members": ["Jim Kading", "Michele Minkebige", "Holland Rittmann", "Megan Salentine"]
+    },
+    {
+      "name": "Nominating",
+      "chair": "Caroline Pirkola",
+      "members": ["Ryan Duescher", "Carlene Enama", "Rhonda Hansen", "Michele Minkebige", "Holland Rittmann"]
+    },
+    {
+      "name": "Legislative",
+      "chair": "Annette Zelinski",
+      "members": ["Ryan Duescher", "Jim Kading", "Matt Mattson"]
+    },
+    {
+      "name": "Youth",
+      "chair": "Megan Salentine",
+      "members": ["Carlene Enama", "Rhonda Hansen", "Becky Landgraf", "Caroline Pirkola", "Amy Young"]
+    }
+  ]
+}

@@ -1,0 +1,105 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import data from "../content/centers.json";
+
+interface Center {
+  name: string;
+  address: string;
+  website: string;
+}
+---
+
+<BaseLayout
+  title={data.heading}
+  description="Bowling centers that are members of the Greater Fox Cities USBC Association."
+>
+  <div class="centers-page">
+    <h1>{data.heading}</h1>
+
+    <div class="centers-grid">
+      {
+        data.centers.map((center: Center) => (
+          <div class="center-card">
+            <h2>{center.name}</h2>
+            <p class="address">{center.address}</p>
+            <a
+              href={
+                center.website.startsWith("http")
+                  ? center.website
+                  : `https://${center.website}`
+              }
+              target="_blank"
+              rel="noopener noreferrer"
+              class="website-link"
+            >
+              Visit Website
+            </a>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .centers-page {
+    max-width: var(--max-w, 960px);
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+
+  h1 {
+    color: var(--navy);
+    border-bottom: 3px solid var(--red);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .centers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .center-card {
+    background: #fff;
+    border: 1px solid var(--border, #ddd);
+    border-top: 3px solid var(--navy);
+    border-radius: 4px;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .center-card h2 {
+    color: var(--navy);
+    font-size: 1.05rem;
+    margin: 0;
+  }
+
+  .address {
+    color: var(--text-muted, #555);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0;
+    flex: 1;
+  }
+
+  .website-link {
+    align-self: flex-start;
+    display: inline-block;
+    margin-top: 0.5rem;
+    background: var(--navy);
+    color: #fff;
+    padding: 0.4rem 0.9rem;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: background 0.2s;
+  }
+
+  .website-link:hover {
+    background: var(--red);
+  }
+</style>

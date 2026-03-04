@@ -1,0 +1,36 @@
+{
+  "heading": "Centers",
+  "intro": "The Greater Fox Cities Bowling Association sanctions leagues at the following member bowling centers.",
+  "centers": [
+    {
+      "name": "Bowlero Sabre Lanes",
+      "address": "1330 Midway Rd, Menasha, WI",
+      "website": "https://www.bowlero.com/location/sabre-lanes"
+    },
+    {
+      "name": "Bowlero Super Bowl",
+      "address": "2222 E Northland Ave, Appleton, WI",
+      "website": "https://www.bowlero.com/location/super-bowl-family-entertainment-center"
+    },
+    {
+      "name": "Electric City Lanes",
+      "address": "136 W Wisconsin Ave, Kaukauna, WI",
+      "website": "https://www.electriccitylanes.com/"
+    },
+    {
+      "name": "Officials Bowl & Spirits",
+      "address": "408 N 8th St, Hilbert, WI",
+      "website": "https://www.facebook.com/officialsden/"
+    },
+    {
+      "name": "Rolling Thunder Lanes",
+      "address": "934 Byrd Ave, Neenah, WI",
+      "website": "https://rollingthunderlanes.com/"
+    },
+    {
+      "name": "Split Happens",
+      "address": "106 S. Main St, Brillion, WI",
+      "website": "https://www.facebook.com/profile.php?id=100046971175071"
+    }
+  ]
+}

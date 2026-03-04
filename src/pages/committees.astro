@@ -1,0 +1,137 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import data from "../content/committees.json";
+
+interface Committee {
+  name: string;
+  chair: string;
+  members: string[];
+}
+---
+
+<BaseLayout
+  title={data.heading}
+  description="GFCBA committee members, chairs, and responsibilities."
+>
+  <div class="committees-page">
+    <h1>{data.heading}</h1>
+
+    <div class="notes-box">
+      <ul>
+        {data.notes.map((note: string) => <li>{note}</li>)}
+      </ul>
+    </div>
+
+    <div class="committees-grid">
+      {
+        data.committees.map((committee: Committee) => (
+          <div class="committee-card">
+            <h2>{committee.name}</h2>
+            <p class="chair-row">
+              <span class="chair-label">Chair:</span>
+              <strong>{committee.chair}</strong>
+            </p>
+            <ul class="member-list">
+              {committee.members.map((member: string) => (
+                <li>{member}</li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .committees-page {
+    max-width: var(--max-w, 960px);
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+
+  h1 {
+    color: var(--navy);
+    border-bottom: 3px solid var(--red);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .notes-box {
+    background: var(--cream, #f7f3ec);
+    border-left: 4px solid var(--navy);
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 2rem;
+    border-radius: 0 4px 4px 0;
+  }
+
+  .notes-box ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 2rem;
+  }
+
+  .notes-box li {
+    font-size: 0.85rem;
+    color: var(--text-muted, #555);
+  }
+
+  .committees-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .committee-card {
+    background: #fff;
+    border: 1px solid var(--border, #ddd);
+    border-top: 3px solid var(--navy);
+    border-radius: 4px;
+    padding: 1.1rem 1.25rem;
+  }
+
+  .committee-card h2 {
+    color: var(--navy);
+    font-size: 1rem;
+    margin: 0 0 0.6rem;
+  }
+
+  .chair-row {
+    font-size: 0.9rem;
+    margin: 0 0 0.6rem;
+    display: flex;
+    gap: 0.4rem;
+    align-items: baseline;
+  }
+
+  .chair-label {
+    color: var(--text-muted, #555);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .chair-row strong {
+    color: var(--red, #c8102e);
+  }
+
+  .member-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.5rem;
+  }
+
+  .member-list li {
+    font-size: 0.85rem;
+    color: #444;
+    background: var(--cream, #f7f3ec);
+    padding: 0.2rem 0.5rem;
+    border-radius: 3px;
+  }
+</style>
