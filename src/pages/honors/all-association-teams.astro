@@ -46,8 +46,9 @@ const pageTitle = data.heading ?? "All Association Teams";
           {data.links.map((l) => (
             <a
               href={l.url}
-              target="_blank"
-              rel="noopener noreferrer"
+              {...(l.url.startsWith("http")
+                ? { target: "_blank", rel: "noopener noreferrer" }
+                : {})}
               class="program-link"
             >
               ↗ {l.label}

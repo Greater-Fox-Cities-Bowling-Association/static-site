@@ -1,0 +1,128 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import raw from "../../../content/honors/womens-youth-aat-program.json";
+
+interface Criterion {
+  title: string;
+  text: string;
+}
+interface PdfLink {
+  label: string;
+  url: string;
+}
+const data = raw as {
+  heading: string;
+  pdf_link?: PdfLink;
+  intro?: string;
+  criteria?: Criterion[];
+  footer_note?: string;
+};
+const pageTitle =
+  data.heading ?? "Women's and Youth All Association Team Program";
+---
+
+<BaseLayout
+  title={pageTitle}
+  description="How the Greater Fox Cities Bowling Association selects its Women's and Youth Bowlers of the Year and All-Association Teams."
+>
+  <div class="program-page">
+    <h1>{pageTitle}</h1>
+
+    {
+      data.pdf_link && (
+        <a
+          href={data.pdf_link.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="pdf-link"
+        >
+          ↗ {data.pdf_link.label}
+        </a>
+      )
+    }
+
+    {data.intro && <p class="intro-text">{data.intro}</p>}
+
+    {
+      data.criteria && data.criteria.length > 0 && (
+        <dl class="criteria-list">
+          {data.criteria.map((c) => (
+            <>
+              <dt>{c.title}</dt>
+              <dd>{c.text}</dd>
+            </>
+          ))}
+        </dl>
+      )
+    }
+
+    {data.footer_note && <p class="footer-note">{data.footer_note}</p>}
+
+    <p class="back-link">
+      <a href="/honors/all-association-teams/"
+        >← Back to All Association Teams</a
+      >
+    </p>
+  </div>
+</BaseLayout>
+
+<style>
+  .program-page {
+    max-width: var(--max-w, 960px);
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+  h1 {
+    color: var(--navy);
+    border-bottom: 3px solid var(--red);
+    padding-bottom: 0.4rem;
+    margin-bottom: 1.5rem;
+  }
+  .pdf-link {
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    color: var(--red);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .pdf-link:hover {
+    text-decoration: underline;
+  }
+  .intro-text {
+    font-size: 1rem;
+    line-height: 1.7;
+    margin-bottom: 1.75rem;
+    color: #333;
+  }
+  .criteria-list {
+    margin: 0 0 2rem;
+  }
+  .criteria-list dt {
+    font-weight: 700;
+    color: var(--navy);
+    margin-top: 1.25rem;
+    font-size: 1rem;
+  }
+  .criteria-list dd {
+    margin: 0.4rem 0 0 0;
+    line-height: 1.7;
+    color: #333;
+  }
+  .footer-note {
+    background: var(--cream);
+    border-left: 4px solid var(--lane-tan, #d4a84b);
+    padding: 0.9rem 1.1rem;
+    font-size: 0.93rem;
+    line-height: 1.7;
+    margin-bottom: 2rem;
+    color: #444;
+  }
+  .back-link a {
+    color: var(--navy);
+    font-size: 0.9rem;
+    text-decoration: none;
+  }
+  .back-link a:hover {
+    text-decoration: underline;
+  }
+</style>

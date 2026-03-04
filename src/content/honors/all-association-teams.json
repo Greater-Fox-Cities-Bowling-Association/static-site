@@ -2,8 +2,8 @@
   "heading": "All Association Teams",
   "intro": "The All Association Teams honor the top bowlers in each division each season.",
   "links": [
-    { "label": "Men's Bowler of the Year and All Association Team Program", "url": "https://www.greaterfoxcitiesba.com/honors/all-association-teams/mens-all-association-team-program/" },
-    { "label": "Women's/Youth Bowler of the Year and All Association Team Program", "url": "https://www.greaterfoxcitiesba.com/honors/all-association-teams/womens-and-youth-all-association-team-program/" }
+    { "label": "Men's Bowler of the Year and All Association Team Program", "url": "/honors/all-association-teams/mens-all-association-team-program/" },
+    { "label": "Women's/Youth Bowler of the Year and All Association Team Program", "url": "/honors/all-association-teams/womens-and-youth-all-association-team-program/" }
   ],
   "seasons": [
     {
