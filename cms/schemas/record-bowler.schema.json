@@ -3,8 +3,25 @@
   "name": "Record Bowler",
   "directory": "src/content/record-bowler",
   "fields": [
-    { "name": "name",   "label": "Name",         "type": "text",   "required": true },
-    { "name": "scores", "label": "Game Scores",  "type": "array",  "of": "number", "helpText": "Individual game scores" },
-    { "name": "total",  "label": "Series Total", "type": "number", "helpText": "Leave blank for game records" }
-  ]
+    {
+      "name": "name",
+      "label": "Name",
+      "type": "text",
+      "required": true
+    },
+    {
+      "name": "scores",
+      "label": "Game Scores",
+      "type": "array",
+      "of": "number",
+      "helpText": "Individual game scores"
+    },
+    {
+      "name": "total",
+      "label": "Series Total",
+      "type": "number",
+      "helpText": "Leave blank for game records"
+    }
+  ],
+  "group": "component"
 }
