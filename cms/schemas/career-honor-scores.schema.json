@@ -3,7 +3,16 @@
   "name": "Career Honor Scores",
   "directory": "src/content/honors/career-honor-scores",
   "fields": [
-    { "name": "heading", "label": "Heading", "type": "text" },
-    { "name": "intro",   "label": "Intro",   "type": "textarea" }
-  ]
+    {
+      "name": "heading",
+      "label": "Heading",
+      "type": "text"
+    },
+    {
+      "name": "intro",
+      "label": "Intro",
+      "type": "textarea"
+    }
+  ],
+  "group": "pages"
 }

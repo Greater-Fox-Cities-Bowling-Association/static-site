@@ -3,9 +3,28 @@
   "name": "High Average",
   "directory": "src/content/honors/high-average",
   "fields": [
-    { "name": "heading", "label": "Heading",        "type": "text" },
-    { "name": "intro",   "label": "Intro",          "type": "textarea" },
-    { "name": "notes",   "label": "Legend Notes",   "type": "array", "of": "text" },
-    { "name": "entries", "label": "Entries",        "type": "array", "ofSchema": "high-average-entry" }
-  ]
+    {
+      "name": "heading",
+      "label": "Heading",
+      "type": "text"
+    },
+    {
+      "name": "intro",
+      "label": "Intro",
+      "type": "textarea"
+    },
+    {
+      "name": "notes",
+      "label": "Legend Notes",
+      "type": "array",
+      "of": "text"
+    },
+    {
+      "name": "entries",
+      "label": "Entries",
+      "type": "array",
+      "ofSchema": "high-average-entry"
+    }
+  ],
+  "group": "pages"
 }

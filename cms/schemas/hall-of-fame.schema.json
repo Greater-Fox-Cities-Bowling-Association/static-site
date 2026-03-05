@@ -3,10 +3,35 @@
   "name": "Hall of Fame",
   "directory": "src/content/honors/hall-of-fame",
   "fields": [
-    { "name": "heading", "label": "Heading",       "type": "text" },
-    { "name": "intro",   "label": "Intro",         "type": "textarea" },
-    { "name": "notes",   "label": "Legend Notes",  "type": "array", "of": "text", "helpText": "Key/legend lines e.g. ^^ — Also inducted into WI State Hall of Fame" },
-    { "name": "links",   "label": "Links",         "type": "array", "ofSchema": "link" },
-    { "name": "entries", "label": "Inductee Years","type": "array", "ofSchema": "hof-year" }
-  ]
+    {
+      "name": "heading",
+      "label": "Heading",
+      "type": "text"
+    },
+    {
+      "name": "intro",
+      "label": "Intro",
+      "type": "textarea"
+    },
+    {
+      "name": "notes",
+      "label": "Legend Notes",
+      "type": "array",
+      "of": "text",
+      "helpText": "Key/legend lines e.g. ^^ — Also inducted into WI State Hall of Fame"
+    },
+    {
+      "name": "links",
+      "label": "Links",
+      "type": "array",
+      "ofSchema": "link"
+    },
+    {
+      "name": "entries",
+      "label": "Inductee Years",
+      "type": "array",
+      "ofSchema": "hof-year"
+    }
+  ],
+  "group": "pages"
 }

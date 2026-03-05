@@ -3,9 +3,28 @@
   "name": "All Association Teams",
   "directory": "src/content/honors/all-association-teams",
   "fields": [
-    { "name": "heading", "label": "Heading",       "type": "text" },
-    { "name": "intro",   "label": "Intro",         "type": "textarea" },
-    { "name": "links",   "label": "Program Links", "type": "array", "ofSchema": "link" },
-    { "name": "seasons", "label": "Seasons",       "type": "array", "ofSchema": "aat-season" }
-  ]
+    {
+      "name": "heading",
+      "label": "Heading",
+      "type": "text"
+    },
+    {
+      "name": "intro",
+      "label": "Intro",
+      "type": "textarea"
+    },
+    {
+      "name": "links",
+      "label": "Program Links",
+      "type": "array",
+      "ofSchema": "link"
+    },
+    {
+      "name": "seasons",
+      "label": "Seasons",
+      "type": "array",
+      "ofSchema": "aat-season"
+    }
+  ],
+  "group": "pages"
 }

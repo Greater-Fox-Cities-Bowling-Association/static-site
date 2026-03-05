@@ -3,8 +3,22 @@
   "name": "Team Records",
   "directory": "src/content/honors/team-records",
   "fields": [
-    { "name": "heading", "label": "Heading", "type": "text" },
-    { "name": "intro",   "label": "Intro",   "type": "textarea" },
-    { "name": "records", "label": "Records", "type": "array", "ofSchema": "team-record" }
-  ]
+    {
+      "name": "heading",
+      "label": "Heading",
+      "type": "text"
+    },
+    {
+      "name": "intro",
+      "label": "Intro",
+      "type": "textarea"
+    },
+    {
+      "name": "records",
+      "label": "Records",
+      "type": "array",
+      "ofSchema": "team-record"
+    }
+  ],
+  "group": "pages"
 }

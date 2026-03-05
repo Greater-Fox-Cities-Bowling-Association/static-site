@@ -3,7 +3,16 @@
   "name": "Match Play Champions",
   "directory": "src/content/honors/match-play-champions",
   "fields": [
-    { "name": "heading", "label": "Heading", "type": "text" },
-    { "name": "intro",   "label": "Intro",   "type": "textarea" }
-  ]
+    {
+      "name": "heading",
+      "label": "Heading",
+      "type": "text"
+    },
+    {
+      "name": "intro",
+      "label": "Intro",
+      "type": "textarea"
+    }
+  ],
+  "group": "pages"
 }
