@@ -3,7 +3,16 @@
   "name": "Career Total Games",
   "directory": "src/content/honors/career-total-games",
   "fields": [
-    { "name": "heading", "label": "Heading", "type": "text" },
-    { "name": "intro",   "label": "Intro",   "type": "textarea" }
-  ]
+    {
+      "name": "heading",
+      "label": "Heading",
+      "type": "text"
+    },
+    {
+      "name": "intro",
+      "label": "Intro",
+      "type": "textarea"
+    }
+  ],
+  "group": "sub pages"
 }

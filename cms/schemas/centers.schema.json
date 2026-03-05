@@ -3,8 +3,22 @@
   "name": "Bowling Centers",
   "directory": "src/content/centers",
   "fields": [
-    { "name": "heading", "label": "Heading",         "type": "text" },
-    { "name": "intro",   "label": "Intro",           "type": "textarea" },
-    { "name": "centers", "label": "Bowling Centers", "type": "array", "ofSchema": "center" }
-  ]
+    {
+      "name": "heading",
+      "label": "Heading",
+      "type": "text"
+    },
+    {
+      "name": "intro",
+      "label": "Intro",
+      "type": "textarea"
+    },
+    {
+      "name": "centers",
+      "label": "Bowling Centers",
+      "type": "array",
+      "ofSchema": "center"
+    }
+  ],
+  "group": "pages"
 }

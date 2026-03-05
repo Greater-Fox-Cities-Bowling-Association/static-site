@@ -3,7 +3,18 @@
   "name": "Hall of Fame Inductee",
   "directory": "src/content/hof-inductee",
   "fields": [
-    { "name": "name", "label": "Name", "type": "text", "required": true },
-    { "name": "note", "label": "Note", "type": "text", "helpText": "Optional symbol(s) e.g. ^^ or *" }
-  ]
+    {
+      "name": "name",
+      "label": "Name",
+      "type": "text",
+      "required": true
+    },
+    {
+      "name": "note",
+      "label": "Note",
+      "type": "text",
+      "helpText": "Optional symbol(s) e.g. ^^ or *"
+    }
+  ],
+  "group": "list component"
 }

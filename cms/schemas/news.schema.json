@@ -34,5 +34,6 @@
       "required": false,
       "ofSchema": "news-listing"
     }
-  ]
+  ],
+  "group": "pages"
 }

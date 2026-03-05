@@ -3,9 +3,28 @@
   "name": "High Series",
   "directory": "src/content/honors/high-series",
   "fields": [
-    { "name": "heading",     "label": "Heading",     "type": "text" },
-    { "name": "intro",       "label": "Intro",       "type": "textarea" },
-    { "name": "record_note", "label": "Record Note", "type": "text", "helpText": "Text describing the all-time record" },
-    { "name": "entries",     "label": "Entries",     "type": "array", "ofSchema": "high-series-entry" }
-  ]
+    {
+      "name": "heading",
+      "label": "Heading",
+      "type": "text"
+    },
+    {
+      "name": "intro",
+      "label": "Intro",
+      "type": "textarea"
+    },
+    {
+      "name": "record_note",
+      "label": "Record Note",
+      "type": "text",
+      "helpText": "Text describing the all-time record"
+    },
+    {
+      "name": "entries",
+      "label": "Entries",
+      "type": "array",
+      "ofSchema": "high-series-entry"
+    }
+  ],
+  "group": "sub pages"
 }

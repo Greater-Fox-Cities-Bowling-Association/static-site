@@ -17,5 +17,6 @@
       "required": false,
       "ofSchema": "history-year"
     }
-  ]
+  ],
+  "group": "list component"
 }

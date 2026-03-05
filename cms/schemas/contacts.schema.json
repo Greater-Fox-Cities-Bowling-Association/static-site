@@ -3,15 +3,60 @@
   "name": "Contacts",
   "directory": "src/content/contacts",
   "fields": [
-    { "name": "heading",               "label": "Heading",               "type": "text" },
-    { "name": "board_appeal",          "label": "Board Appeal Text",      "type": "textarea" },
-    { "name": "application_link_label","label": "Application Link: Label","type": "text" },
-    { "name": "application_link_url",  "label": "Application Link: URL",  "type": "text" },
-    { "name": "facebook_label",        "label": "Facebook: Label",        "type": "text" },
-    { "name": "facebook_url",          "label": "Facebook: URL",          "type": "text" },
-    { "name": "emails",                "label": "Email Addresses",        "type": "array", "of": "text" },
-    { "name": "vacancies_note",        "label": "Vacancies Note",         "type": "text", "helpText": "e.g. '1 spot available — apply today!'" },
-    { "name": "officers",              "label": "Officers",               "type": "array", "ofSchema": "officer" },
-    { "name": "board",                 "label": "Board Members",          "type": "array", "of": "text" }
-  ]
+    {
+      "name": "heading",
+      "label": "Heading",
+      "type": "text"
+    },
+    {
+      "name": "board_appeal",
+      "label": "Board Appeal Text",
+      "type": "textarea"
+    },
+    {
+      "name": "application_link_label",
+      "label": "Application Link: Label",
+      "type": "text"
+    },
+    {
+      "name": "application_link_url",
+      "label": "Application Link: URL",
+      "type": "text"
+    },
+    {
+      "name": "facebook_label",
+      "label": "Facebook: Label",
+      "type": "text"
+    },
+    {
+      "name": "facebook_url",
+      "label": "Facebook: URL",
+      "type": "text"
+    },
+    {
+      "name": "emails",
+      "label": "Email Addresses",
+      "type": "array",
+      "of": "text"
+    },
+    {
+      "name": "vacancies_note",
+      "label": "Vacancies Note",
+      "type": "text",
+      "helpText": "e.g. '1 spot available — apply today!'"
+    },
+    {
+      "name": "officers",
+      "label": "Officers",
+      "type": "array",
+      "ofSchema": "officer"
+    },
+    {
+      "name": "board",
+      "label": "Board Members",
+      "type": "array",
+      "of": "text"
+    }
+  ],
+  "group": "pages"
 }

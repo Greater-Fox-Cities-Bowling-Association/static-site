@@ -9,5 +9,6 @@
       "type": "text",
       "required": false
     }
-  ]
+  ],
+  "group": "pages"
 }
