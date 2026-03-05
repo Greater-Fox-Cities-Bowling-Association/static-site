@@ -17,6 +17,7 @@ import Typography from "@mui/material/Typography";
 import ArticleIcon from "@mui/icons-material/Article";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import DashboardCustomizeIcon from "@mui/icons-material/DashboardCustomize";
 import LogoutIcon from "@mui/icons-material/Logout";
 import SchemaIcon from "@mui/icons-material/Schema";
 import TableChartIcon from "@mui/icons-material/TableChart";
@@ -26,6 +27,7 @@ import { useGitHubToken } from "./useGitHubToken";
 import { ContentList } from "./pages/ContentList";
 import { ContentFileEditor } from "./editor/ContentFileEditor";
 import { CsvImporter } from "./csv/CsvImporter";
+import { GroupManager } from "./schema/GroupManager";
 import { SchemaList } from "./schema/SchemaList";
 import { listSchemas } from "../../../cms/github/githubSchemas";
 import type { CmsSchema } from "../../../cms/types";
@@ -38,6 +40,7 @@ const DRAWER_WIDTH = 268;
 // Section key format:
 //   "schema:<id>"    → content list for that schema
 //   "content-models" → schema builder UI
+//   "groups"         → drag-and-drop group organizer
 //   "csv"            → CSV importer
 
 const cmsTheme = createTheme({
@@ -127,6 +130,23 @@ function AdminDashboard() {
       );
     }
     if (activeSection === "csv") return <CsvImporter token={token} />;
+    if (activeSection === "groups")
+      return (
+        <GroupManager
+          token={token}
+          onSaved={() => {
+            if (!token) return;
+            listSchemas(token, REPO, BRANCH)
+              .then((list) => {
+                setSchemas(list);
+                setOpenGroups(
+                  new Set(list.map((s) => s.group?.trim() || "— Ungrouped")),
+                );
+              })
+              .catch(() => {});
+          }}
+        />
+      );
     if (activeSection === "content-models") {
       return (
         <SchemaList
@@ -338,9 +358,29 @@ function AdminDashboard() {
 
           <Divider sx={{ borderColor: "rgba(255,255,255,0.06)", my: 1 }} />
 
-          {/* Content Models */}
-          {(["content-models", "csv"] as const).map((key) => {
-            const isModels = key === "content-models";
+          {/* Content Models / Groups / CSV */}
+          {(
+            [
+              {
+                key: "content-models",
+                label: "Content Models",
+                sub: "Define your content types",
+                icon: <SchemaIcon />,
+              },
+              {
+                key: "groups",
+                label: "Organize Groups",
+                sub: "Drag & drop type assignments",
+                icon: <DashboardCustomizeIcon />,
+              },
+              {
+                key: "csv",
+                label: "CSV Import",
+                sub: "Bulk import from a spreadsheet",
+                icon: <TableChartIcon />,
+              },
+            ] as const
+          ).map(({ key, label, sub, icon }) => {
             const selected = activeSection === key;
             return (
               <ListItemButton
@@ -366,15 +406,11 @@ function AdminDashboard() {
                     opacity: selected ? 1 : 0.7,
                   }}
                 >
-                  {isModels ? <SchemaIcon /> : <TableChartIcon />}
+                  {icon}
                 </ListItemIcon>
                 <ListItemText
-                  primary={isModels ? "Content Models" : "CSV Import"}
-                  secondary={
-                    isModels
-                      ? "Define your content types"
-                      : "Bulk import from a spreadsheet"
-                  }
+                  primary={label}
+                  secondary={sub}
                   primaryTypographyProps={{
                     fontWeight: 600,
                     fontSize: 14,
