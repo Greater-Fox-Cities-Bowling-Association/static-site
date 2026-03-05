@@ -3,11 +3,37 @@
   "name": "Men's AAT Program",
   "directory": "src/content/honors/mens-aat-program",
   "fields": [
-    { "name": "heading",       "label": "Heading",              "type": "text" },
-    { "name": "pdf_link_label","label": "PDF Link: Label",      "type": "text" },
-    { "name": "pdf_link_url",  "label": "PDF Link: URL",        "type": "text" },
-    { "name": "intro",         "label": "Intro",                "type": "textarea" },
-    { "name": "criteria",      "label": "Point Criteria",       "type": "array", "ofSchema": "aat-criteria" },
-    { "name": "footer_note",   "label": "Footer Note",          "type": "textarea" }
-  ]
+    {
+      "name": "heading",
+      "label": "Heading",
+      "type": "text"
+    },
+    {
+      "name": "pdf_link_label",
+      "label": "PDF Link: Label",
+      "type": "text"
+    },
+    {
+      "name": "pdf_link_url",
+      "label": "PDF Link: URL",
+      "type": "text"
+    },
+    {
+      "name": "intro",
+      "label": "Intro",
+      "type": "textarea"
+    },
+    {
+      "name": "criteria",
+      "label": "Point Criteria",
+      "type": "array",
+      "ofSchema": "aat-criteria"
+    },
+    {
+      "name": "footer_note",
+      "label": "Footer Note",
+      "type": "textarea"
+    }
+  ],
+  "group": "pages"
 }
