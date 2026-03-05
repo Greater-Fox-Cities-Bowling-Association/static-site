@@ -122,6 +122,8 @@ export interface CmsSchema {
   id: string;
   /** Human-readable name shown in the admin sidebar */
   name: string;
+  /** Optional group label for organizing schemas in the sidebar (e.g. "Records", "Navigation") */
+  group?: string;
   /** Path to the directory where entries are stored, e.g. "src/content/pages" */
   directory: string;
   /** Ordered list of fields for this content type */

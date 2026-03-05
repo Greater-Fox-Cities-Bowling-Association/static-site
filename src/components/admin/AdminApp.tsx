@@ -62,7 +62,7 @@ function AdminDashboard() {
 
   const [schemas, setSchemas] = useState<CmsSchema[]>([]);
   const [schemasLoading, setSchemasLoading] = useState(false);
-  const [contentOpen, setContentOpen] = useState(true);
+  const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
   const [activeSection, setActiveSection] = useState<string>("content-models");
   const [editingFile, setEditingFile] = useState<{
     path: string;
@@ -77,6 +77,10 @@ function AdminDashboard() {
     listSchemas(token, REPO, BRANCH)
       .then((list) => {
         setSchemas(list);
+        // Open every group by default
+        setOpenGroups(
+          new Set(list.map((s) => s.group?.trim() || "— Ungrouped")),
+        );
         if (list.length > 0) {
           setActiveSection((prev) =>
             prev === "content-models" ? `schema:${list[0].id}` : prev,
@@ -208,93 +212,129 @@ function AdminDashboard() {
 
         {/* Nav */}
         <List sx={{ px: 1.5, pt: 1.5, flex: 1 }}>
-          {/* CONTENT section header (collapsible) */}
-          <ListItemButton
-            onClick={() => setContentOpen((o) => !o)}
-            sx={{
-              borderRadius: 2,
-              mb: 0.5,
-              py: 0.8,
-              "&:hover": { bgcolor: "rgba(255,255,255,0.05)" },
-            }}
-          >
-            <ListItemText
-              primary="CONTENT"
-              primaryTypographyProps={{
-                fontSize: 10,
-                fontWeight: 700,
-                letterSpacing: 1,
-                color: "#64748b",
-              }}
-            />
-            {contentOpen ? (
-              <ExpandLessIcon sx={{ fontSize: 16, color: "#64748b" }} />
-            ) : (
-              <ExpandMoreIcon sx={{ fontSize: 16, color: "#64748b" }} />
-            )}
-          </ListItemButton>
-
-          <Collapse in={contentOpen}>
-            {schemasLoading &&
-              [0, 1].map((i) => (
-                <Skeleton
-                  key={i}
-                  variant="rounded"
-                  height={40}
-                  sx={{ mb: 0.5, bgcolor: "rgba(255,255,255,0.05)" }}
-                />
-              ))}
-            {!schemasLoading &&
-              schemas.map((schema) => {
-                const key = `schema:${schema.id}`;
-                const selected = activeSection === key;
+          {/* Grouped content sections */}
+          {schemasLoading &&
+            [0, 1, 2].map((i) => (
+              <Skeleton
+                key={i}
+                variant="rounded"
+                height={40}
+                sx={{ mb: 0.5, bgcolor: "rgba(255,255,255,0.05)" }}
+              />
+            ))}
+          {!schemasLoading &&
+            (() => {
+              // Build ordered, stable group list (ungrouped goes last)
+              const groupOrder: string[] = [];
+              const groupMap = new Map<string, CmsSchema[]>();
+              for (const s of schemas) {
+                const g = s.group?.trim() || "— Ungrouped";
+                if (!groupMap.has(g)) {
+                  groupOrder.push(g);
+                  groupMap.set(g, []);
+                }
+                groupMap.get(g)!.push(s);
+              }
+              const sorted = [
+                ...groupOrder.filter((g) => g !== "— Ungrouped"),
+                ...(groupOrder.includes("— Ungrouped") ? ["— Ungrouped"] : []),
+              ];
+              return sorted.map((groupName) => {
+                const groupSchemas = groupMap.get(groupName)!;
+                const isOpen = openGroups.has(groupName);
+                const toggleGroup = () =>
+                  setOpenGroups((prev) => {
+                    const next = new Set(prev);
+                    next.has(groupName)
+                      ? next.delete(groupName)
+                      : next.add(groupName);
+                    return next;
+                  });
                 return (
-                  <ListItemButton
-                    key={key}
-                    selected={selected}
-                    onClick={() => navigate(key)}
-                    sx={{
-                      borderRadius: 2,
-                      mb: 0.5,
-                      py: 1,
-                      pl: 2.5,
-                      "&.Mui-selected": {
-                        bgcolor: "rgba(37,99,235,0.85)",
-                        "&:hover": { bgcolor: "rgba(37,99,235,0.95)" },
-                      },
-                      "&:hover": { bgcolor: "rgba(255,255,255,0.07)" },
-                      color: selected ? "#fff" : "#cbd5e1",
-                    }}
-                  >
-                    <ListItemIcon
+                  <Box key={groupName}>
+                    <ListItemButton
+                      onClick={toggleGroup}
                       sx={{
-                        minWidth: 34,
-                        color: "inherit",
-                        opacity: selected ? 1 : 0.7,
+                        borderRadius: 2,
+                        mb: 0.5,
+                        py: 0.8,
+                        "&:hover": { bgcolor: "rgba(255,255,255,0.05)" },
                       }}
                     >
-                      <ArticleIcon fontSize="small" />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={schema.name}
-                      primaryTypographyProps={{
-                        fontWeight: 600,
-                        fontSize: 13,
-                        color: "inherit",
-                      }}
-                    />
-                  </ListItemButton>
+                      <ListItemText
+                        primary={groupName.toUpperCase()}
+                        primaryTypographyProps={{
+                          fontSize: 10,
+                          fontWeight: 700,
+                          letterSpacing: 1,
+                          color: "#64748b",
+                        }}
+                      />
+                      {isOpen ? (
+                        <ExpandLessIcon
+                          sx={{ fontSize: 16, color: "#64748b" }}
+                        />
+                      ) : (
+                        <ExpandMoreIcon
+                          sx={{ fontSize: 16, color: "#64748b" }}
+                        />
+                      )}
+                    </ListItemButton>
+                    <Collapse in={isOpen}>
+                      {groupSchemas.map((schema) => {
+                        const key = `schema:${schema.id}`;
+                        const selected = activeSection === key;
+                        return (
+                          <ListItemButton
+                            key={key}
+                            selected={selected}
+                            onClick={() => navigate(key)}
+                            sx={{
+                              borderRadius: 2,
+                              mb: 0.5,
+                              py: 1,
+                              pl: 2.5,
+                              "&.Mui-selected": {
+                                bgcolor: "rgba(37,99,235,0.85)",
+                                "&:hover": { bgcolor: "rgba(37,99,235,0.95)" },
+                              },
+                              "&:hover": { bgcolor: "rgba(255,255,255,0.07)" },
+                              color: selected ? "#fff" : "#cbd5e1",
+                            }}
+                          >
+                            <ListItemIcon
+                              sx={{
+                                minWidth: 34,
+                                color: "inherit",
+                                opacity: selected ? 1 : 0.7,
+                              }}
+                            >
+                              <ArticleIcon fontSize="small" />
+                            </ListItemIcon>
+                            <ListItemText
+                              primary={schema.name}
+                              primaryTypographyProps={{
+                                fontWeight: 600,
+                                fontSize: 13,
+                                color: "inherit",
+                              }}
+                            />
+                          </ListItemButton>
+                        );
+                      })}
+                    </Collapse>
+                  </Box>
                 );
-              })}
-            {!schemasLoading && schemas.length === 0 && (
-              <Typography
-                variant="caption"
-                sx={{ pl: 3, color: "#475569", display: "block", py: 1 }}
-              >
-                No content types yet
-              </Typography>
-            )}
-          </Collapse>
+              });
+            })()}
+          {!schemasLoading && schemas.length === 0 && (
+            <Typography
+              variant="caption"
+              sx={{ pl: 3, color: "#475569", display: "block", py: 1 }}
+            >
+              No content types yet
+            </Typography>
+          )}
 
           <Divider sx={{ borderColor: "rgba(255,255,255,0.06)", my: 1 }} />
 

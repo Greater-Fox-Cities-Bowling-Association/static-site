@@ -5,6 +5,7 @@
  */
 import { useState } from "react";
 import Alert from "@mui/material/Alert";
+import Autocomplete from "@mui/material/Autocomplete";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
@@ -99,7 +100,13 @@ export function SchemaEditor({
   const [name, setName] = useState(initialSchema?.name ?? "");
   const [idEdited, setIdEdited] = useState(!isNew);
   const [id, setId] = useState(initialSchema?.id ?? "");
+  const [group, setGroup] = useState(initialSchema?.group ?? "");
   const [fields, setFields] = useState<CmsField[]>(initialSchema?.fields ?? []);
+
+  // Derive unique group names from all existing schemas for autocomplete suggestions
+  const existingGroups = Array.from(
+    new Set(allSchemas.map((s) => s.group ?? "").filter(Boolean)),
+  ).sort();
 
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -171,6 +178,7 @@ export function SchemaEditor({
     const schema: CmsSchema = {
       id,
       name,
+      ...(group.trim() ? { group: group.trim() } : {}),
       directory: `src/content/${id}`,
       fields,
     };
@@ -302,6 +310,21 @@ export function SchemaEditor({
                 size="small"
                 fullWidth
                 disabled={!isNew}
+              />
+              <Autocomplete
+                freeSolo
+                options={existingGroups}
+                value={group}
+                onInputChange={(_, v) => setGroup(v)}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Group"
+                    size="small"
+                    helperText="Optional — organizes this type in the sidebar"
+                    fullWidth
+                  />
+                )}
               />
             </Box>
           </Box>
