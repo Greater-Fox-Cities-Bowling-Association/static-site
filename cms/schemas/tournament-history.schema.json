@@ -22,5 +22,6 @@
       "required": false,
       "ofSchema": "history-tournament-group"
     }
-  ]
+  ],
+  "group": "pages"
 }

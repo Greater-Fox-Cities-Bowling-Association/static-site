@@ -3,8 +3,23 @@
   "name": "Committees",
   "directory": "src/content/committees",
   "fields": [
-    { "name": "heading",    "label": "Heading",    "type": "text" },
-    { "name": "notes",      "label": "Notes",      "type": "array", "of": "text" },
-    { "name": "committees", "label": "Committees", "type": "array", "ofSchema": "committee" }
-  ]
+    {
+      "name": "heading",
+      "label": "Heading",
+      "type": "text"
+    },
+    {
+      "name": "notes",
+      "label": "Notes",
+      "type": "array",
+      "of": "text"
+    },
+    {
+      "name": "committees",
+      "label": "Committees",
+      "type": "array",
+      "ofSchema": "committee"
+    }
+  ],
+  "group": "pages"
 }

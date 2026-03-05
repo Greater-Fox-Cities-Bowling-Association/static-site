@@ -3,11 +3,41 @@
   "name": "Awards",
   "directory": "src/content/awards",
   "fields": [
-    { "name": "heading",      "label": "Heading",             "type": "text" },
-    { "name": "rules_who",    "label": "Rules: Who",          "type": "textarea", "helpText": "Who is eligible for awards" },
-    { "name": "rules_when",   "label": "Rules: When",         "type": "textarea", "helpText": "When eligibility applies" },
-    { "name": "rules_where",  "label": "Rules: Where",        "type": "textarea", "helpText": "Where to submit forms" },
-    { "name": "links",        "label": "Download Links",      "type": "array", "ofSchema": "link" },
-    { "name": "award_groups", "label": "Award Groups",        "type": "array", "ofSchema": "award-group" }
-  ]
+    {
+      "name": "heading",
+      "label": "Heading",
+      "type": "text"
+    },
+    {
+      "name": "rules_who",
+      "label": "Rules: Who",
+      "type": "textarea",
+      "helpText": "Who is eligible for awards"
+    },
+    {
+      "name": "rules_when",
+      "label": "Rules: When",
+      "type": "textarea",
+      "helpText": "When eligibility applies"
+    },
+    {
+      "name": "rules_where",
+      "label": "Rules: Where",
+      "type": "textarea",
+      "helpText": "Where to submit forms"
+    },
+    {
+      "name": "links",
+      "label": "Download Links",
+      "type": "array",
+      "ofSchema": "link"
+    },
+    {
+      "name": "award_groups",
+      "label": "Award Groups",
+      "type": "array",
+      "ofSchema": "award-group"
+    }
+  ],
+  "group": "pages"
 }
