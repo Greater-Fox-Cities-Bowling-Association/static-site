@@ -20,13 +20,11 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import DashboardCustomizeIcon from "@mui/icons-material/DashboardCustomize";
 import LogoutIcon from "@mui/icons-material/Logout";
 import SchemaIcon from "@mui/icons-material/Schema";
-import TableChartIcon from "@mui/icons-material/TableChart";
 import { useEffect, useState } from "react";
 
 import { useGitHubToken } from "./useGitHubToken";
 import { ContentList } from "./pages/ContentList";
 import { ContentFileEditor } from "./editor/ContentFileEditor";
-import { CsvImporter } from "./csv/CsvImporter";
 import { GroupManager } from "./schema/GroupManager";
 import { SchemaList } from "./schema/SchemaList";
 import { listSchemas } from "../../../cms/github/githubSchemas";
@@ -41,7 +39,6 @@ const DRAWER_WIDTH = 268;
 //   "schema:<id>"    → content list for that schema
 //   "content-models" → schema builder UI
 //   "groups"         → drag-and-drop group organizer
-//   "csv"            → CSV importer
 
 const cmsTheme = createTheme({
   palette: {
@@ -129,7 +126,6 @@ function AdminDashboard() {
         />
       );
     }
-    if (activeSection === "csv") return <CsvImporter token={token} />;
     if (activeSection === "groups")
       return (
         <GroupManager
@@ -358,7 +354,7 @@ function AdminDashboard() {
 
           <Divider sx={{ borderColor: "rgba(255,255,255,0.06)", my: 1 }} />
 
-          {/* Content Models / Groups / CSV */}
+          {/* Content Models / Groups */}
           {(
             [
               {
@@ -372,12 +368,6 @@ function AdminDashboard() {
                 label: "Organize Groups",
                 sub: "Drag & drop type assignments",
                 icon: <DashboardCustomizeIcon />,
-              },
-              {
-                key: "csv",
-                label: "CSV Import",
-                sub: "Bulk import from a spreadsheet",
-                icon: <TableChartIcon />,
               },
             ] as const
           ).map(({ key, label, sub, icon }) => {

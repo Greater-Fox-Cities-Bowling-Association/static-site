@@ -6,6 +6,7 @@
 import { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
 import Divider from "@mui/material/Divider";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormHelperText from "@mui/material/FormHelperText";
@@ -17,7 +18,9 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import FileUploadIcon from "@mui/icons-material/FileUpload";
 import type { CmsField, CmsEntry, CmsSchema } from "../../../../cms/types";
+import { ArrayCsvImporter } from "../csv/ArrayCsvImporter";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -87,6 +90,15 @@ function ArrayField({ field, value, onChange, error, allSchemas }: FieldProps) {
     : undefined;
   const itemType = field.of ?? "text";
   const items: unknown[] = Array.isArray(value) ? (value as unknown[]) : [];
+  const [csvMode, setCsvMode] = useState<"append" | "replace" | null>(null);
+
+  function handleCsvAppend(newItems: unknown[]) {
+    onChange([...items, ...newItems]);
+  }
+
+  function handleCsvReplace(newItems: unknown[]) {
+    onChange(newItems);
+  }
 
   function defaultValue(): unknown {
     if (referencedSchema) return {};
@@ -159,14 +171,53 @@ function ArrayField({ field, value, onChange, error, allSchemas }: FieldProps) {
             {error}
           </FormHelperText>
         )}
-        <Button
-          size="small"
-          startIcon={<AddIcon />}
-          onClick={add}
-          variant="outlined"
+        <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+          <Button
+            size="small"
+            startIcon={<AddIcon />}
+            onClick={add}
+            variant="outlined"
+          >
+            Add {referencedSchema.name}
+          </Button>
+          <Button
+            size="small"
+            startIcon={<FileUploadIcon />}
+            onClick={() => setCsvMode("replace")}
+            variant="outlined"
+            color="warning"
+          >
+            Replace with CSV
+          </Button>
+          <Button
+            size="small"
+            startIcon={<FileUploadIcon />}
+            onClick={() => setCsvMode("append")}
+            variant="outlined"
+            color="secondary"
+          >
+            Append from CSV
+          </Button>
+        </Box>
+
+        <Dialog
+          open={csvMode !== null}
+          onClose={() => setCsvMode(null)}
+          maxWidth="md"
+          fullWidth
+          PaperProps={{ sx: { borderRadius: 3 } }}
         >
-          Add {referencedSchema.name}
-        </Button>
+          {csvMode !== null && (
+            <ArrayCsvImporter
+              field={field}
+              allSchemas={allSchemas}
+              mode={csvMode}
+              onAppend={handleCsvAppend}
+              onReplace={handleCsvReplace}
+              onClose={() => setCsvMode(null)}
+            />
+          )}
+        </Dialog>
       </Box>
     );
   }
@@ -275,14 +326,53 @@ function ArrayField({ field, value, onChange, error, allSchemas }: FieldProps) {
           {error}
         </FormHelperText>
       )}
-      <Button
-        size="small"
-        startIcon={<AddIcon />}
-        onClick={add}
-        variant="outlined"
+      <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+        <Button
+          size="small"
+          startIcon={<AddIcon />}
+          onClick={add}
+          variant="outlined"
+        >
+          Add item
+        </Button>
+        <Button
+          size="small"
+          startIcon={<FileUploadIcon />}
+          onClick={() => setCsvMode("replace")}
+          variant="outlined"
+          color="warning"
+        >
+          Replace with CSV
+        </Button>
+        <Button
+          size="small"
+          startIcon={<FileUploadIcon />}
+          onClick={() => setCsvMode("append")}
+          variant="outlined"
+          color="secondary"
+        >
+          Append from CSV
+        </Button>
+      </Box>
+
+      <Dialog
+        open={csvMode !== null}
+        onClose={() => setCsvMode(null)}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: 3 } }}
       >
-        Add item
-      </Button>
+        {csvMode !== null && (
+          <ArrayCsvImporter
+            field={field}
+            allSchemas={allSchemas}
+            mode={csvMode}
+            onAppend={handleCsvAppend}
+            onReplace={handleCsvReplace}
+            onClose={() => setCsvMode(null)}
+          />
+        )}
+      </Dialog>
     </Box>
   );
 }
