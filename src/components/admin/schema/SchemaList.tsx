@@ -3,7 +3,7 @@
  * Lists all CMS schemas (content models) stored in cms/schemas/ on GitHub.
  * Allows creating new schemas and navigating to the schema editor.
  */
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -16,16 +16,21 @@ import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
+import Divider from "@mui/material/Divider";
 import Grid from "@mui/material/Grid";
 import IconButton from "@mui/material/IconButton";
+import InputAdornment from "@mui/material/InputAdornment";
 import Skeleton from "@mui/material/Skeleton";
+import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import AddIcon from "@mui/icons-material/Add";
 import CategoryIcon from "@mui/icons-material/Category";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import RefreshIcon from "@mui/icons-material/Refresh";
+import SearchIcon from "@mui/icons-material/Search";
 import { listSchemas } from "../../../../cms/github/githubSchemas";
 import { commitFiles } from "../../../../cms/github/github";
 import type { CmsSchema } from "../../../../cms/types";
@@ -48,12 +53,44 @@ export function SchemaList({ token, onSaved }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const [search, setSearch] = useState("");
+
   // Editing state: null = list view, CmsSchema | 'new' = editor
   const [editing, setEditing] = useState<CmsSchema | "new" | null>(null);
 
   // Delete confirm dialog
   const [deleteTarget, setDeleteTarget] = useState<CmsSchema | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  // Filter + group schemas
+  const grouped = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const filtered = q
+      ? schemas.filter(
+          (s) =>
+            s.name.toLowerCase().includes(q) ||
+            s.id.toLowerCase().includes(q) ||
+            (s.group ?? "").toLowerCase().includes(q),
+        )
+      : schemas;
+
+    const order: string[] = [];
+    const map = new Map<string, CmsSchema[]>();
+    for (const s of filtered) {
+      const g = s.group?.trim() || "";
+      if (!map.has(g)) {
+        order.push(g);
+        map.set(g, []);
+      }
+      map.get(g)!.push(s);
+    }
+    // Named groups first (alpha), ungrouped last
+    const named = order.filter((g) => g !== "").sort();
+    return [
+      ...named.map((g) => ({ group: g, schemas: map.get(g)! })),
+      ...(map.has("") ? [{ group: null, schemas: map.get("")! }] : []),
+    ];
+  }, [schemas, search]);
 
   async function loadSchemas() {
     if (!token) return;
@@ -155,7 +192,7 @@ export function SchemaList({ token, onSaved }: Props) {
         sx={{
           display: "flex",
           alignItems: "center",
-          mb: 4,
+          mb: 3,
           gap: 2,
           flexWrap: "wrap",
         }}
@@ -185,6 +222,25 @@ export function SchemaList({ token, onSaved }: Props) {
           New model
         </Button>
       </Box>
+
+      {/* Search */}
+      {!loading && schemas.length > 0 && (
+        <TextField
+          placeholder="Search by name, ID, or group…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          size="small"
+          fullWidth
+          sx={{ mb: 3 }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon fontSize="small" sx={{ color: "text.disabled" }} />
+              </InputAdornment>
+            ),
+          }}
+        />
+      )}
 
       {error && (
         <Alert severity="error" onClose={() => setError("")} sx={{ mb: 3 }}>
@@ -237,106 +293,168 @@ export function SchemaList({ token, onSaved }: Props) {
         </Box>
       )}
 
-      {/* Cards */}
+      {/* Grouped cards */}
       {!loading && schemas.length > 0 && (
-        <Grid container spacing={2}>
-          {schemas.map((schema) => (
-            <Grid item xs={12} sm={6} md={4} key={schema.id}>
-              <Card
-                elevation={0}
-                sx={{
-                  border: "1px solid",
-                  borderColor: "grey.200",
-                  borderRadius: 3,
-                  height: "100%",
-                  display: "flex",
-                  flexDirection: "column",
-                  transition: "box-shadow 0.15s, border-color 0.15s",
-                  "&:hover": {
-                    boxShadow: "0 4px 16px rgba(0,0,0,0.10)",
-                    borderColor: "primary.light",
-                  },
-                }}
+        <Box>
+          {grouped.length === 0 && (
+            <Box
+              sx={{
+                textAlign: "center",
+                py: 6,
+                border: "2px dashed",
+                borderColor: "grey.200",
+                borderRadius: 4,
+              }}
+            >
+              <Typography variant="body2" color="text.secondary">
+                No models match "{search}"
+              </Typography>
+            </Box>
+          )}
+          {grouped.map(({ group, schemas: groupSchemas }, idx) => (
+            <Box key={group ?? "__ungrouped"} sx={{ mb: 4 }}>
+              {/* Group divider (not before first group) */}
+              {idx > 0 && <Divider sx={{ mb: 3 }} />}
+              {/* Group header */}
+              <Box
+                sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}
               >
-                <CardContent sx={{ flex: 1, pb: 0 }}>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "flex-start",
-                      gap: 1.5,
-                      mb: 1,
-                    }}
-                  >
-                    <Box
+                <FolderOpenIcon
+                  sx={{
+                    fontSize: 16,
+                    color: group ? "primary.main" : "text.disabled",
+                  }}
+                />
+                <Typography
+                  variant="overline"
+                  sx={{
+                    fontWeight: 700,
+                    letterSpacing: 1,
+                    color: group ? "primary.main" : "text.disabled",
+                    lineHeight: 1,
+                  }}
+                >
+                  {group ?? "Ungrouped"}
+                </Typography>
+                <Chip
+                  label={groupSchemas.length}
+                  size="small"
+                  sx={{
+                    height: 18,
+                    fontSize: 11,
+                    "& .MuiChip-label": { px: 0.8 },
+                  }}
+                />
+              </Box>
+              <Grid container spacing={2}>
+                {groupSchemas.map((schema) => (
+                  <Grid item xs={12} sm={6} md={4} key={schema.id}>
+                    <Card
+                      elevation={0}
                       sx={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: 2,
-                        bgcolor: "#f0fdf4",
+                        border: "1px solid",
+                        borderColor: "grey.200",
+                        borderRadius: 3,
+                        height: "100%",
                         display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        flexShrink: 0,
+                        flexDirection: "column",
+                        transition: "box-shadow 0.15s, border-color 0.15s",
+                        "&:hover": {
+                          boxShadow: "0 4px 16px rgba(0,0,0,0.10)",
+                          borderColor: "primary.light",
+                        },
                       }}
                     >
-                      <CategoryIcon
-                        sx={{ color: "success.main", fontSize: 22 }}
-                      />
-                    </Box>
-                    <Box sx={{ minWidth: 0 }}>
-                      <Typography variant="subtitle1" fontWeight={700}>
-                        {schema.name}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {schema.directory}
-                      </Typography>
-                    </Box>
-                  </Box>
-                  <Box
-                    sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 1 }}
-                  >
-                    {schema.fields.slice(0, 4).map((f) => (
-                      <Chip
-                        key={f.name}
-                        label={f.label}
-                        size="small"
-                        variant="outlined"
-                        sx={{ fontFamily: "monospace", fontSize: 11 }}
-                      />
-                    ))}
-                    {schema.fields.length > 4 && (
-                      <Chip
-                        label={`+${schema.fields.length - 4} more`}
-                        size="small"
-                        sx={{ fontSize: 11 }}
-                      />
-                    )}
-                  </Box>
-                </CardContent>
-                <CardActions sx={{ px: 2, pb: 1.5, pt: 1, gap: 0.5 }}>
-                  <Button
-                    variant="contained"
-                    size="small"
-                    startIcon={<EditOutlinedIcon />}
-                    onClick={() => setEditing(schema)}
-                    sx={{ flex: 1 }}
-                  >
-                    Edit model
-                  </Button>
-                  <Tooltip title="Delete model">
-                    <IconButton
-                      size="small"
-                      color="error"
-                      onClick={() => setDeleteTarget(schema)}
-                    >
-                      <DeleteOutlineIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                </CardActions>
-              </Card>
-            </Grid>
+                      <CardContent sx={{ flex: 1, pb: 0 }}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "flex-start",
+                            gap: 1.5,
+                            mb: 1,
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              width: 40,
+                              height: 40,
+                              borderRadius: 2,
+                              bgcolor: "#f0fdf4",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              flexShrink: 0,
+                            }}
+                          >
+                            <CategoryIcon
+                              sx={{ color: "success.main", fontSize: 22 }}
+                            />
+                          </Box>
+                          <Box sx={{ minWidth: 0, flex: 1 }}>
+                            <Typography variant="subtitle1" fontWeight={700}>
+                              {schema.name}
+                            </Typography>
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                            >
+                              {schema.directory}
+                            </Typography>
+                          </Box>
+                        </Box>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexWrap: "wrap",
+                            gap: 0.5,
+                            mt: 1,
+                          }}
+                        >
+                          {schema.fields.slice(0, 4).map((f) => (
+                            <Chip
+                              key={f.name}
+                              label={f.label}
+                              size="small"
+                              variant="outlined"
+                              sx={{ fontFamily: "monospace", fontSize: 11 }}
+                            />
+                          ))}
+                          {schema.fields.length > 4 && (
+                            <Chip
+                              label={`+${schema.fields.length - 4} more`}
+                              size="small"
+                              sx={{ fontSize: 11 }}
+                            />
+                          )}
+                        </Box>
+                      </CardContent>
+                      <CardActions sx={{ px: 2, pb: 1.5, pt: 1, gap: 0.5 }}>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          startIcon={<EditOutlinedIcon />}
+                          onClick={() => setEditing(schema)}
+                          sx={{ flex: 1 }}
+                        >
+                          Edit model
+                        </Button>
+                        <Tooltip title="Delete model">
+                          <IconButton
+                            size="small"
+                            color="error"
+                            onClick={() => setDeleteTarget(schema)}
+                          >
+                            <DeleteOutlineIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </CardActions>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
+            </Box>
           ))}
-        </Grid>
+        </Box>
       )}
 
       {/* Delete confirm */}
