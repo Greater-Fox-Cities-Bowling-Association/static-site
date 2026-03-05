@@ -3,8 +3,24 @@
   "name": "High Series Entry",
   "directory": "src/content/high-series-entry",
   "fields": [
-    { "name": "score",  "label": "Score",  "type": "number", "required": true },
-    { "name": "bowler", "label": "Bowler", "type": "text",   "required": true },
-    { "name": "date",   "label": "Date",   "type": "text",   "helpText": "e.g. 2/22/2005" }
-  ]
+    {
+      "name": "score",
+      "label": "Score",
+      "type": "number",
+      "required": true
+    },
+    {
+      "name": "bowler",
+      "label": "Bowler",
+      "type": "text",
+      "required": true
+    },
+    {
+      "name": "date",
+      "label": "Date",
+      "type": "text",
+      "helpText": "e.g. 2/22/2005"
+    }
+  ],
+  "group": "list component"
 }

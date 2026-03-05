@@ -17,5 +17,6 @@
       "required": false,
       "ofSchema": "history-link"
     }
-  ]
+  ],
+  "group": "list component"
 }
