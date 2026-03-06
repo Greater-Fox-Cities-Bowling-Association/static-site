@@ -1,23 +1,23 @@
-﻿{
-    "id":  "history-year",
-    "name":  "History Year",
-    "listOnly":  true,
-    "directory":  "src/content/history-year",
-    "fields":  [
-                   {
-                       "name":  "season",
-                       "label":  "Season",
-                       "type":  "text",
-                       "required":  true,
-                       "helpText":  "e.g. 2025/2026"
-                   },
-                   {
-                       "name":  "links",
-                       "label":  "Links",
-                       "type":  "array",
-                       "required":  false,
-                       "ofSchema":  "history-link"
-                   }
-               ],
-    "group":  "Tournament History"
+{
+  "id": "history-year",
+  "name": "History Year",
+  "listOnly": true,
+  "directory": "src/content/history-year",
+  "fields": [
+    {
+      "name": "season",
+      "label": "Season",
+      "type": "text",
+      "required": true,
+      "helpText": "e.g. 2025/2026"
+    },
+    {
+      "name": "links",
+      "label": "Links",
+      "type": "array",
+      "required": false,
+      "ofSchema": "history-link"
+    }
+  ],
+  "group": "Tournaments"
 }

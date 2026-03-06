@@ -1,28 +1,28 @@
-﻿{
-    "id":  "record-bowler",
-    "name":  "Record Bowler",
-    "listOnly":  true,
-    "directory":  "src/content/record-bowler",
-    "fields":  [
-                   {
-                       "name":  "name",
-                       "label":  "Name",
-                       "type":  "text",
-                       "required":  true
-                   },
-                   {
-                       "name":  "scores",
-                       "label":  "Game Scores",
-                       "type":  "array",
-                       "of":  "number",
-                       "helpText":  "Individual game scores"
-                   },
-                   {
-                       "name":  "total",
-                       "label":  "Series Total",
-                       "type":  "number",
-                       "helpText":  "Leave blank for game records"
-                   }
-               ],
-    "group":  "Honors: Team Records"
+{
+  "id": "record-bowler",
+  "name": "Record Bowler",
+  "listOnly": true,
+  "directory": "src/content/record-bowler",
+  "fields": [
+    {
+      "name": "name",
+      "label": "Name",
+      "type": "text",
+      "required": true
+    },
+    {
+      "name": "scores",
+      "label": "Game Scores",
+      "type": "array",
+      "of": "number",
+      "helpText": "Individual game scores"
+    },
+    {
+      "name": "total",
+      "label": "Series Total",
+      "type": "number",
+      "helpText": "Leave blank for game records"
+    }
+  ],
+  "group": "Honors"
 }

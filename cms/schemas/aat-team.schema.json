@@ -1,22 +1,22 @@
-﻿{
-    "id":  "aat-team",
-    "name":  "AAT Team",
-    "listOnly":  true,
-    "directory":  "src/content/aat-team",
-    "fields":  [
-                   {
-                       "name":  "division",
-                       "label":  "Division",
-                       "type":  "text",
-                       "required":  true,
-                       "helpText":  "e.g. 1st Team (Men)"
-                   },
-                   {
-                       "name":  "members",
-                       "label":  "Members",
-                       "type":  "array",
-                       "of":  "text"
-                   }
-               ],
-    "group":  "Honors: All Association Teams"
+{
+  "id": "aat-team",
+  "name": "AAT Team",
+  "listOnly": true,
+  "directory": "src/content/aat-team",
+  "fields": [
+    {
+      "name": "division",
+      "label": "Division",
+      "type": "text",
+      "required": true,
+      "helpText": "e.g. 1st Team (Men)"
+    },
+    {
+      "name": "members",
+      "label": "Members",
+      "type": "array",
+      "of": "text"
+    }
+  ],
+  "group": "Honors"
 }
