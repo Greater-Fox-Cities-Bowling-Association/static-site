@@ -1,20 +1,21 @@
-{
-  "id": "officer",
-  "name": "Officer",
-  "directory": "src/content/officer",
-  "fields": [
-    {
-      "name": "name",
-      "label": "Name",
-      "type": "text",
-      "required": true
-    },
-    {
-      "name": "title",
-      "label": "Title",
-      "type": "text",
-      "required": true
-    }
-  ],
-  "group": "Contacts"
+﻿{
+    "id":  "officer",
+    "name":  "Officer",
+    "listOnly":  true,
+    "directory":  "src/content/officer",
+    "fields":  [
+                   {
+                       "name":  "name",
+                       "label":  "Name",
+                       "type":  "text",
+                       "required":  true
+                   },
+                   {
+                       "name":  "title",
+                       "label":  "Title",
+                       "type":  "text",
+                       "required":  true
+                   }
+               ],
+    "group":  "Contacts"
 }

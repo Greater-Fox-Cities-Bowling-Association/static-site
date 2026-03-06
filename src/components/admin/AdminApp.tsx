@@ -256,7 +256,11 @@ function AdminDashboard() {
                 ...(groupOrder.includes("— Ungrouped") ? ["— Ungrouped"] : []),
               ];
               return sorted.map((groupName) => {
-                const groupSchemas = groupMap.get(groupName)!;
+                // Hide list-only schemas from the sidebar nav
+                const groupSchemas = groupMap
+                  .get(groupName)!
+                  .filter((s) => !s.listOnly);
+                if (groupSchemas.length === 0) return null;
                 const isOpen = openGroups.has(groupName);
                 const toggleGroup = () =>
                   setOpenGroups((prev) => {

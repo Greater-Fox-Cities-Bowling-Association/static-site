@@ -124,6 +124,12 @@ export interface CmsSchema {
   name: string;
   /** Optional group label for organizing schemas in the sidebar (e.g. "Records", "Navigation") */
   group?: string;
+  /**
+   * When true, this schema is used only as an item type inside array fields on
+   * other schemas. It will be hidden from the sidebar navigation and content
+   * list — editors cannot create top-level entries for it.
+   */
+  listOnly?: boolean;
   /** Path to the directory where entries are stored, e.g. "src/content/pages" */
   directory: string;
   /** Ordered list of fields for this content type */

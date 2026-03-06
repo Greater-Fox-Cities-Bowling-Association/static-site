@@ -1,46 +1,47 @@
-{
-  "id": "aat-season",
-  "name": "AAT Season",
-  "directory": "src/content/aat-season",
-  "fields": [
-    {
-      "name": "year",
-      "label": "Year",
-      "type": "text",
-      "required": true
-    },
-    {
-      "name": "boty_men",
-      "label": "Bowler of Year (Men)",
-      "type": "text"
-    },
-    {
-      "name": "boty_women",
-      "label": "Bowler of Year (Women)",
-      "type": "text"
-    },
-    {
-      "name": "boty_boys",
-      "label": "Bowler of Year (Boys)",
-      "type": "text"
-    },
-    {
-      "name": "boty_girls",
-      "label": "Bowler of Year (Girls)",
-      "type": "text"
-    },
-    {
-      "name": "placeholder",
-      "label": "Placeholder (Data N/A)",
-      "type": "boolean",
-      "helpText": "Check if no team data is available for this year"
-    },
-    {
-      "name": "teams",
-      "label": "Teams",
-      "type": "array",
-      "ofSchema": "aat-team"
-    }
-  ],
-  "group": "Honors: All Association Teams"
+﻿{
+    "id":  "aat-season",
+    "name":  "AAT Season",
+    "listOnly":  true,
+    "directory":  "src/content/aat-season",
+    "fields":  [
+                   {
+                       "name":  "year",
+                       "label":  "Year",
+                       "type":  "text",
+                       "required":  true
+                   },
+                   {
+                       "name":  "boty_men",
+                       "label":  "Bowler of Year (Men)",
+                       "type":  "text"
+                   },
+                   {
+                       "name":  "boty_women",
+                       "label":  "Bowler of Year (Women)",
+                       "type":  "text"
+                   },
+                   {
+                       "name":  "boty_boys",
+                       "label":  "Bowler of Year (Boys)",
+                       "type":  "text"
+                   },
+                   {
+                       "name":  "boty_girls",
+                       "label":  "Bowler of Year (Girls)",
+                       "type":  "text"
+                   },
+                   {
+                       "name":  "placeholder",
+                       "label":  "Placeholder (Data N/A)",
+                       "type":  "boolean",
+                       "helpText":  "Check if no team data is available for this year"
+                   },
+                   {
+                       "name":  "teams",
+                       "label":  "Teams",
+                       "type":  "array",
+                       "ofSchema":  "aat-team"
+                   }
+               ],
+    "group":  "Honors: All Association Teams"
 }

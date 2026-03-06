@@ -1,36 +1,37 @@
-{
-  "id": "tournament-entry",
-  "name": "Tournament Entry",
-  "directory": "src/content/tournament-entry",
-  "fields": [
-    {
-      "name": "name",
-      "label": "Tournament Name",
-      "type": "text",
-      "required": true
-    },
-    {
-      "name": "dates",
-      "label": "Dates",
-      "type": "text",
-      "required": false,
-      "helpText": "e.g. January 10-11 / 17-18, 2026"
-    },
-    {
-      "name": "location",
-      "label": "Location",
-      "type": "text",
-      "required": false,
-      "helpText": "e.g. Rolling Thunder Lanes, Neenah"
-    },
-    {
-      "name": "links",
-      "label": "Links",
-      "type": "array",
-      "required": false,
-      "ofSchema": "history-link",
-      "helpText": "e.g. Entry Form, Online Registration, Results, Prize List"
-    }
-  ],
-  "group": "Tournaments"
+﻿{
+    "id":  "tournament-entry",
+    "name":  "Tournament Entry",
+    "listOnly":  true,
+    "directory":  "src/content/tournament-entry",
+    "fields":  [
+                   {
+                       "name":  "name",
+                       "label":  "Tournament Name",
+                       "type":  "text",
+                       "required":  true
+                   },
+                   {
+                       "name":  "dates",
+                       "label":  "Dates",
+                       "type":  "text",
+                       "required":  false,
+                       "helpText":  "e.g. January 10-11 / 17-18, 2026"
+                   },
+                   {
+                       "name":  "location",
+                       "label":  "Location",
+                       "type":  "text",
+                       "required":  false,
+                       "helpText":  "e.g. Rolling Thunder Lanes, Neenah"
+                   },
+                   {
+                       "name":  "links",
+                       "label":  "Links",
+                       "type":  "array",
+                       "required":  false,
+                       "ofSchema":  "history-link",
+                       "helpText":  "e.g. Entry Form, Online Registration, Results, Prize List"
+                   }
+               ],
+    "group":  "Tournaments"
 }

@@ -1,34 +1,35 @@
-{
-  "id": "boty-entry",
-  "name": "Bowler of the Year Entry",
-  "directory": "src/content/boty-entry",
-  "fields": [
-    {
-      "name": "year",
-      "label": "Year",
-      "type": "number",
-      "required": true
-    },
-    {
-      "name": "men",
-      "label": "Men",
-      "type": "text"
-    },
-    {
-      "name": "women",
-      "label": "Women",
-      "type": "text"
-    },
-    {
-      "name": "boys",
-      "label": "Boys",
-      "type": "text"
-    },
-    {
-      "name": "girls",
-      "label": "Girls",
-      "type": "text"
-    }
-  ],
-  "group": "Honors: Bowler of the Year"
+﻿{
+    "id":  "boty-entry",
+    "name":  "Bowler of the Year Entry",
+    "listOnly":  true,
+    "directory":  "src/content/boty-entry",
+    "fields":  [
+                   {
+                       "name":  "year",
+                       "label":  "Year",
+                       "type":  "number",
+                       "required":  true
+                   },
+                   {
+                       "name":  "men",
+                       "label":  "Men",
+                       "type":  "text"
+                   },
+                   {
+                       "name":  "women",
+                       "label":  "Women",
+                       "type":  "text"
+                   },
+                   {
+                       "name":  "boys",
+                       "label":  "Boys",
+                       "type":  "text"
+                   },
+                   {
+                       "name":  "girls",
+                       "label":  "Girls",
+                       "type":  "text"
+                   }
+               ],
+    "group":  "Honors: Bowler of the Year"
 }

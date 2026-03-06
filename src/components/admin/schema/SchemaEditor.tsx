@@ -101,6 +101,7 @@ export function SchemaEditor({
   const [idEdited, setIdEdited] = useState(!isNew);
   const [id, setId] = useState(initialSchema?.id ?? "");
   const [group, setGroup] = useState(initialSchema?.group ?? "");
+  const [listOnly, setListOnly] = useState(initialSchema?.listOnly ?? false);
   const [fields, setFields] = useState<CmsField[]>(initialSchema?.fields ?? []);
 
   // Derive unique group names from all existing schemas for autocomplete suggestions
@@ -179,6 +180,7 @@ export function SchemaEditor({
       id,
       name,
       ...(group.trim() ? { group: group.trim() } : {}),
+      ...(listOnly ? { listOnly: true } : {}),
       directory: `src/content/${id}`,
       fields,
     };
@@ -326,6 +328,28 @@ export function SchemaEditor({
                   />
                 )}
               />
+              <Box sx={{ gridColumn: "1 / -1" }}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      size="small"
+                      checked={listOnly}
+                      onChange={(e) => setListOnly(e.target.checked)}
+                    />
+                  }
+                  label={
+                    <Box>
+                      <Typography variant="body2" fontWeight={600}>
+                        List item model only
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Hide from the sidebar — this model is only used as an
+                        item type inside an array field on another model.
+                      </Typography>
+                    </Box>
+                  }
+                />
+              </Box>
             </Box>
           </Box>
 

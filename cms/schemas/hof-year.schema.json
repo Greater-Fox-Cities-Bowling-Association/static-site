@@ -1,20 +1,21 @@
-{
-  "id": "hof-year",
-  "name": "Hall of Fame Year",
-  "directory": "src/content/hof-year",
-  "fields": [
-    {
-      "name": "year",
-      "label": "Year",
-      "type": "number",
-      "required": true
-    },
-    {
-      "name": "names",
-      "label": "Inductees",
-      "type": "array",
-      "ofSchema": "hof-inductee"
-    }
-  ],
-  "group": "Honors: Hall of Fame"
+﻿{
+    "id":  "hof-year",
+    "name":  "Hall of Fame Year",
+    "listOnly":  true,
+    "directory":  "src/content/hof-year",
+    "fields":  [
+                   {
+                       "name":  "year",
+                       "label":  "Year",
+                       "type":  "number",
+                       "required":  true
+                   },
+                   {
+                       "name":  "names",
+                       "label":  "Inductees",
+                       "type":  "array",
+                       "ofSchema":  "hof-inductee"
+                   }
+               ],
+    "group":  "Honors: Hall of Fame"
 }

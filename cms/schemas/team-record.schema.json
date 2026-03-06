@@ -1,53 +1,54 @@
-{
-  "id": "team-record",
-  "name": "Team Record",
-  "directory": "src/content/team-record",
-  "fields": [
-    {
-      "name": "title",
-      "label": "Record Title",
-      "type": "text",
-      "required": true,
-      "helpText": "e.g. High 5-Man Team Series"
-    },
-    {
-      "name": "score",
-      "label": "Score",
-      "type": "number"
-    },
-    {
-      "name": "team",
-      "label": "Team Name",
-      "type": "text"
-    },
-    {
-      "name": "league",
-      "label": "League",
-      "type": "text"
-    },
-    {
-      "name": "center",
-      "label": "Bowling Center",
-      "type": "text"
-    },
-    {
-      "name": "date",
-      "label": "Date",
-      "type": "text"
-    },
-    {
-      "name": "game_totals",
-      "label": "Game Totals",
-      "type": "array",
-      "of": "number",
-      "helpText": "Individual game totals for a series record"
-    },
-    {
-      "name": "bowlers",
-      "label": "Bowlers",
-      "type": "array",
-      "ofSchema": "record-bowler"
-    }
-  ],
-  "group": "Honors: Team Records"
+﻿{
+    "id":  "team-record",
+    "name":  "Team Record",
+    "listOnly":  true,
+    "directory":  "src/content/team-record",
+    "fields":  [
+                   {
+                       "name":  "title",
+                       "label":  "Record Title",
+                       "type":  "text",
+                       "required":  true,
+                       "helpText":  "e.g. High 5-Man Team Series"
+                   },
+                   {
+                       "name":  "score",
+                       "label":  "Score",
+                       "type":  "number"
+                   },
+                   {
+                       "name":  "team",
+                       "label":  "Team Name",
+                       "type":  "text"
+                   },
+                   {
+                       "name":  "league",
+                       "label":  "League",
+                       "type":  "text"
+                   },
+                   {
+                       "name":  "center",
+                       "label":  "Bowling Center",
+                       "type":  "text"
+                   },
+                   {
+                       "name":  "date",
+                       "label":  "Date",
+                       "type":  "text"
+                   },
+                   {
+                       "name":  "game_totals",
+                       "label":  "Game Totals",
+                       "type":  "array",
+                       "of":  "number",
+                       "helpText":  "Individual game totals for a series record"
+                   },
+                   {
+                       "name":  "bowlers",
+                       "label":  "Bowlers",
+                       "type":  "array",
+                       "ofSchema":  "record-bowler"
+                   }
+               ],
+    "group":  "Honors: Team Records"
 }

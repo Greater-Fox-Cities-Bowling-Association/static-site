@@ -31,6 +31,7 @@ import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import SearchIcon from "@mui/icons-material/Search";
+import ListAltIcon from "@mui/icons-material/ListAlt";
 import { listSchemas } from "../../../../cms/github/githubSchemas";
 import { commitFiles } from "../../../../cms/github/github";
 import type { CmsSchema } from "../../../../cms/types";
@@ -379,21 +380,49 @@ export function SchemaList({ token, onSaved }: Props) {
                               width: 40,
                               height: 40,
                               borderRadius: 2,
-                              bgcolor: "#f0fdf4",
+                              bgcolor: schema.listOnly ? "#eff6ff" : "#f0fdf4",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
                               flexShrink: 0,
                             }}
                           >
-                            <CategoryIcon
-                              sx={{ color: "success.main", fontSize: 22 }}
-                            />
+                            {schema.listOnly ? (
+                              <ListAltIcon
+                                sx={{ color: "primary.main", fontSize: 22 }}
+                              />
+                            ) : (
+                              <CategoryIcon
+                                sx={{ color: "success.main", fontSize: 22 }}
+                              />
+                            )}
                           </Box>
                           <Box sx={{ minWidth: 0, flex: 1 }}>
-                            <Typography variant="subtitle1" fontWeight={700}>
-                              {schema.name}
-                            </Typography>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 0.75,
+                                flexWrap: "wrap",
+                              }}
+                            >
+                              <Typography variant="subtitle1" fontWeight={700}>
+                                {schema.name}
+                              </Typography>
+                              {schema.listOnly && (
+                                <Chip
+                                  label="list item"
+                                  size="small"
+                                  color="primary"
+                                  variant="outlined"
+                                  sx={{
+                                    height: 18,
+                                    fontSize: 10,
+                                    "& .MuiChip-label": { px: 0.75 },
+                                  }}
+                                />
+                              )}
+                            </Box>
                             <Typography
                               variant="caption"
                               color="text.secondary"
