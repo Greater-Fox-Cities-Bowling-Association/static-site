@@ -3,117 +3,39 @@
   "intro": "The Bowler of the Year award recognizes the top bowlers in each division for the season.",
   "entries": [
     {
-      "year": 2025,
-      "men": "Hietpas Nick",
-      "women": "Kosiorek Beth",
-      "boys": "Harder Kameron",
-      "girls": "Dehlinger Audry"
-    },
-    {
-      "year": 2024,
-      "men": "Southworth Randy",
-      "women": "Brown Traci",
-      "boys": "Brown Tyler",
-      "girls": "Young Miley"
-    },
-    {
-      "year": 2023,
-      "men": "Hietpas Nick",
-      "women": "Brown Traci",
-      "boys": "Gaschler Joshua",
-      "girls": "Stadler Hailey"
-    },
-    {
-      "year": 2022,
-      "men": "Steffen Wes",
-      "women": "Schmal Rachel",
-      "boys": "Hackbarth Jacob",
-      "girls": "Winter Kate"
-    },
-    {
-      "year": 2021,
-      "men": "Southworth Randy",
-      "women": "Boelter Charly",
-      "boys": "Winter Luke",
-      "girls": "Kandler Alyson"
-    },
-    {
-      "year": 2020,
-      "men": "Green Rick",
-      "women": "Boelter Charly",
-      "boys": "Rusch Cale",
-      "girls": "Juedes Mackenzie"
-    },
-    {
-      "year": 2019,
-      "men": "Blaese Kyle",
-      "women": "Boelter Charly",
-      "boys": "Rusch Cale",
-      "girls": "Lamers Olivia"
-    },
-    {
-      "year": 2018,
-      "men": "Hietpas Nick"
-    },
-    {
-      "year": 2017,
-      "men": "Wendt Jason"
-    },
-    {
-      "year": 2016,
-      "men": "Kempf Kenny"
-    },
-    {
-      "year": 2015,
-      "men": "Wendt Jason"
-    },
-    {
-      "year": 2014,
-      "men": "Kempf Kenny"
-    },
-    {
-      "year": 2013,
-      "men": "Van Domelen Steve"
-    },
-    {
-      "year": 2012,
-      "men": "Kempf Kenny"
-    },
-    {
-      "year": 2011,
-      "men": "Kuhr Brad"
-    },
-    {
-      "year": 2010,
-      "men": "Kuhr Brad"
-    },
-    {
-      "year": 2009,
-      "men": "Van Domelen Steve"
-    },
-    {
-      "year": 2008,
-      "men": "Wendt Jason"
-    },
-    {
-      "year": 2007,
-      "men": "Johnson Dean"
-    },
-    {
-      "year": 2006,
-      "men": "Kempf Kenny"
-    },
-    {
-      "year": 2005,
-      "men": "Wendt Jason"
-    },
-    {
-      "year": 2004,
-      "men": "Wendt Jason"
-    },
-    {
       "year": 2026,
-      "men": "Mike Young"
+      "men": "Smith Robert",
+      "women": "Johnson Lisa",
+      "boys": "Carter Ethan",
+      "girls": "Meyer Sophia"
+    },
+    {
+      "year": 2027,
+      "men": "Anderson Paul",
+      "women": "Williams Karen",
+      "boys": "Thompson Drew",
+      "girls": "Nelson Emma"
+    },
+    {
+      "year": 2028,
+      "men": "Davis Mark",
+      "women": "Martinez Rosa",
+      "boys": "Harris Caleb",
+      "girls": "Taylor Ava"
+    },
+    {
+      "year": 2029,
+      "men": "Wilson Brett",
+      "women": "Garcia Maria",
+      "boys": "Lewis Owen",
+      "girls": "Mitchell Grace"
+    },
+    {
+      "year": 2030,
+      "men": "Moore Kevin",
+      "women": "Clark Susan",
+      "boys": "Walker Finn",
+      "girls": "Evans Lily"
     }
   ]
 }
